@@ -57,7 +57,7 @@ surprises.
 
 ## 🙌 Credits
 
-- [Paresh](https://gitlab.com/Paresh-Maheshwari/paresh-patches) — thanks for the work on the JioHotstar patches
+- [Paresh Maheshwari](https://gitlab.com/Paresh-Maheshwari/paresh-patches) — thanks for the work on the JioHotstar patches
 - [MorpheApp](https://github.com/MorpheApp) — the Morphe patcher and tooling
 
 ## ⚠️ Disclaimer
