@@ -1,4 +1,4 @@
-rootProject.name = "morphe-patches-template"
+rootProject.name = "brokenn-patches"
 
 pluginManagement {
     repositories {

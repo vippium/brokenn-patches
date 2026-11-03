@@ -1,14 +1,13 @@
-group = "app.template"
+group = "app.brokenn"
 
 patches {
-    // TODO: Update this section with your project details.
     about {
-        name = "UserXYZ Patches"
-        description = "Patches for apps I like"
-        source = "git@github.com:UserXYZ/morphe-patches.git"
-        author = "Awesome dev"
-        contact = "na"
-        website = "na"
+        name = "Brokenn Patches"
+        description = "Community patches maintained by vippium."
+        source = "https://github.com/vippium/brokenn-patches"
+        author = "vippium"
+        contact = "https://github.com/vippium/brokenn-patches/issues"
+        website = "https://github.com/vippium/brokenn-patches"
         license = "GPLv3"
     }
 }
