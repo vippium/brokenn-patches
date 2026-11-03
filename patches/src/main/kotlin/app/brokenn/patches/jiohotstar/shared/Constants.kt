@@ -11,10 +11,7 @@ object Constants {
         apkFileType = ApkFileType.APKM,
         appIconColor = 0x1A237E,
         targets = listOf(
-            // Tested and verified working against a real 26.08.17.3 APKM.
-            AppTarget(version = "26.08.17.3"),
-            // Upstream-tested fallback (Paresh patches).
-            AppTarget(version = "26.04.27.10")
+            AppTarget(version = "26.08.17.3")
         )
     )
 }
