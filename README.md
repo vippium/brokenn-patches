@@ -1,22 +1,32 @@
-# Brokenn Patches
+<div align="center">
 
-Morphe patches maintained by [vippium](https://github.com/vippium).
+# 🥀 Brokenn Patches
 
-## Use these patches
+### Morphe patches for apps which I love
 
-Add this repository to Morphe Manager:
-
-```text
-https://github.com/vippium/brokenn-patches
-```
-
-For development releases, enable **pre-releases** in Morphe Manager.
+[![Release](https://img.shields.io/github/v/release/vippium/brokenn-patches?include_prereleases&logo=github&label=release)](https://github.com/vippium/brokenn-patches/releases)
+[![License](https://img.shields.io/badge/license-GPL%20v3-yellow.svg)](LICENSE)
+[![Patches](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fvippium%2Fbrokenn-patches%2Fdev%2Fpatches-list.json&query=%24.patches.length&logo=android&label=patches)](patches-list.json)
 
 <a href="https://morphe.software/add-source?github=vippium/brokenn-patches">
   <img src=".github/assets/add-to-morphe.svg" alt="Add to Morphe" height="48">
 </a>
 
-## Available patches
+</div>
+
+---
+
+## 💡 About
+
+**Brokenn Patches** is a collection of community patches for the
+[Morphe](https://morphe.software) patcher — unlocking premium features, removing
+ads, and restoring user freedom in Android apps I use every day.
+
+Every release is built automatically by CI, signed, and published through
+[semantic-release](https://semantic-release.gitbook.io/) — no manual uploads, no
+surprises.
+
+## 🩹 Patches
 
 <!-- PATCHES_START EXPANDED -->
 
@@ -26,37 +36,18 @@ For development releases, enable **pre-releases** in Morphe Manager.
 
 <!-- PATCHES_END -->
 
-## Development
+## 🙌 Credits
 
-Work on the `dev` branch. The `main` branch contains stable releases.
+- [Paresh](https://gitlab.com/Paresh-Maheshwari/paresh-patches) — thanks for the work on the JioHotstar patches
+- [MorpheApp](https://github.com/MorpheApp) — the Morphe patcher and tooling
 
-Build locally with:
+## ⚠️ Disclaimer
 
-```sh
-./gradlew buildAndroid
-```
+This project is for **educational and research purposes only**. Patches modify
+third-party applications and may violate their terms of service. Brokenn Patches
+is not affiliated with any app developer. Use at your own risk.
 
-The generated `.mpp` file is written to `patches/build/libs/`. Apply it with
-[Morphe Desktop](https://github.com/MorpheApp/morphe-desktop).
-
-Use Conventional Commit messages:
-
-```text
-feat: add a patch
-fix: correct patch behavior
-chore: update tooling or documentation
-```
-
-Commits with `feat:` or `fix:` publish development releases automatically.
-Dependabot keeps GitHub Actions, npm, Gradle, and the Gradle wrapper updated
-through pull requests targeting `dev`.
-
-## Contributing
-
-Open an issue or pull request at
-https://github.com/vippium/brokenn-patches.
-
-## License
+## 📜 License
 
 Brokenn Patches are licensed under the
 [GNU General Public License v3.0](LICENSE).
