@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.0.0-dev.1",
+  "version": "1.0.0-dev.2",
   "patches": [
     {
       "name": "Bypass signature check",
@@ -19,13 +19,6 @@
           "targets": [
             {
               "version": "26.08.17.3",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "26.04.27.10",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -57,13 +50,6 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
-            },
-            {
-              "version": "26.04.27.10",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
             }
           ]
         }
@@ -87,13 +73,6 @@
           "targets": [
             {
               "version": "26.08.17.3",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "26.04.27.10",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -125,13 +104,6 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
-            },
-            {
-              "version": "26.04.27.10",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
             }
           ]
         }
@@ -155,13 +127,6 @@
           "targets": [
             {
               "version": "26.08.17.3",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "26.04.27.10",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -193,13 +158,6 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
-            },
-            {
-              "version": "26.04.27.10",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
             }
           ]
         }
@@ -223,13 +181,6 @@
           "targets": [
             {
               "version": "26.08.17.3",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "26.04.27.10",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,

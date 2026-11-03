@@ -29,7 +29,7 @@ surprises.
 ## 🩹 Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.0.0-dev.1](https://github.com/vippium/brokenn-patches/releases/tag/v1.0.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;7 patches total
+> **[v1.0.0-dev.2](https://github.com/vippium/brokenn-patches/releases/tag/v1.0.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;7 patches total
 <details open>
 <summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;7 patches</summary>
 <br>
@@ -38,8 +38,8 @@ surprises.
 
 **🎯 Supported versions:**
 
-| 26.08.17.3 | 26.04.27.10 |
-| :---: | :---: |
+| 26.08.17.3 |
+| :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
