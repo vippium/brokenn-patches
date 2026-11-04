@@ -41,19 +41,30 @@ import org.w3c.dom.Element
  * method rename; it fails loudly if ic_launcher.xml is missing or if
  * the bundled monochrome drawable is not in the patch jar.
  *
+ * Fix (2026-11-04, from a real Morphe Manager run on 26.10.12.2):
+ * the original version wrote the drawable with a plain
+ * java.io.File("res/drawable") path. In a Morphe resource patch
+ * that path is NOT the decoded APK's resource root — mkdirs()
+ * silently failed (its boolean return was ignored), and the
+ * following writeBytes() then threw FileNotFoundException:
+ * "res/drawable/ic_launcher_monochrome.webp (No such file or
+ * directory)" at MonochromeIconPatch.kt:71, in Patch.finalize.
+ * The fix is to resolve the path through the resource patch
+ * context itself — get("res/drawable/ic_launcher_monochrome.webp")
+ * — which points inside the decoded resources correctly, and to
+ * fail loudly if its parent directory still cannot be created,
+ * instead of letting writeBytes fail with a bare file error.
+ *
  * Not verified here: this environment cannot build the .mpp (Morphe
- * registry access is not available from this VM), so the bundled
- * resource loading and the arsclib path handling must be confirmed
- * by a real Morphe Manager patch run. If the patcher reports that
- * res/drawable/ic_launcher_monochrome.webp was not written, the
- * fallback is ResourcePatchContext.get("res/drawable/ic_launcher_monochrome.webp")
- * instead of a plain File path (arsclib decodes resources into a
- * different folder layout than apktool).
+ * registry access is not available from this VM), so this fix
+ * itself still needs a real Morphe Manager patch run to confirm.
+ * If the XML step then fails, that would mean ic_launcher.xml
+ * moved/changed in 26.10.12.2, which is a separate check.
  */
 @Suppress("unused")
 val monochromeIconPatch = resourcePatch(
-    name = "Monochrome icon support",
-    description = "Adds a themed-icon version of the launcher icon for Android 13+.",
+    name = "Add monochrome icon support",
+    description = "Adds a monochrome layer to the launcher icon, so it follows the system theme on Android 13+.",
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
@@ -66,9 +77,21 @@ val monochromeIconPatch = resourcePatch(
             "Monochrome icon drawable not found in patch resources: " +
                 "/jiohotstar/ic_launcher_monochrome.webp",
         )
-        val drawableDir = File("res/drawable")
-        if (!drawableDir.exists()) drawableDir.mkdirs()
-        File(drawableDir, "ic_launcher_monochrome.webp").writeBytes(iconBytes)
+        // Do NOT use a plain File("res/drawable") path here: in a
+        // Morphe resource patch that path is not the decoded APK
+        // root, mkdirs() fails silently, and writeBytes() then
+        // throws FileNotFoundException (the dev.5 failure on
+        // 26.10.12.2). Resolve through the patch context instead.
+        val drawableFile = get("res/drawable/ic_launcher_monochrome.webp")
+        drawableFile.parentFile?.let { parent ->
+            if (!parent.exists() && !parent.mkdirs() && !parent.exists()) {
+                throw PatchException(
+                    "Could not create drawable directory for monochrome icon: " +
+                        parent.path,
+                )
+            }
+        }
+        drawableFile.writeBytes(iconBytes)
 
         // 2. Add the <monochrome> layer to the main adaptive icon.
         document("res/mipmap-anydpi-v26/ic_launcher.xml").use { doc ->
