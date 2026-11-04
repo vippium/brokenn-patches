@@ -63,8 +63,8 @@ import org.w3c.dom.Element
  */
 @Suppress("unused")
 val monochromeIconPatch = resourcePatch(
-    name = "Add monochrome icon support",
-    description = "Adds a monochrome layer to the launcher icon, so it follows the system theme on Android 13+.",
+    name = "Monochrome icon support",
+    description = "Adds a themed-icon version of the launcher icon for Android 13+.",
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
