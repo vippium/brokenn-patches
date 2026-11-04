@@ -38,7 +38,7 @@ surprises.
 
 **🎯 Supported versions:**
 
-| 26.08.17.3 |
+| 26.10.12.2 |
 | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
