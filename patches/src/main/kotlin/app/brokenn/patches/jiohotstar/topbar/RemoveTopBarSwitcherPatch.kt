@@ -47,6 +47,9 @@ val removeTopBarSwitcherPatch = bytecodePatch(
                 if (instr.opcode == Opcode.INVOKE_STATIC &&
                     ref.name == "j" && ref.returnType == "F"
                 ) {
+                    require(topBarClass == null || topBarClass == ref.definingClass) {
+                        "TopBar content: multiple distinct j()F calls in e() — ambiguous"
+                    }
                     topBarClass = ref.definingClass
                 }
                 if (ref.definingClass.startsWith("Lr0/")) {
@@ -185,6 +188,9 @@ val removeTopBarSwitcherPatch = bytecodePatch(
                 }
                 i++
             }
+        }
+        require(durationCallIndices.isNotEmpty()) {
+            "TopBar container: no animation duration calls found (LA/n renamed?)"
         }
         durationCallIndices.sortedDescending().forEach { index ->
             containerMethod.addInstructions(index, "const/4 v5, 0x0")
