@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.0.0-dev.5",
+  "version": "1.0.0-dev.6",
   "patches": [
     {
       "name": "Add monochrome icon support",
@@ -58,7 +58,7 @@
     },
     {
       "name": "Enable all codecs",
-      "description": "Enables all video codecs (H265, VP9, AV1) and 4K resolution by bypassing blacklist and capability checks.",
+      "description": "Unlocks H.265, VP9, AV1 and 4K playback on capable devices.",
       "default": true,
       "category": null,
       "compatiblePackages": [
@@ -112,7 +112,7 @@
     },
     {
       "name": "Enable screenshots",
-      "description": "Removes screenshot and screen recording restrictions.",
+      "description": "Allows screenshots and screen recording.",
       "default": true,
       "category": null,
       "compatiblePackages": [
@@ -139,7 +139,7 @@
     },
     {
       "name": "Force HDR10",
-      "description": "Forces HDR10 and HDR10+ playback on compatible devices by bypassing blacklist and capability checks.",
+      "description": "Enables HDR10 and HDR10+ playback on compatible devices.",
       "default": true,
       "category": null,
       "compatiblePackages": [
@@ -193,7 +193,7 @@
     },
     {
       "name": "Remove ads",
-      "description": "Removes pre-roll, mid-roll, and live match video ads.",
+      "description": "Removes pre-roll, mid-roll, live-match and home-feed ads.",
       "default": true,
       "category": null,
       "compatiblePackages": [
@@ -220,7 +220,7 @@
     },
     {
       "name": "Remove top bar switcher",
-      "description": "Removes floating `Tadka` and `JioHotstar` topbar switcher from app.",
+      "description": "Removes the JioHotstar/Tadka mode-switcher row from the top of Home.",
       "default": true,
       "category": null,
       "compatiblePackages": [

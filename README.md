@@ -29,7 +29,7 @@ surprises.
 ## 🩹 Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.0.0-dev.5](https://github.com/vippium/brokenn-patches/releases/tag/v1.0.0-dev.5)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;9 patches total
+> **[v1.0.0-dev.6](https://github.com/vippium/brokenn-patches/releases/tag/v1.0.0-dev.6)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;9 patches total
 <details open>
 <summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;9 patches</summary>
 <br>
@@ -45,13 +45,13 @@ surprises.
 |----------|----------------|-----------|
 | [Add monochrome icon support](#add-monochrome-icon-support) | Adds a monochrome layer to the launcher icon, so it follows the system theme on Android 13+. |  |
 | [Bypass signature check](#bypass-signature-check) | Bypasses app signature verification to allow API access. |  |
-| [Enable all codecs](#enable-all-codecs) | Enables all video codecs (H265, VP9, AV1) and 4K resolution by bypassing blacklist and capability checks. |  |
+| [Enable all codecs](#enable-all-codecs) | Unlocks H.265, VP9, AV1 and 4K playback on capable devices. |  |
 | [Enable screen mirroring](#enable-screen-mirroring) | Allows playback while screen mirroring or HDMI is connected. |  |
-| [Enable screenshots](#enable-screenshots) | Removes screenshot and screen recording restrictions. |  |
-| [Force HDR10](#force-hdr10) | Forces HDR10 and HDR10+ playback on compatible devices by bypassing blacklist and capability checks. |  |
+| [Enable screenshots](#enable-screenshots) | Allows screenshots and screen recording. |  |
+| [Force HDR10](#force-hdr10) | Enables HDR10 and HDR10+ playback on compatible devices. |  |
 | [Premium unlock](#premium-unlock) | Unlocks premium UI features, removes subscription nudges, and enables downloads. |  |
-| [Remove ads](#remove-ads) | Removes pre-roll, mid-roll, and live match video ads. |  |
-| [Remove top bar switcher](#remove-top-bar-switcher) | Removes floating `Tadka` and `JioHotstar` topbar switcher from app. |  |
+| [Remove ads](#remove-ads) | Removes pre-roll, mid-roll, live-match and home-feed ads. |  |
+| [Remove top bar switcher](#remove-top-bar-switcher) | Removes the JioHotstar/Tadka mode-switcher row from the top of Home. |  |
 
 </details>
 

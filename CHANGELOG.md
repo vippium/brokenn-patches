@@ -1,3 +1,10 @@
+## [1.0.0-dev.6](https://github.com/vippium/brokenn-patches/compare/v1.0.0-dev.5...v1.0.0-dev.6) (2026-11-04)
+
+### 🐛 Bug Fixes
+
+* resolve monochrome drawable error ([6de2eda](https://github.com/vippium/brokenn-patches/commit/6de2edad869a826ba43970be1670bcea572291f7))
+* update top bar switcher fingerprints for `26.10.12.2` ([1bddb0e](https://github.com/vippium/brokenn-patches/commit/1bddb0e2c3a5c0859577f64510a5787e9f018a28))
+
 ## [1.0.0-dev.5](https://github.com/vippium/brokenn-patches/compare/v1.0.0-dev.4...v1.0.0-dev.5) (2026-11-04)
 
 ### ✨ New Features
