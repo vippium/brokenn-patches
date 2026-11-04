@@ -1,9 +1,11 @@
 package app.brokenn.patches.jiohotstar.topbar
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 
 /**
  * The TopBar content container, in the analysed build:
@@ -123,4 +125,16 @@ object TopBarScrollFingerprint : Fingerprint(
         methodCall(definingClass = "LEm/q;", name = "z2"),
         methodCall(definingClass = "LEm/q;", name = "y2")
     )
+)
+
+/**
+ * Ldn/j0;-><clinit>()V — initialises the TopBar's dp constants as floats:
+ *   a:F = 54.0f, b:F = 64.0f (bar heights), c:F = 16.0f,
+ *   d:F = 12.0f (static-path vertical/horizontal padding)
+ *
+ * Method-only fingerprint; the patch scans the body for the d:F store.
+ */
+object TopBarClinitFingerprint : Fingerprint(
+    definingClass = "Ldn/j0;",
+    name = "<clinit>"
 )
