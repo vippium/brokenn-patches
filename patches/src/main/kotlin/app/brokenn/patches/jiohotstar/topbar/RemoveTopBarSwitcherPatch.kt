@@ -225,49 +225,61 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             .getInstruction<OneRegisterInstruction>(sgetDIndex).registerA
         containerMethod.addInstructions(sgetDIndex + 1, "const v$sgetDRegister, 0x00000000")
 
-        // 3. Mid-feed scroll-up: force the show call (first invoke
-        // after the -50 literal) to false, leaving its pair call
-        // untouched. The inserted const is skipped exactly when the
-        // invoke is, by the preceding if-ge branch.
+        // 3. Mid-feed scroll-up: the show arm is the only consecutive
+        // (Z)V invoke pair on the same receiver with (true, false)
+        // arguments — every other branch pairs (false,false) or
+        // (true,true). Force the show call's argument register to 0.
         val scrollMethod = TopBarScrollFingerprint.method
-        val scrollMatches = TopBarScrollFingerprint.instructionMatches
-        val scrollMinus50Index = scrollMatches[0].index
-        var scrollShowIndex = -1
-        var scanScroll = scrollMinus50Index + 1
+
+        // Track boolean constants per register, then find the pair.
+        data class BoolCall(val index: Int, val receiver: Int, val arg: Int, val value: Int)
+        val constBool = mutableMapOf<Int, Int>()
+        val calls = mutableListOf<BoolCall>()
+        var scanScroll = 0
         while (scanScroll < 200) {
             val instr = try {
                 scrollMethod.getInstruction<Instruction>(scanScroll)
             } catch (e: Exception) {
                 break
             }
-            if (instr.opcode.name.startsWith("INVOKE")) {
-                scrollShowIndex = scanScroll
-                break
+            when (instr.opcode) {
+                Opcode.CONST_4 -> {
+                    val lit = (instr as NarrowLiteralInstruction).narrowLiteral.toInt()
+                    if (lit == 0 || lit == 1) {
+                        constBool[(instr as OneRegisterInstruction).registerA] = lit
+                    }
+                }
+                Opcode.INVOKE_VIRTUAL -> {
+                    val ref = (instr as ReferenceInstruction).reference as? MethodReference
+                    if (ref != null && ref.parameterTypes == listOf("Z") &&
+                        ref.returnType == "V"
+                    ) {
+                        val regs = instr as FiveRegisterInstruction
+                        val arg = regs.registerD
+                        constBool[arg]?.let { value ->
+                            calls.add(BoolCall(scanScroll, regs.registerC, arg, value))
+                        }
+                    }
+                }
+                else -> {}
             }
             scanScroll++
         }
-        require(scrollShowIndex >= 0) {
-            "TopBar scroll: no invoke after the -50 literal (fingerprint matched the wrong method?)"
+        val showCall = calls.asSequence()
+            .zipWithNext { a, b -> a to b }
+            .firstOrNull { (a, b) ->
+                a.value == 1 && b.value == 0 && b.index == a.index + 1 &&
+                    a.receiver == b.receiver && a.arg != b.arg
+            }?.first
+        require(showCall != null) {
+            "TopBar scroll: (true,false) show pair not found — scroll listener " +
+                "structure changed in this app version"
         }
-        val scrollInvoke =
-            scrollMethod.getInstruction<FiveRegisterInstruction>(scrollShowIndex)
-        val scrollUsedRegisters = listOf(
-            scrollInvoke.registerC,
-            scrollInvoke.registerD,
-            scrollInvoke.registerE,
-            scrollInvoke.registerF,
-            scrollInvoke.registerG
-        ).take(scrollInvoke.registerCount)
-        val scrollArgRegister = scrollUsedRegisters[1]
-        scrollMethod.addInstructions(
-            scrollShowIndex,
-            "const/4 v$scrollArgRegister, 0x0"
-        )
+        scrollMethod.addInstructions(showCall.index, "const/4 v${showCall.arg}, 0x0")
 
         // 4. First-item scroll-up: nop only the delta arm
         // (neg-int + if-le). The previousOffset == 0 arm stays, so
-        // the bar returns only at the very top. This insertion is
-        // after the -50 branch, so it does not shift this scan.
+        // the bar returns only at the very top.
         var firstItemShowBranchIndex = -1
         var scanIndex = 0
         while (scanIndex < 100) {
