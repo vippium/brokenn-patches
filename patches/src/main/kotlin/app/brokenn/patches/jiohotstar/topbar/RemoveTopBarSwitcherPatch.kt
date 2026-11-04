@@ -7,8 +7,13 @@ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
@@ -16,24 +21,24 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 @Suppress("unused")
 val removeTopBarSwitcherPatch = bytecodePatch(
     name = "Remove top bar switcher",
-    description = "Removes the JioHotstar / Tadka mode switcher pills, shrinks the empty space they leave behind to 8dp, and makes the top area behave like the old app's scrolling header: it only comes back at the very top of the feed, never on a scroll up mid-feed or partway through the first item."
+    description = "Removes floating `Tadka` and `JioHotstar` topbar switcher from app."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
     execute {
         // v6 — three changes, all in the same patch:
         //
-        // 1. e(): hide the pills (v3/v4) and shrink their height to 8dp
-        //    (v5 was 16dp, user asked for 8dp).
+        // 1. e(): hide the pills (v3/v4) and shrink their height to 1dp
+        //    (v6-v8 were 8dp, user asked for 1dp in v9).
         //    In Ldn/j0;->e(): j() at 48, move-result at 49, Modifier.height
-        //    at 50. 0x41000000 is the IEEE-754 bit pattern for 8.0f.
+        //    at 50. 0x00000000 is the IEEE-754 bit pattern for 0.0f.
         //
-        // 2. b(): shrink the container itself to 8dp. This matters
+        // 2. b(): shrink the container itself to 1dp. This matters
         //    because on a modern device (Ve/c.a true) b() takes its static
         //    branch and sizes the container from its own calculation
         //    (2*12dp + j() = 78dp), not from e()'s height — so changing
-        //    e() alone would leave a 78dp container around an 8dp child.
-        //    Overwriting the add-float result (v7) with 8.0f fixes the
+        //    e() alone would leave a 78dp container around a 1dp child.
+        //    Overwriting the add-float result (v7) with 0.0f fixes the
         //    container; the later "if hidden, v7 = 0" step still runs
         //    after this point, so a hidden bar stays 0.
         //
@@ -65,25 +70,20 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         // (j() at 48 comes before the -673482817 literal at 53).
         // Do not reintroduce any of those directions.
 
-        // --- 1. e(): remove content, shrink height to 8dp ---
+        // --- 1. e(): remove the pills, KEEP the row height ---
+        // e()'s Modifier.height(j()) sizes the row to 54/64dp. That height
+        // must stay: the bar is a pure spacer now, and its total height is
+        // fraction × child(= 24dp padding + this row). Shrinking the row
+        // (v9-v12 did) starves the fraction math, so the strip can never
+        // grow tall enough to push the feed's "For You" title below the
+        // status bar.
         val contentMethod = TopBarContentFingerprint.method
         val contentMatches = TopBarContentFingerprint.instructionMatches
 
         val contentIndex = contentMatches.last().index
         contentMethod.removeInstruction(contentIndex)
 
-        val heightCallIndex = contentMatches[1].index
-        val heightMoveResultIndex = heightCallIndex + 1
-        val heightRegister =
-            contentMethod.getInstruction<OneRegisterInstruction>(heightMoveResultIndex).registerA
-        contentMethod.addInstructions(
-            heightMoveResultIndex + 1,
-            // 0x41000000 = 8.0f bits. Dalvik registers are untyped, so a
-            // const with those bits is read as 8.0f by Modifier.height.
-            "const v$heightRegister, 0x41000000"
-        )
-
-        // --- 2. b(): shrink the container height to 8dp ---
+        // --- 2. b(): shrink the container height to 1dp ---
         val containerMethod = TopBarContainerFingerprint.method
         val containerMatches = TopBarContainerFingerprint.instructionMatches
         val containerHeightCallIndex = containerMatches[2].index
@@ -125,8 +125,129 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         }
         containerMethod.addInstructions(
             addFloatIndex + 1,
-            "const v$containerHeightRegister, 0x41000000"
+            // ~25dp — matches the animated expanded target: 0.46 × e() row (54dp).
+            // static/animated path flip on tab switch caused an ~11dp ghost/bounce.
+            "const v$containerHeightRegister, 0x41C80000" // 25.0f
         )
+
+        // --- 2b. v11: force the animated TopBarHeight target to ~4dp ---
+        // On devices where Ve/c.a is false, b() skips the static height
+        // modifier entirely and takes the :cond_6 branch instead, which
+        // animates the bar height via LA/g;->b(target, spec, "TopBarHeight",
+        // ...) with target = 1.0f (expanded) or 0.0f (collapsed). The static
+        // overwrite above never executes on that path — this is why v8-v10
+        // (8dp/4dp/1dp/0dp) produced no visible change on those devices.
+        //
+        // dn/Z's layout lambda computes barHeightPx = childHeightPx * target,
+        // where childHeightPx is the 54/64dp e() row. The branch consts set
+        // target = 1.0f (expanded) or 0.0f (collapsed by the scroll handler).
+        // Patching the EXPANDED branch to 0.46 keeps the two-state behaviour:
+        // ~25dp spacer (status-bar clearance) at the top of the feed, full
+        // collapse while scrolled — a pinned constant (v11-v14) stopped the
+        // collapse entirely, leaving the bar's dark background visible as a
+        // black strip over scrolled content.
+        val expandedTargetBits = 0x3EEB851F // 0.46f
+
+        var topBarHeightIndex = addFloatIndex + 1
+        var scannedHeight = 0
+        while (scannedHeight <= 60) {
+            val instr = containerMethod.getInstruction<Instruction>(topBarHeightIndex)
+            if (instr.opcode == Opcode.CONST_STRING &&
+                (instr as ReferenceInstruction).reference is StringReference &&
+                ((instr as ReferenceInstruction).reference as StringReference).string ==
+                "TopBarHeight"
+            ) {
+                break
+            }
+            topBarHeightIndex++
+            scannedHeight++
+        }
+        require(scannedHeight <= 60) {
+            "TopBar container: TopBarHeight animation call not found after ADD_FLOAT"
+        }
+
+        // --- 2c. v15: retarget the EXPANDED branch (1.0f -> 0.46f) ---
+        // Two const/high16 1.0f consts live in this block: a scratch one for
+        // the easing spec and the expanded-state animation target. Replace
+        // the LAST one (the target branch); the collapsed branch stays 0.0f.
+        // Replace (not insert) so no indices shift for the scans below.
+        val oneFloatIndices = buildList {
+            var i = addFloatIndex + 1
+            while (i < topBarHeightIndex) {
+                val instr = containerMethod.getInstruction<Instruction>(i)
+                if (instr.opcode == Opcode.CONST_HIGH16 &&
+                    (instr as NarrowLiteralInstruction).narrowLiteral == 0x3f800000
+                ) {
+                    add(i)
+                }
+                i++
+            }
+        }
+        require(oneFloatIndices.size >= 2) {
+            "TopBar container: expected the expanded/collapsed target branch after ADD_FLOAT"
+        }
+        val expandedBranchIndex = oneFloatIndices.last()
+        val expandedRegister = containerMethod
+            .getInstruction<OneRegisterInstruction>(expandedBranchIndex).registerA
+        containerMethod.replaceInstruction(
+            expandedBranchIndex,
+            "const v$expandedRegister, $expandedTargetBits"
+        )
+
+        // --- 2d. v11: kill the collapse/expand animation (tab-switch bounce) ---
+        // The animated path builds its tween via LA/n;->c(duration, delay, ...)
+        // — 420ms when expanding, 240ms when collapsing. Tab switches can
+        // retrigger these, bouncing the whole page. Zeroing the duration
+        // register (v5) of each A/n.c call in this block makes every height
+        // change instant. Collect all call sites first, then insert in
+        // descending order so earlier indices stay valid.
+        val durationCallIndices = buildList {
+            var i = addFloatIndex + 1
+            while (i < topBarHeightIndex) {
+                val instr = containerMethod.getInstruction<Instruction>(i)
+                if (instr.opcode == Opcode.INVOKE_STATIC) {
+                    val ref = (instr as ReferenceInstruction).reference as? MethodReference
+                    if (ref != null && ref.definingClass == "LA/n;" && ref.name == "c") {
+                        add(i)
+                    }
+                }
+                i++
+            }
+        }
+
+        durationCallIndices.sortedDescending().forEach { index ->
+            containerMethod.addInstructions(index, "const/4 v5, 0x0")
+        }
+
+        // --- 2d. v11: zero the 12dp padding field (dn/j0.d) ---
+        // The static path applies .padding(vertical = d, horizontal = d)
+        // AFTER its height modifier, so even at 0/4dp height it kept a 24dp
+        // strip — the other half of the tab-switch bounce. j0.d has exactly
+        // one consumer (the static-path padding), so zeroing it in <clinit>
+        // aligns both paths with no other side effects.
+        val clinitMethod = TopBarClinitFingerprint.method
+        var sputDIndex = -1
+        var scannedClinit = 0
+        while (scannedClinit <= 40) {
+            val instr = clinitMethod.getInstruction<Instruction>(scannedClinit)
+            if (instr.opcode == Opcode.SPUT) {
+                val fieldRef = (instr as ReferenceInstruction).reference as? FieldReference
+                if (fieldRef != null &&
+                    fieldRef.definingClass == "Ldn/j0;" &&
+                    fieldRef.name == "d"
+                ) {
+                    sputDIndex = scannedClinit
+                    break
+                }
+            }
+            scannedClinit++
+        }
+        require(sputDIndex >= 0) {
+            "TopBar clinit: sput of d:F not found"
+        }
+        val sputDRegister = clinitMethod
+            .getInstruction<OneRegisterInstruction>(sputDIndex).registerA
+        clinitMethod.addInstructions(sputDIndex, "const v$sputDRegister, 0x00000000")
 
         // --- 3. j$a: mid-feed scroll-up must not show the bar ---
         val scrollMethod = TopBarScrollFingerprint.method
