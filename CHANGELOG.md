@@ -1,3 +1,10 @@
+## [1.1.0-dev.1](https://github.com/vippium/brokenn-patches/compare/v1.0.1...v1.1.0-dev.1) (2026-11-04)
+
+### ✨ New Features
+
+* make top bar switcher patch universal across JioHotstar versions ([035ed07](https://github.com/vippium/brokenn-patches/commit/035ed071ed3962be83ffa656bb4563b811d70f0a))
+* universal top bar switcher removal ([7655fcd](https://github.com/vippium/brokenn-patches/commit/7655fcdd405a53ce406a9e4bdf3325e7b2a9ac06))
+
 ## [1.0.1](https://github.com/vippium/brokenn-patches/compare/v1.0.0...v1.0.1) (2026-11-04)
 
 ### 🐛 Bug Fixes
