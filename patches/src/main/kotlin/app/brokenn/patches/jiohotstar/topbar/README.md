@@ -12,7 +12,17 @@ directly, with no switcher above it.
   in `classes11.dex` of the base APK. The switcher is Jetpack Compose, not
   an XML layout, and the tabs are server-supplied
   (`BffMenuWidgetTab` list in `Lef/q;->a`).
-- v8 (current, old-layout approach): v7 plus one more scroll change.
+- v10 (current): v9 with the gap reduced to 1dp, to test. Both height
+  constants (`e()` and the `b()` container) now use `0x3F800000`
+  (1.0f) instead of `0x40800000` (4.0f). Nothing else changed. Note:
+  the container still adds its own padding on top of that 1dp, so
+  the visible space at the top is 1dp plus padding, not 1dp total.
+- v9: v8 with the gap reduced to 4dp. Both height constants
+  (`e()` and the `b()` container) now use `0x40800000` (4.0f) instead
+  of `0x41000000` (8.0f). Nothing else changed. Note: the container
+  still adds its own padding on top of that 4dp, so the visible space
+  at the top is 4dp plus padding, not 4dp total.
+- v8 (old-layout approach): v7 plus one more scroll change.
   In the old app (25.09.29.0, checked 2026-11-03) the top was a feed
   widget (`LandingPageHeaderUi` / `TitleBarHeaderWidget`), not a fixed
   container: it scrolled away with the page and only came back at the
@@ -103,7 +113,7 @@ and must not be edited by hand.
 
 1. Patch applies cleanly to stock 26.08.17.3, no fingerprint failure.
 2. Home opens with no JioHotstar / Tadka switcher pills, but a small
-   gap (8dp + the container's own padding) is still there at the very
+   gap (1dp + the container's own padding) is still there at the very
    top — the top banner does not slide up under the status bar.
 3. Scroll down, then scroll up mid-feed: the gap must NOT come back.
    Content should scroll back from behind the status bar. Scroll up
