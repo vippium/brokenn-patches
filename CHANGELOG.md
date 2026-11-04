@@ -1,3 +1,9 @@
+## [1.1.0-dev.2](https://github.com/vippium/brokenn-patches/compare/v1.1.0-dev.1...v1.1.0-dev.2) (2026-11-04)
+
+### 🐛 Bug Fixes
+
+* locate mid-feed show arm by (true,false) call pair ([56f4413](https://github.com/vippium/brokenn-patches/commit/56f44134e769bc40d123c0d1401e501bc2ec0711))
+
 ## [1.1.0-dev.1](https://github.com/vippium/brokenn-patches/compare/v1.0.1...v1.1.0-dev.1) (2026-11-04)
 
 ### ✨ New Features
