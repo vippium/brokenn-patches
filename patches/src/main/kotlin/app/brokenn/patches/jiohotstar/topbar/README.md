@@ -6,37 +6,19 @@ directly, with no switcher above it.
 
 ## Universal (2026-11-04, dev)
 
-This patch is now version-agnostic for the two builds below. The
-26.08.17.3 -> 26.10.12.2 change was pure R8 renaming
-(`Ldn/j0;` -> `Lvn/e0;`, `Lr0/c;->c` -> `Lr0/d;->h`,
-`LEm/q;->z2/y2` -> `LUm/n;->B2/A2`); the logic, constants and
-instruction layout are identical in both (content `e()` 117
-instructions, container `b()` 131, scroll `invokeSuspend` 39, same
-indices — verified by dex dump of both base APKs, and by a
-full-dex scan of each: the content literal pair and the container
-restart key each match exactly one method in each build).
+Version-agnostic for 26.08.17.3 and 26.10.12.2. The change between
+them was pure R8 renaming; the code is identical in both (verified
+by dex dump and full-dex scan: content literal pair and container
+restart key each match exactly 1 method per build).
 
-How it stays universal (see `Fingerprints.kt` for the full notes):
-- Fingerprints contain no obfuscated class/method names — only
-  Compose restart keys, distinctive literals, a stable androidx
-  layout call, and signatures.
-- The patch body finds the version-specific pieces by scanning:
-  TopBar class from the `j()` call in `e()`, pills call as the
-  single `Lr0/` invoke in `e()`, height call as the `j()` call in
-  `b()`, mid-feed show call as the first invoke after the `-50`
-  literal, and the 12dp padding as the single `sget` of field `d`
-  in `b()` (this replaces the old `<clinit>` step, which could
-  only be found by its defining class).
-- Patch logic and constants are unchanged from the 26.10 build:
-  container 25.0f, animated expanded target 0.46f, zeroed animation
-  durations, `d` -> 0.0f, mid-feed show forced false, first-item
-  `if-le` nopped.
-- Compatibility is a topbar-only list (both versions) in
-  `shared/Constants.kt` — the other patches stay 26.10-only.
-- If a future build renames `Lr0/`, `j`, `d`, `LA/n;->c` or
-  `TopBarHeight`, the patch fails loudly via `require()` instead
-  of patching the wrong instruction. That failure is the signal to
-  add a variant for that build.
+Fingerprints use only restart keys, literals, a stable androidx
+call, and signatures — no obfuscated names. The patch body finds
+its targets by scanning, and fails loudly on a scan miss instead
+of patching the wrong instruction. Logic and constants are
+unchanged from the 26.10 build (container 25dp, expanded 0.46,
+zeroed durations, d -> 0, mid-feed show forced false, first-item
+if-le nopped). Compatibility is topbar-only; other patches stay
+26.10-only.
 
 ## Target (verified by smali analysis, 2026-11-03)
 

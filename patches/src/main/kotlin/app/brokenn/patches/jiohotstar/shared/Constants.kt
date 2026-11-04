@@ -15,12 +15,9 @@ object Constants {
         )
     )
 
-    // TopBar only: its fingerprints are version-agnostic (see
-    // topbar/Fingerprints.kt), so it is offered for both builds whose
-    // TopBar code was verified identical apart from R8 renaming.
-    // The other patches keep COMPATIBILITY_JIOHOTSTAR above — do NOT
-    // widen that one to 26.08.17.3, or Manager would offer every patch
-    // for a build they were not verified against.
+    // TopBar only — its fingerprints are version-agnostic.
+    // Do not widen the shared list above; other patches are
+    // verified for 26.10 only.
     val COMPATIBILITY_JIOHOTSTAR_TOPBAR = Compatibility(
         name = "JioHotstar",
         packageName = "in.startv.hotstar",
