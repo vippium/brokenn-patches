@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.0.0-dev.2",
+  "version": "1.0.0-dev.3",
   "patches": [
     {
       "name": "Bypass signature check",
@@ -167,6 +167,33 @@
     {
       "name": "Remove ads",
       "description": "Removes pre-roll, mid-roll, and live match video ads.",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "in.startv.hotstar",
+          "name": "JioHotstar",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#1A237E",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "26.08.17.3",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Remove top bar switcher",
+      "description": "Removes floating `Tadka` and `JioHotstar` topbar switcher from app.",
       "default": true,
       "category": null,
       "compatiblePackages": [

@@ -1,3 +1,10 @@
+## [1.0.0-dev.3](https://github.com/vippium/brokenn-patches/compare/v1.0.0-dev.2...v1.0.0-dev.3) (2026-11-04)
+
+### ✨ New Features
+
+* add Remove top bar switcher patch ([65ffe1d](https://github.com/vippium/brokenn-patches/commit/65ffe1db2ef6b6a7fb744a0e9d74caeccea246b4))
+* refine top bar switcher removal ([7acbc19](https://github.com/vippium/brokenn-patches/commit/7acbc199e99b0873f3c88263bae3fd15c032d11b))
+
 ## [1.0.0-dev.2](https://github.com/vippium/brokenn-patches/compare/v1.0.0-dev.1...v1.0.0-dev.2) (2026-11-03)
 
 ### 🚀 Updated App Support

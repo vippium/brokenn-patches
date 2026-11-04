@@ -29,9 +29,9 @@ surprises.
 ## 🩹 Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.0.0-dev.2](https://github.com/vippium/brokenn-patches/releases/tag/v1.0.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;7 patches total
+> **[v1.0.0-dev.3](https://github.com/vippium/brokenn-patches/releases/tag/v1.0.0-dev.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;8 patches total
 <details open>
-<summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;7 patches</summary>
+<summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;8 patches</summary>
 <br>
 
 **Package name:** `in.startv.hotstar`
@@ -50,6 +50,7 @@ surprises.
 | [Force HDR10](#force-hdr10) | Forces HDR10 and HDR10+ playback on compatible devices by bypassing blacklist and capability checks. |  |
 | [Premium unlock](#premium-unlock) | Unlocks premium UI features, removes subscription nudges, and enables downloads. |  |
 | [Remove ads](#remove-ads) | Removes pre-roll, mid-roll, and live match video ads. |  |
+| [Remove top bar switcher](#remove-top-bar-switcher) | Removes floating `Tadka` and `JioHotstar` topbar switcher from app. |  |
 
 </details>
 
