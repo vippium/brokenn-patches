@@ -1,3 +1,9 @@
+## [1.0.0-dev.4](https://github.com/vippium/brokenn-patches/compare/v1.0.0-dev.3...v1.0.0-dev.4) (2026-11-04)
+
+### 🚀 Updated App Support
+
+* **JioHotstar:** Added `26.10.12.2` support ([5deae42](https://github.com/vippium/brokenn-patches/commit/5deae42d7e8df887dff609f7b5536fbe50225a8d))
+
 ## [1.0.0-dev.3](https://github.com/vippium/brokenn-patches/compare/v1.0.0-dev.2...v1.0.0-dev.3) (2026-11-04)
 
 ### ✨ New Features
