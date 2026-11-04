@@ -5,7 +5,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
+import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR_TOPBAR
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
@@ -23,53 +23,61 @@ val removeTopBarSwitcherPatch = bytecodePatch(
     name = "Remove top bar switcher",
     description = "Removes the JioHotstar/Tadka mode-switcher row from the top of Home."
 ) {
-    compatibleWith(COMPATIBILITY_JIOHOTSTAR)
+    compatibleWith(COMPATIBILITY_JIOHOTSTAR_TOPBAR)
 
     execute {
-        // 26.10.12.2 — same patch as dev.5, re-derived for the new build.
-        // Only the obfuscated names changed (see Fingerprints.kt):
-        //   Ldn/j0; -> Lvn/e0;, LVe/c; -> LWe/c;, LQm/a; -> Lhn/a;,
-        //   Lr0/c;->c -> Lr0/d;->h, LEm/j$a; -> LUm/g$a;,
-        //   LEm/q;->z2/y2 -> LUm/n;->B2/A2. All constants are
-        //   unchanged from dev.5: container 25.0f, expanded target
-        //   0.46f, zeroed animation durations, clinit d -> 0.0f,
-        //   mid-feed B2 forced false, first-item if-le nopped.
+        // UNIVERSAL — same patch logic as 26.10.12.2, with no
+        // obfuscated class/method name hardcoded anywhere (see
+        // Fingerprints.kt). The 26.08.17.3 -> 26.10.12.2 change was
+        // pure R8 renaming (Ldn/j0; -> Lvn/e0;, Lr0/c;->c -> Lr0/d;->h,
+        // LEm/q;->z2/y2 -> LUm/n;->B2/A2); the logic, constants and
+        // instruction layout are identical in both builds. All
+        // constants are unchanged from the 26.10 build: container
+        // 25.0f, expanded target 0.46f, zeroed animation durations,
+        // d (12dp) -> 0.0f, mid-feed show forced false, first-item
+        // if-le nopped.
+        //
+        // How the version-specific pieces are found, without names:
+        //   - TopBar class: the defining class of the j() call in e().
+        //   - Pills call: the single invoke in e() whose defining
+        //     class starts with "Lr0/".
+        //   - Height call: the invoke-static j() in b() whose defining
+        //     class is that TopBar class.
+        //   - Mid-feed show call: the first invoke after the -50
+        //     literal in the scroll listener.
+        //   - 12dp padding: the single sget of field "d" (type F) in b().
+        // Every one of these is checked with require() — if a future
+        // build renames one of them, the patch fails loudly instead
+        // of patching the wrong instruction.
         //
         // v6 — three changes, all in the same patch:
         //
-        // 1. e(): hide the pills (v3/v4) and shrink their height to 1dp
-        //    (v6-v8 were 8dp, user asked for 1dp in v9).
-        //    In Lvn/e0;->e(): j() at 47, move-result at 48, Modifier.height
+        // 1. e(): hide the pills (v3/v4).
+        //    In e(): j() at 47, move-result at 48, Modifier.height
         //    at 50. 0x00000000 is the IEEE-754 bit pattern for 0.0f.
         //
-        // 2. b(): shrink the container itself to 1dp. This matters
-        //    because on a modern device (We/c.a true) b() takes its static
+        // 2. b(): shrink the container itself. This matters
+        //    because on a modern device (state.a true) b() takes its static
         //    branch and sizes the container from its own calculation
         //    (2*12dp + j() = 78dp), not from e()'s height — so changing
         //    e() alone would leave a 78dp container around a 1dp child.
-        //    Overwriting the add-float result (v7) with 0.0f fixes the
+        //    Overwriting the add-float result (v7) with 25.0f fixes the
         //    container; the later "if hidden, v7 = 0" step still runs
         //    after this point, so a hidden bar stays 0.
         //
-        // 3. g$a (BottomNavController scroll listener): stop the bar
+        // 3. BottomNavController scroll listener: stop the bar
         //    reappearing on a mid-feed scroll up. Its logic is:
         //      index == 0 -> show/hide within the top item (kept)
         //      index != 0, delta > j0 -> hide (kept)
         //      index != 0, delta < -50 -> SHOW (removed: forced false)
-        //    Only the last B2 call is touched — the one after the -50
+        //    Only the last show call is touched — the one after the -50
         //    literal — by inserting const/4 <arg register>, 0x0 right
-        //    before it. A2 is left exactly as it was (false in that
-        //    branch), so bottom-nav behaviour is unchanged.
+        //    before it. Its pair call is left exactly as it was
+        //    (false in that branch), so bottom-nav behaviour is unchanged.
         //    Result: while scrolling mid-feed, content scrolls naturally
         //    from behind the status bar; the small gap only comes back
         //    when the user is back on the first item (top of the feed),
         //    which is also where it is present on launch.
-        //
-        // ORDER MATTERS in e(): remove first, then insert. The removal
-        // is at index 108, after the height instructions, so it does
-        // not shift the height indices. Inserting first would shift the
-        // content call to 109 and a stale index would remove the wrong
-        // instruction.
         //
         // History: v1 forced s2() to 1, which is the render branch
         // (if-nez branches when NOT zero) and kept the switcher on
@@ -87,15 +95,78 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         // grow tall enough to push the feed's "For You" title below the
         // status bar.
         val contentMethod = TopBarContentFingerprint.method
-        val contentMatches = TopBarContentFingerprint.instructionMatches
 
-        val contentIndex = contentMatches.last().index
-        contentMethod.removeInstruction(contentIndex)
+        // TopBar class, derived — not hardcoded. e() calls its own
+        // height method j() (static, returns F, one runtime param).
+        var topBarClass: String? = null
+        var contentCallIndex = -1
+        var scanContent = 0
+        while (scanContent < 200) {
+            val instr = try {
+                contentMethod.getInstruction<Instruction>(scanContent)
+            } catch (e: Exception) {
+                break
+            }
+            val ref = (instr as? ReferenceInstruction)?.reference as? MethodReference
+            if (ref != null) {
+                if (instr.opcode == Opcode.INVOKE_STATIC &&
+                    ref.name == "j" && ref.returnType == "F"
+                ) {
+                    topBarClass = ref.definingClass
+                }
+                if (ref.definingClass.startsWith("Lr0/")) {
+                    require(contentCallIndex < 0) {
+                        "TopBar content: more than one Lr0/ call in e() — ambiguous, refusing to guess"
+                    }
+                    contentCallIndex = scanContent
+                }
+            }
+            scanContent++
+        }
+        require(topBarClass != null) {
+            "TopBar content: no TopBar;->j() call found in e() (fingerprint matched the wrong method?)"
+        }
+        require(contentCallIndex >= 0) {
+            "TopBar content: no Lr0/ pills call found in e() (fingerprint matched the wrong method?)"
+        }
+        // The pills call's result must be unused: the next instruction
+        // must not be a move-result, or removing the call would leave
+        // a dangling result register.
+        val afterContent = contentMethod.getInstruction<Instruction>(contentCallIndex + 1)
+        require(afterContent.opcode != Opcode.MOVE_RESULT &&
+            afterContent.opcode != Opcode.MOVE_RESULT_OBJECT &&
+            afterContent.opcode != Opcode.MOVE_RESULT_WIDE
+        ) {
+            "TopBar content: pills call result is used — removing it is not safe"
+        }
+        contentMethod.removeInstruction(contentCallIndex)
 
         // --- 2. b(): shrink the container height to 1dp ---
         val containerMethod = TopBarContainerFingerprint.method
-        val containerMatches = TopBarContainerFingerprint.instructionMatches
-        val containerHeightCallIndex = containerMatches[2].index
+
+        // Height call: invoke-static j() in the TopBar class itself
+        // (not the state provider's a() call, which is earlier).
+        var containerHeightCallIndex = -1
+        var scanContainer = 0
+        while (scanContainer < 200) {
+            val instr = try {
+                containerMethod.getInstruction<Instruction>(scanContainer)
+            } catch (e: Exception) {
+                break
+            }
+            val ref = (instr as? ReferenceInstruction)?.reference as? MethodReference
+            if (ref != null && instr.opcode == Opcode.INVOKE_STATIC &&
+                ref.name == "j" && ref.returnType == "F" &&
+                ref.definingClass == topBarClass
+            ) {
+                containerHeightCallIndex = scanContainer
+                break
+            }
+            scanContainer++
+        }
+        require(containerHeightCallIndex >= 0) {
+            "TopBar container: no TopBar;->j() call found in b() (fingerprint matched the wrong method?)"
+        }
 
         // Scan forward from the j() call for the first float add
         // (v7 = 2*12dp + j()); do not hardcode its offset.
@@ -228,46 +299,80 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             containerMethod.addInstructions(index, "const/4 v5, 0x0")
         }
 
-        // --- 2d. v11: zero the 12dp padding field (vn/e0.d) ---
+        // --- 2e. v11, universal form: zero the 12dp padding (field d) ---
         // The static path applies .padding(vertical = d, horizontal = d)
         // AFTER its height modifier, so even at 0/4dp height it kept a 24dp
-        // strip — the other half of the tab-switch bounce. e0.d has exactly
-        // one consumer (the static-path padding), so zeroing it in <clinit>
-        // aligns both paths with no other side effects.
-        val clinitMethod = TopBarClinitFingerprint.method
-        var sputDIndex = -1
-        var scannedClinit = 0
-        while (scannedClinit <= 40) {
-            val instr = clinitMethod.getInstruction<Instruction>(scannedClinit)
-            if (instr.opcode == Opcode.SPUT) {
+        // strip — the other half of the tab-switch bounce. Previously
+        // this zeroed d in <clinit>, but <clinit> can only be found by
+        // its defining class, which is exactly what changes every
+        // build. Instead, zero the value where b() reads it: the single
+        // sget of field "d" (type F) in b(). In both analysed builds
+        // d's uses are all inside b() (the 2*12dp height term and the
+        // static-path padding), so this is equivalent to zeroing the
+        // field, with no class name to keep in sync.
+        //
+        // This runs AFTER the container edits above, on purpose: those
+        // edits insert at or after the add-float (index 49), which is
+        // after the sget (index 47), so the sget index is unchanged by
+        // them. No container scan runs after this step, so the
+        // insertion here cannot shift a later container index.
+        var sgetDIndex = -1
+        var scannedSget = 0
+        while (scannedSget < 200) {
+            val instr = try {
+                containerMethod.getInstruction<Instruction>(scannedSget)
+            } catch (e: Exception) {
+                break
+            }
+            if (instr.opcode == Opcode.SGET) {
                 val fieldRef = (instr as ReferenceInstruction).reference as? FieldReference
-                if (fieldRef != null &&
-                    fieldRef.definingClass == "Lvn/e0;" &&
-                    fieldRef.name == "d"
-                ) {
-                    sputDIndex = scannedClinit
-                    break
+                if (fieldRef != null && fieldRef.name == "d" && fieldRef.type == "F") {
+                    require(sgetDIndex < 0) {
+                        "TopBar container: more than one sget of d:F in b() — ambiguous, refusing to guess"
+                    }
+                    sgetDIndex = scannedSget
                 }
             }
-            scannedClinit++
+            scannedSget++
         }
-        require(sputDIndex >= 0) {
-            "TopBar clinit: sput of d:F not found"
+        require(sgetDIndex >= 0) {
+            "TopBar container: sget of d:F not found in b()"
         }
-        val sputDRegister = clinitMethod
-            .getInstruction<OneRegisterInstruction>(sputDIndex).registerA
-        clinitMethod.addInstructions(sputDIndex, "const v$sputDRegister, 0x00000000")
+        val sgetDRegister = containerMethod
+            .getInstruction<OneRegisterInstruction>(sgetDIndex).registerA
+        containerMethod.addInstructions(sgetDIndex + 1, "const v$sgetDRegister, 0x00000000")
 
-        // --- 3. g$a: mid-feed scroll-up must not show the bar ---
+        // --- 3. scroll listener: mid-feed scroll-up must not show the bar ---
         val scrollMethod = TopBarScrollFingerprint.method
         val scrollMatches = TopBarScrollFingerprint.instructionMatches
-        val scrollShowIndex = scrollMatches[1].index
+        // instructionMatches[0] is the -50 literal (the fingerprint's
+        // only filter). The show call is the first invoke after it —
+        // the state method name (z2 in 26.08, B2 in 26.10) is NOT used
+        // to find it, so this survives the next rename too.
+        val scrollMinus50Index = scrollMatches[0].index
+        var scrollShowIndex = -1
+        var scanScroll = scrollMinus50Index + 1
+        while (scanScroll < 200) {
+            val instr = try {
+                scrollMethod.getInstruction<Instruction>(scanScroll)
+            } catch (e: Exception) {
+                break
+            }
+            if (instr.opcode.name.startsWith("INVOKE")) {
+                scrollShowIndex = scanScroll
+                break
+            }
+            scanScroll++
+        }
+        require(scrollShowIndex >= 0) {
+            "TopBar scroll: no invoke after the -50 literal (fingerprint matched the wrong method?)"
+        }
 
-        // The B2 invoke takes (object, boolean); the boolean is the
+        // The show invoke takes (object, boolean); the boolean is the
         // second register used. Overwrite it with 0 just before the
-        // invoke, so this one call becomes B2(false). The preceding
-        // if-ge branches over both this invoke and the A2 after it,
-        // so the inserted const is skipped exactly when the invoke is.
+        // invoke, so this one call becomes show(false). The preceding
+        // if-ge branches over both this invoke and the pair call after
+        // it, so the inserted const is skipped exactly when the invoke is.
         val scrollInvoke =
             scrollMethod.getInstruction<FiveRegisterInstruction>(scrollShowIndex)
         val scrollUsedRegisters = listOf(
@@ -288,7 +393,7 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         // In the old app the header was a feed widget, not a fixed
         // container: it scrolled away with the page and only came
         // back when the feed was back at the top. The new app's
-        // first-item branch in the same j$a method is:
+        // first-item branch in the same scroll method is:
         //   index == 0:
         //     if (delta >= threshold) hide
         //     else if (delta <= -threshold || previousOffset == 0) show
@@ -298,7 +403,7 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         // Removing only that arm (nop-ing its if-le) leaves the
         // previousOffset == 0 arm untouched, so the bar still comes
         // back when the feed genuinely reaches the top, and it does
-        // nothing else: if neither arm fires, B2 is simply left
+        // nothing else: if neither arm fires, the show state is simply left
         // unchanged, exactly as the original code did.
         //
         // The arm is located by pattern, not by hardcoded index:
