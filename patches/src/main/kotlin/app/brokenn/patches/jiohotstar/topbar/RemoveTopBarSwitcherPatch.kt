@@ -26,15 +26,24 @@ val removeTopBarSwitcherPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
     execute {
+        // 26.10.12.2 — same patch as dev.5, re-derived for the new build.
+        // Only the obfuscated names changed (see Fingerprints.kt):
+        //   Ldn/j0; -> Lvn/e0;, LVe/c; -> LWe/c;, LQm/a; -> Lhn/a;,
+        //   Lr0/c;->c -> Lr0/d;->h, LEm/j$a; -> LUm/g$a;,
+        //   LEm/q;->z2/y2 -> LUm/n;->B2/A2. All constants are
+        //   unchanged from dev.5: container 25.0f, expanded target
+        //   0.46f, zeroed animation durations, clinit d -> 0.0f,
+        //   mid-feed B2 forced false, first-item if-le nopped.
+        //
         // v6 — three changes, all in the same patch:
         //
         // 1. e(): hide the pills (v3/v4) and shrink their height to 1dp
         //    (v6-v8 were 8dp, user asked for 1dp in v9).
-        //    In Ldn/j0;->e(): j() at 48, move-result at 49, Modifier.height
+        //    In Lvn/e0;->e(): j() at 47, move-result at 48, Modifier.height
         //    at 50. 0x00000000 is the IEEE-754 bit pattern for 0.0f.
         //
         // 2. b(): shrink the container itself to 1dp. This matters
-        //    because on a modern device (Ve/c.a true) b() takes its static
+        //    because on a modern device (We/c.a true) b() takes its static
         //    branch and sizes the container from its own calculation
         //    (2*12dp + j() = 78dp), not from e()'s height — so changing
         //    e() alone would leave a 78dp container around a 1dp child.
@@ -42,14 +51,14 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         //    container; the later "if hidden, v7 = 0" step still runs
         //    after this point, so a hidden bar stays 0.
         //
-        // 3. j$a (BottomNavController scroll listener): stop the bar
+        // 3. g$a (BottomNavController scroll listener): stop the bar
         //    reappearing on a mid-feed scroll up. Its logic is:
         //      index == 0 -> show/hide within the top item (kept)
         //      index != 0, delta > j0 -> hide (kept)
         //      index != 0, delta < -50 -> SHOW (removed: forced false)
-        //    Only the last z2 call is touched — the one after the -50
+        //    Only the last B2 call is touched — the one after the -50
         //    literal — by inserting const/4 <arg register>, 0x0 right
-        //    before it. y2 is left exactly as it was (false in that
+        //    before it. A2 is left exactly as it was (false in that
         //    branch), so bottom-nav behaviour is unchanged.
         //    Result: while scrolling mid-feed, content scrolls naturally
         //    from behind the status bar; the small gap only comes back
@@ -131,7 +140,7 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         )
 
         // --- 2b. v11: force the animated TopBarHeight target to ~4dp ---
-        // On devices where Ve/c.a is false, b() skips the static height
+        // On devices where We/c.a is false, b() skips the static height
         // modifier entirely and takes the :cond_6 branch instead, which
         // animates the bar height via LA/g;->b(target, spec, "TopBarHeight",
         // ...) with target = 1.0f (expanded) or 0.0f (collapsed). The static
@@ -219,10 +228,10 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             containerMethod.addInstructions(index, "const/4 v5, 0x0")
         }
 
-        // --- 2d. v11: zero the 12dp padding field (dn/j0.d) ---
+        // --- 2d. v11: zero the 12dp padding field (vn/e0.d) ---
         // The static path applies .padding(vertical = d, horizontal = d)
         // AFTER its height modifier, so even at 0/4dp height it kept a 24dp
-        // strip — the other half of the tab-switch bounce. j0.d has exactly
+        // strip — the other half of the tab-switch bounce. e0.d has exactly
         // one consumer (the static-path padding), so zeroing it in <clinit>
         // aligns both paths with no other side effects.
         val clinitMethod = TopBarClinitFingerprint.method
@@ -233,7 +242,7 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             if (instr.opcode == Opcode.SPUT) {
                 val fieldRef = (instr as ReferenceInstruction).reference as? FieldReference
                 if (fieldRef != null &&
-                    fieldRef.definingClass == "Ldn/j0;" &&
+                    fieldRef.definingClass == "Lvn/e0;" &&
                     fieldRef.name == "d"
                 ) {
                     sputDIndex = scannedClinit
@@ -249,15 +258,15 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             .getInstruction<OneRegisterInstruction>(sputDIndex).registerA
         clinitMethod.addInstructions(sputDIndex, "const v$sputDRegister, 0x00000000")
 
-        // --- 3. j$a: mid-feed scroll-up must not show the bar ---
+        // --- 3. g$a: mid-feed scroll-up must not show the bar ---
         val scrollMethod = TopBarScrollFingerprint.method
         val scrollMatches = TopBarScrollFingerprint.instructionMatches
         val scrollShowIndex = scrollMatches[1].index
 
-        // The z2 invoke takes (object, boolean); the boolean is the
+        // The B2 invoke takes (object, boolean); the boolean is the
         // second register used. Overwrite it with 0 just before the
-        // invoke, so this one call becomes z2(false). The preceding
-        // if-ge branches over both this invoke and the y2 after it,
+        // invoke, so this one call becomes B2(false). The preceding
+        // if-ge branches over both this invoke and the A2 after it,
         // so the inserted const is skipped exactly when the invoke is.
         val scrollInvoke =
             scrollMethod.getInstruction<FiveRegisterInstruction>(scrollShowIndex)
@@ -289,7 +298,7 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         // Removing only that arm (nop-ing its if-le) leaves the
         // previousOffset == 0 arm untouched, so the bar still comes
         // back when the feed genuinely reaches the top, and it does
-        // nothing else: if neither arm fires, z2 is simply left
+        // nothing else: if neither arm fires, B2 is simply left
         // unchanged, exactly as the original code did.
         //
         // The arm is located by pattern, not by hardcoded index:
