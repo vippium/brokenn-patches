@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/vippium/brokenn-patches/compare/v1.0.0...v1.0.1) (2026-11-04)
+
+### 🐛 Bug Fixes
+
+* restore monochrome icon name and description ([0fcaab9](https://github.com/vippium/brokenn-patches/commit/0fcaab95151b0ed4ca16fd7c2e27f40409fc0dbd))
+
 ## 1.0.0 (2026-11-04)
 
 ### ✨ New Features

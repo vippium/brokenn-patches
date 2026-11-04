@@ -1,34 +1,7 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "patches": [
-    {
-      "name": "Add monochrome icon support",
-      "description": "Adds a monochrome layer to the launcher icon, so it follows the system theme on Android 13+.",
-      "default": true,
-      "category": null,
-      "compatiblePackages": [
-        {
-          "packageName": "in.startv.hotstar",
-          "name": "JioHotstar",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#1A237E",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "26.10.12.2",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
     {
       "name": "Bypass signature check",
       "description": "Bypasses app signature verification to allow API access.",
@@ -140,6 +113,33 @@
     {
       "name": "Force HDR10",
       "description": "Enables HDR10 and HDR10+ playback on compatible devices.",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "in.startv.hotstar",
+          "name": "JioHotstar",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#1A237E",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "26.10.12.2",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Monochrome icon support",
+      "description": "Adds a themed-icon version of the launcher icon for Android 13+.",
       "default": true,
       "category": null,
       "compatiblePackages": [
