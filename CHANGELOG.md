@@ -1,3 +1,9 @@
+## [1.0.0-dev.5](https://github.com/vippium/brokenn-patches/compare/v1.0.0-dev.4...v1.0.0-dev.5) (2026-11-04)
+
+### ✨ New Features
+
+* add monochrome icon support for JioHotstar ([b0f0537](https://github.com/vippium/brokenn-patches/commit/b0f0537960490ab8a9839ec9f3b46676b9c41d47))
+
 ## [1.0.0-dev.4](https://github.com/vippium/brokenn-patches/compare/v1.0.0-dev.3...v1.0.0-dev.4) (2026-11-04)
 
 ### 🚀 Updated App Support

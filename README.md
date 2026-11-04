@@ -29,9 +29,9 @@ surprises.
 ## 🩹 Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.0.0-dev.4](https://github.com/vippium/brokenn-patches/releases/tag/v1.0.0-dev.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;8 patches total
+> **[v1.0.0-dev.5](https://github.com/vippium/brokenn-patches/releases/tag/v1.0.0-dev.5)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;9 patches total
 <details open>
-<summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;8 patches</summary>
+<summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;9 patches</summary>
 <br>
 
 **Package name:** `in.startv.hotstar`
@@ -43,6 +43,7 @@ surprises.
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
+| [Add monochrome icon support](#add-monochrome-icon-support) | Adds a monochrome layer to the launcher icon, so it follows the system theme on Android 13+. |  |
 | [Bypass signature check](#bypass-signature-check) | Bypasses app signature verification to allow API access. |  |
 | [Enable all codecs](#enable-all-codecs) | Enables all video codecs (H265, VP9, AV1) and 4K resolution by bypassing blacklist and capability checks. |  |
 | [Enable screen mirroring](#enable-screen-mirroring) | Allows playback while screen mirroring or HDMI is connected. |  |

@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-11-04T11:22:47",
-  "description": "## [1.0.0-dev.4](https://github.com/vippium/brokenn-patches/compare/v1.0.0-dev.3...v1.0.0-dev.4) (2026-11-04)\n\n### 🚀 Updated App Support\n\n* **JioHotstar:** Added `26.10.12.2` support ([5deae42](https://github.com/vippium/brokenn-patches/commit/5deae42d7e8df887dff609f7b5536fbe50225a8d))",
-  "download_url": "https://github.com/vippium/brokenn-patches/releases/download/v1.0.0-dev.4/patches-1.0.0-dev.4.mpp",
+  "created_at": "2026-11-04T13:14:58",
+  "description": "## [1.0.0-dev.5](https://github.com/vippium/brokenn-patches/compare/v1.0.0-dev.4...v1.0.0-dev.5) (2026-11-04)\n\n### ✨ New Features\n\n* add monochrome icon support for JioHotstar ([b0f0537](https://github.com/vippium/brokenn-patches/commit/b0f0537960490ab8a9839ec9f3b46676b9c41d47))",
+  "download_url": "https://github.com/vippium/brokenn-patches/releases/download/v1.0.0-dev.5/patches-1.0.0-dev.5.mpp",
   "signature_download_url": "",
-  "version": "1.0.0-dev.4"
+  "version": "1.0.0-dev.5"
 }
