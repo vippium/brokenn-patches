@@ -7,7 +7,7 @@ import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
 @Suppress("unused")
 val enableAllCodecsPatch = bytecodePatch(
     name = "Enable all codecs",
-    description = "Enables all video codecs (H265, VP9, AV1) and 4K resolution by bypassing blacklist and capability checks."
+    description = "Unlocks H.265, VP9, AV1 and 4K playback on capable devices."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 

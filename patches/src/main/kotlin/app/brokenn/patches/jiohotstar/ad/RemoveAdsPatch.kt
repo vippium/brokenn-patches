@@ -7,7 +7,7 @@ import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
 @Suppress("unused")
 val removeAdsPatch = bytecodePatch(
     name = "Remove ads",
-    description = "Removes pre-roll, mid-roll, and live match video ads."
+    description = "Removes pre-roll, mid-roll, live-match and home-feed ads."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 

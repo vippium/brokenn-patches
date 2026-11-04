@@ -7,7 +7,7 @@ import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
 @Suppress("unused")
 val forceHdr10Patch = bytecodePatch(
     name = "Force HDR10",
-    description = "Forces HDR10 and HDR10+ playback on compatible devices by bypassing blacklist and capability checks."
+    description = "Enables HDR10 and HDR10+ playback on compatible devices."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 

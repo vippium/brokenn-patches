@@ -21,7 +21,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 @Suppress("unused")
 val removeTopBarSwitcherPatch = bytecodePatch(
     name = "Remove top bar switcher",
-    description = "Removes floating `Tadka` and `JioHotstar` topbar switcher from app."
+    description = "Removes the JioHotstar/Tadka mode-switcher row from the top of Home."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 

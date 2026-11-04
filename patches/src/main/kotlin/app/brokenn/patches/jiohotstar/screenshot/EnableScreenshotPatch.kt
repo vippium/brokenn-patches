@@ -7,7 +7,7 @@ import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
 @Suppress("unused")
 val enableScreenshotPatch = bytecodePatch(
     name = "Enable screenshots",
-    description = "Removes screenshot and screen recording restrictions."
+    description = "Allows screenshots and screen recording."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
