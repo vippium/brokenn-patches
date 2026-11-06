@@ -5,7 +5,7 @@ Adds a themed-icon (`<monochrome>`) layer to the JioHotstar launcher icon.
 ## Target
 
 - App: JioHotstar, package `in.startv.hotstar`
-- Version: **26.10.12.2** (current dev target in shared Constants; the monochrome asset itself was made from the 26.08.17.3 foreground — check the new build's foreground star is unchanged before relying on the match)
+- Version: **26.10.12.2**
 - Stock icon: `res/mipmap-anydpi-v26/ic_launcher.xml` — background +
   foreground only, no monochrome layer.
 
@@ -30,10 +30,3 @@ Only the main icon is patched; the seasonal variants
 
 - This is a `resourcePatch`, not a bytecode patch — it decodes and
   rebuilds resources, so it is slower than the other JioHotstar patches.
-- Dotted-outline variants of the icon were made and dropped by the
-  user; the patch uses the plain v1 icon.
-- Unconfirmed until a real Morphe Manager run: this environment cannot
-  build the .mpp, so confirm the patch lands, the patched app installs,
-  and the icon follows the theme (e.g. Material You themed icons on).
-  If it fails, send the Morphe patcher log — in particular whether it
-  failed on the bundled drawable or on the ic_launcher.xml edit.

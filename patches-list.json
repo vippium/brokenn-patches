@@ -234,20 +234,6 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": null,
-              "versionCodes": null,
-              "isExperimental": true,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "26.08.17.3",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
               "version": "26.10.12.2",
               "versionCodes": null,
               "isExperimental": false,

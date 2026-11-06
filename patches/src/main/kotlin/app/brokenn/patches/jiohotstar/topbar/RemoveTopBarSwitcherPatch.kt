@@ -26,12 +26,6 @@ val removeTopBarSwitcherPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_JIOHOTSTAR_TOPBAR)
 
     execute {
-        // Universal: no obfuscated names hardcoded. Version-specific
-        // targets are found by scanning (see Fingerprints.kt); any
-        // scan miss fails loudly via require().
-
-        // 1. Remove the pills call (the single Lr0/ invoke in e()),
-        // keeping the row height. Its result must be unused.
         val contentMethod = TopBarContentFingerprint.method
         var topBarClass: String? = null
         var contentCallIndex = -1
@@ -76,9 +70,6 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         }
         contentMethod.removeInstruction(contentCallIndex)
 
-        // 2. Set the container height to 25dp. b() sizes itself
-        // (2*12dp + j() = 78dp), not from e(), so e() alone is not
-        // enough. A hidden bar stays 0 via its later step.
         val containerMethod = TopBarContainerFingerprint.method
         var containerHeightCallIndex = -1
         var scanContainer = 0
@@ -102,8 +93,6 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             "TopBar container: no TopBar;->j() call found in b() (fingerprint matched the wrong method?)"
         }
 
-        // First float add after j(), handling both ADD_FLOAT and
-        // ADD_FLOAT_2ADDR, bounded to 20 instructions.
         var addFloatIndex = containerHeightCallIndex
         var scanned = 0
         while (scanned <= 20) {
@@ -130,9 +119,6 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             "const v$containerHeightRegister, 0x41C80000" // 25.0f
         )
 
-        // Animated path: retarget the expanded 1.0f branch to 0.46f
-        // (~25dp), keeping the collapsed 0.0f branch. Replace, don't
-        // insert, so later indices stay stable.
         val expandedTargetBits = 0x3EEB851F // 0.46f
         var topBarHeightIndex = addFloatIndex + 1
         var scannedHeight = 0
@@ -174,8 +160,6 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             "const v$expandedRegister, $expandedTargetBits"
         )
 
-        // Zero animation durations (LA/n;->c) so height changes are
-        // instant. Insert descending so earlier indices stay valid.
         val durationCallIndices = buildList {
             var i = addFloatIndex + 1
             while (i < topBarHeightIndex) {
@@ -196,9 +180,6 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             containerMethod.addInstructions(index, "const/4 v5, 0x0")
         }
 
-        // Zero the 12dp padding: the single sget of d:F in b().
-        // Runs last for b() on purpose — its index precedes all
-        // edits above, so it is unchanged by them.
         var sgetDIndex = -1
         var scannedSget = 0
         while (scannedSget < 200) {
@@ -225,13 +206,8 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             .getInstruction<OneRegisterInstruction>(sgetDIndex).registerA
         containerMethod.addInstructions(sgetDIndex + 1, "const v$sgetDRegister, 0x00000000")
 
-        // 3. Mid-feed scroll-up: the show arm is the only consecutive
-        // (Z)V invoke pair on the same receiver with (true, false)
-        // arguments — every other branch pairs (false,false) or
-        // (true,true). Force the show call's argument register to 0.
         val scrollMethod = TopBarScrollFingerprint.method
 
-        // Track boolean constants per register, then find the pair.
         data class BoolCall(val index: Int, val receiver: Int, val arg: Int, val value: Int)
         val constBool = mutableMapOf<Int, Int>()
         val calls = mutableListOf<BoolCall>()
@@ -277,9 +253,6 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         }
         scrollMethod.addInstructions(showCall.index, "const/4 v${showCall.arg}, 0x0")
 
-        // 4. First-item scroll-up: nop only the delta arm
-        // (neg-int + if-le). The previousOffset == 0 arm stays, so
-        // the bar returns only at the very top.
         var firstItemShowBranchIndex = -1
         var scanIndex = 0
         while (scanIndex < 100) {
