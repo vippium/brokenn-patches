@@ -1,3 +1,9 @@
+## [1.1.0-dev.3](https://github.com/vippium/brokenn-patches/compare/v1.1.0-dev.2...v1.1.0-dev.3) (2026-11-06)
+
+### 🐛 Bug Fixes
+
+* compile error against Morphe patcher 2.3.0 ([d9e6b4a](https://github.com/vippium/brokenn-patches/commit/d9e6b4a9db8b1cb5b4240c29b66cc6e1a778e581))
+
 ## [1.1.0-dev.2](https://github.com/vippium/brokenn-patches/compare/v1.1.0-dev.1...v1.1.0-dev.2) (2026-11-04)
 
 ### 🐛 Bug Fixes
