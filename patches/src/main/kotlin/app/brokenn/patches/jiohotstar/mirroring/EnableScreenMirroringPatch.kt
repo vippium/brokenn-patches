@@ -12,6 +12,7 @@ val enableScreenMirroringPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
     execute {
+        // NOP the multiple display detection — skips "Multiple screens detected" error
         MultipleDisplayCheckFingerprint.method.addInstructions(0, """
             return-void
         """)
