@@ -1,8 +1,6 @@
 <div align="center">
 
-# 🥀 Brokenn Patches
-
-### Morphe patches for apps which I love
+![Repository Card](.github/assets/repo_card.jpg)
 
 ![Release](https://img.shields.io/github/v/release/vippium/brokenn-patches?include_prereleases&logo=github&label=Release&labelColor=1E201E&color=3C3D37) 
 ![License](https://img.shields.io/badge/License-GPL_v3-D5CEA3?labelColor=3C2A21&logo=gplv3) 
@@ -22,10 +20,6 @@
 [Morphe](https://morphe.software) patcher — unlocking premium features, removing
 ads, and restoring user freedom in Android apps I use every day.
 
-Every release is built automatically by CI, signed, and published through
-[semantic-release](https://semantic-release.gitbook.io/) — no manual uploads, no
-surprises.
-
 ## 🩹 Patches
 
 <!-- PATCHES_START EXPANDED -->
@@ -41,8 +35,8 @@ surprises.
 | 26.10.12.2 |
 | :---: |
 
-| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
-|----------|----------------|-----------|
+| Patch | Description |
+|----------|----------------|
 | [Bypass signature check](#bypass-signature-check) | Bypasses app signature verification to allow API access. |  |
 | [Enable all codecs](#enable-all-codecs) | Unlocks H.265, VP9, AV1 and 4K playback on capable devices. |  |
 | [Enable screen mirroring](#enable-screen-mirroring) | Allows playback while screen mirroring or HDMI is connected. |  |
