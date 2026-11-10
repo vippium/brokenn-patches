@@ -15,8 +15,8 @@ import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
 
 @Suppress("unused")
 val removeVoiceAssistantPatch = bytecodePatch(
-    name = "Remove voice assistant",
-    description = "Removes the voice assistant and its ChatGPT integration: Ask orb, search-bar mic, and voice overlay entry points."
+    name = "Remove ChatGPT Voice Assistant",
+    description = "Strips out the integrated ChatGPT voice assistant module entirely."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
