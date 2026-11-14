@@ -62,10 +62,16 @@ object CvdWidgetTypeFingerprint : Fingerprint(
     )
 )
 
-// Sub-nav row parser; the Ask pill rides the ILLUSTRATION_PILL branch like Swiggy pills.
-object CvdSubNavParserFingerprint : Fingerprint(
-    filters = listOf(
-        string("getSubMenuItemsList(...)"),
-        string("getIllustrationPill(...)")
-    )
+// The CVD-orb click lambda (version-pinned class; the orb's action processor).
+object AskActionClickFingerprint : Fingerprint(
+    definingClass = "LGo/i;",
+    name = "invoke",
+    returnType = "Ljava/lang/Object;"
+)
+
+// The home suggestion tray (ChatGPT block) converter: staggered tray of TopicsPill chips.
+object HomeSuggestionTrayFingerprint : Fingerprint(
+    definingClass = "LBd/Q7;",
+    name = "a",
+    returnType = "LBd/P7;"
 )
