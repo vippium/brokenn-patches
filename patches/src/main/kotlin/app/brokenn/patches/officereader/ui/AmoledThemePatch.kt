@@ -8,7 +8,6 @@ import app.morphe.patcher.patch.stringOption
 import java.util.logging.Logger
 import org.w3c.dom.Element
 
-// Ported from kmru/nai64extrapatches (universal AMOLED theme patch), scoped to Office Reader.
 @Suppress("unused")
 val amoledThemePatch = resourcePatch(
     name = "AMOLED theme",

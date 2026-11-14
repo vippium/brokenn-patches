@@ -42,7 +42,7 @@ object RowBuilderFingerprint : Fingerprint(
 @Suppress("unused")
 val unlockPremiumPatch = bytecodePatch(
     name = "Unlock premium",
-    description = "Unlocks premium features locally and cleans up the About screen (no rate prompt, no family-apps promos).",
+    description = "Unlocks premium and removes Family-apps promos from the About screens.",
 ) {
     compatibleWith(COMPATIBILITY_OFFICEREADER)
 
