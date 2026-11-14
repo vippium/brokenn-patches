@@ -1,3 +1,9 @@
+## [1.3.0-dev.2](https://github.com/vippium/brokenn-patches/compare/v1.3.0-dev.1...v1.3.0-dev.2) (2026-11-14)
+
+### 🐛 Bug Fixes
+
+* **octogram:** anti delete message patch ([450cc5e](https://github.com/vippium/brokenn-patches/commit/450cc5e098d026ac1683d4bb12d3be344901b70e))
+
 ## [1.3.0-dev.1](https://github.com/vippium/brokenn-patches/compare/v1.2.0...v1.3.0-dev.1) (2026-11-14)
 
 ### ✨ New Features
