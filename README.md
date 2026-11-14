@@ -39,8 +39,8 @@
 | 5.0.4 |
 | :---: |
 
-| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
-|----------|----------------|-----------|
+| Patch | Description |
+|----------|:----------------:|
 | [AMOLED theme](#amoled-theme) | Makes dark mode pure black for AMOLED screens. Light mode stays normal. | • AMOLED color<br>• Blacken Status Bar<br>• Blacken Navigation Bar<br>• Blacken Surfaces |
 | [Unlock premium](#unlock-premium) | Unlocks premium features locally and cleans up the About screen (no rate prompt, no family-apps promos). |  |
 
