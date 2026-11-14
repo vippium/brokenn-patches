@@ -7,9 +7,8 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.iface.ClassDef
 
-// Locates MessagesStorage by its message-delete SQL, then patches the
-// markMessagesAsDeleted(long, ArrayList, boolean, boolean, int, int) wrapper.
-// p4 = useQueue: true = user-initiated delete, false = server push.
+private const val TAG_MESSAGE_SQL = "DELETE FROM tag_message_id WHERE mid IN ("
+
 @Suppress("unused")
 val antiDeleteMessagesPatch = bytecodePatch(
     name = "Anti-delete messages",
@@ -20,7 +19,7 @@ val antiDeleteMessagesPatch = bytecodePatch(
     execute {
         val storageClasses = mutableListOf<ClassDef>()
         classDefForEach { c ->
-            if (c.methods.any { "DELETE FROM tag_message_id WHERE mid IN(%s)" in it.stringConstants() }) {
+            if (c.methods.any { TAG_MESSAGE_SQL in it.stringConstants() }) {
                 storageClasses.add(c)
             }
         }
