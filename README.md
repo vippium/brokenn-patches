@@ -27,7 +27,25 @@
 ## <img src="https://cdn.simpleicons.org/android" height="20" /> Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.3.0](https://github.com/vippium/brokenn-patches/releases/tag/v1.3.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;17 patches total
+> **[v1.4.0-dev.1](https://github.com/vippium/brokenn-patches/releases/tag/v1.4.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;19 patches total
+<details open>
+<summary>📦 Office Reader&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
+<br>
+
+**Package name:** `net.sjava.officereader`
+
+**🎯 Supported versions:**
+
+| 5.0.4 |
+| :---: |
+
+| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
+|----------|----------------|-----------|
+| [AMOLED theme](#amoled-theme) | Makes dark mode pure black for AMOLED screens. Light mode stays normal. | • AMOLED color<br>• Blacken Status Bar<br>• Blacken Navigation Bar<br>• Blacken Surfaces |
+| [Unlock premium](#unlock-premium) | Unlocks premium features locally and cleans up the About screen (no rate prompt, no family-apps promos). |  |
+
+</details>
+
 <details open>
 <summary>📦 OctoGram&nbsp;&nbsp;•&nbsp;&nbsp;6 patches</summary>
 <br>
