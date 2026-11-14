@@ -27,28 +27,62 @@
 ## <img src="https://cdn.simpleicons.org/android" height="20" /> Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.2.0](https://github.com/vippium/brokenn-patches/releases/tag/v1.2.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;10 patches total
+> **[v1.3.0-dev.1](https://github.com/vippium/brokenn-patches/releases/tag/v1.3.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;17 patches total
+<details open>
+<summary>📦 OctoGram&nbsp;&nbsp;•&nbsp;&nbsp;6 patches</summary>
+<br>
+
+**Package name:** `it.octogram.android`
+
+**🎯 Supported versions:**
+
+| 3.6.1 Beta 2 |
+| :---: |
+
+| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
+|----------|----------------|-----------|
+| [Anti-delete messages](#anti-delete-messages) | Prevents server-deleted messages from being removed locally. |  |
+| [Anti-disappearing media](#anti-disappearing-media) | Keeps view-once and self-destructing media viewable forever. |  |
+| [Bypass content restrictions](#bypass-content-restrictions) | Bypasses restricted-content gates and channel no-forward checks. |  |
+| [Enable premium](#enable-premium) | Unlocks premium feature UI and shows the premium badge on self only. |  |
+| [Hide typing indicator](#hide-typing-indicator) | Prevents typing status from being sent to other users. |  |
+| [Remove sponsored messages](#remove-sponsored-messages) | Stops sponsored messages from being fetched and shown in channels. |  |
+
+</details>
+
 <details open>
 <summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;10 patches</summary>
 <br>
+
+**Package name:** `in.startv.hotstar`
 
 **🎯 Supported versions:**
 
 | 26.10.26.0 |
 | :---: |
 
-| Patch | Description |
-|----------|:----------------:|
-| [Bypass signature check](#bypass-signature-check) | Bypasses app signature verification to allow API access. |
-| [Enable all codecs](#enable-all-codecs) | Unlocks H.265, VP9, AV1 and 4K playback on capable devices. |
-| [Enable screen mirroring](#enable-screen-mirroring) | Allows playback while screen mirroring or HDMI is connected. |
-| [Enable screenshots](#enable-screenshots) | Allows screenshots and screen recording. |
-| [Force HDR10](#force-hdr10) | Enables HDR10 and HDR10+ playback on compatible devices. |
-| [Monochrome icon support](#monochrome-icon-support) | Adds a themed-icon version of the launcher icon for Android 13+. |
-| [Premium unlock](#premium-unlock) | Unlocks premium UI features, removes subscription nudges, and enables downloads. |
-| [Remove ChatGPT Voice Assistant](#remove-chatgpt-voice-assistant) | Strips out the integrated ChatGPT voice assistant module entirely. |
-| [Remove ads](#remove-ads) | Removes pre-roll, mid-roll, live-match and home-feed ads. |
-| [Remove top bar switcher](#remove-top-bar-switcher) | Removes the JioHotstar/Tadka switcher from the top of Home. |
+| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
+|----------|----------------|-----------|
+| [Bypass signature check](#bypass-signature-check) | Bypasses app signature verification to allow API access. |  |
+| [Enable all codecs](#enable-all-codecs) | Unlocks H.265, VP9, AV1 and 4K playback on capable devices. |  |
+| [Enable screen mirroring](#enable-screen-mirroring) | Allows playback while screen mirroring or HDMI is connected. |  |
+| [Enable screenshots](#enable-screenshots) | Allows screenshots and screen recording. |  |
+| [Force HDR10](#force-hdr10) | Enables HDR10 and HDR10+ playback on compatible devices. |  |
+| [Monochrome icon support](#monochrome-icon-support) | Adds a themed-icon version of the launcher icon for Android 13+. |  |
+| [Premium unlock](#premium-unlock) | Unlocks premium UI features, removes subscription nudges, and enables downloads. |  |
+| [Remove ChatGPT Voice Assistant](#remove-chatgpt-voice-assistant) | Strips out the integrated ChatGPT voice assistant module entirely. |  |
+| [Remove ads](#remove-ads) | Removes pre-roll, mid-roll, live-match and home-feed ads. |  |
+| [Remove top bar switcher](#remove-top-bar-switcher) | Removes the JioHotstar/Tadka switcher from the top of Home. |  |
+
+</details>
+
+<details open>
+<summary>🌐 Universal&nbsp;&nbsp;•&nbsp;&nbsp;1 patch</summary>
+<br>
+
+| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
+|----------|----------------|-----------|
+| [Disable Play Store updates](#disable-play-store-updates) | Disables Play Store updates by setting the version code to the maximum allowed. This patch may cause unexpected issues with some apps and does not work if the app is installed by root mounting |  |
 
 </details>
 
