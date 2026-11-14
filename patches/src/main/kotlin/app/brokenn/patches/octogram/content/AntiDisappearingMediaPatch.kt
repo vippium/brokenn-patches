@@ -52,14 +52,13 @@ val antiDisappearingMediaPatch = bytecodePatch(
                 if (m.returnType != "Z") return@forEach
 
                 if (!m.isStatic() && m.parameters.isEmpty() && m.startsWithMessageOwnerSecretCheck()) {
-                    // isSecretMedia
+
                     m.addInstructions(0, """
                         const/4 v0, 0x0
                         return v0
                     """)
                     patched++
                 } else if (!m.isStatic() && m.parameters.isEmpty() && m.hasWideLiteral(0x7FFFFFFF)) {
-                    // isVoiceOnce / isRoundOnce (ttl_seconds == 0x7FFFFFFF)
                     m.addInstructions(0, """
                         const/4 v0, 0x0
                         return v0

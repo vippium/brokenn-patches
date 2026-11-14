@@ -32,7 +32,7 @@ val removeAdsPatch = bytecodePatch(
         var patched = 0
         for (c in controllerClasses) {
             val mc = mutableClassDefBy(c)
-            // getSponsoredMessages(long): the only (J) method building the request → return null.
+
             mc.methods.filter {
                 it.parameters.toList() == listOf("J") && it.constructsType(SPONSORED_CTOR)
             }.forEach { m ->
@@ -42,7 +42,7 @@ val removeAdsPatch = bytecodePatch(
                 """)
                 patched++
             }
-            // isSponsoredDisabled(): force true so premium-gated ad paths stay off.
+
             mc.methods.filter {
                 it.returnType == "Z" && it.parameters.isEmpty() && it.readsField(SPONSORED_ENABLED)
             }.forEach { m ->
