@@ -4,17 +4,17 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.addFreeRegisters
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
+import app.brokenn.patches.jiohotstar.watchpage.AdaptiveTabConverterFingerprint
 
 @Suppress("unused")
 val hidePlayerButtonsPatch = bytecodePatch(
     name = "Hide player buttons",
-    description = "Hides selected buttons (Watch Next, Episodes, Shop, Speed, Rate, Next Episode) from the player control bar."
+    description = "Hides selected buttons (Watch Next, Episodes, Shop, Speed, Rate, Next Episode) from the player settings sheet and the fullscreen bottom-row tab bar."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
@@ -28,7 +28,7 @@ val hidePlayerButtonsPatch = bytecodePatch(
     )
     val hideShop by booleanOption(
         key = "hide_shop", title = "Hide Shop",
-        description = "Hides the Shop button.", default = false
+        description = "Hides the Shop / Order Food button.", default = false
     )
     val hideSpeed by booleanOption(
         key = "hide_speed", title = "Hide Speed",
@@ -54,103 +54,111 @@ val hidePlayerButtonsPatch = bytecodePatch(
         }
         if (titles.isEmpty()) return@execute
 
-        // Path 1 (active): VerticalPlayerControlWidget.Settings.items - each item is a
-        // Button whose data.text is the visible label. Hidden items skip the loop body,
-        // so they never reach the button bar while the data stays intact server-side.
-        val v2Method = VerticalControlAssemblyFingerprint.method
-        val (_, v2Regs) = v2Method.addFreeRegisters(2)
-        val workReg = v2Regs
-        val needleReg = v2Regs + 1
+        // PlayerWidget converts menu items into settings sheet entries, 
+        // ignoring hidden titles. Reverse-order patching preserves indices and ensures
+        // safe register reassignment.
+        val dConv = PlayerWidgetConverterFingerprint.method
+        val dImpl = dConv.implementation!!.instructions
 
-        val v2Impl = v2Method.implementation!!.instructions
-        val settingSites = v2Impl.withIndex().filter { (_, ins) ->
+        data class Site(val idx: Int, val elemReg: Int, val loopHead: Int, val itemType: String)
+        val sites = mutableListOf<Site>()
+        dImpl.forEachIndexed { idx, ins ->
+            if (ins.opcode == Opcode.INVOKE_STATIC) {
+                val ref = (ins as? ReferenceInstruction)?.reference.toString()
+                if (ref.contains("PlayerControlMenuItem;)")) {
+                    val elemReg = dConv.getInstruction<OneRegisterInstruction>(idx + 1).registerA
+                    var head = -1
+                    for (j in idx downTo 0) {
+                        val l = dImpl[j]
+                        if (l.opcode == Opcode.INVOKE_INTERFACE &&
+                            (l as? ReferenceInstruction)?.reference.toString().contains("Iterator;->hasNext")
+                        ) { head = j; break }
+                    }
+                    require(head >= 0) { "PlayerWidgetConverter: loop head not found" }
+                    // the item interface type is the converter call's return type — it is
+                    // R8-obfuscated and must never be hardcoded
+                    val itemType = ref.substringAfterLast(')')
+                    sites.add(Site(idx, elemReg, head, itemType))
+                }
+            }
+        }
+        require(sites.isNotEmpty()) { "PlayerWidgetConverter: menu item sites not found" }
+
+        for (site in sites.sortedByDescending { it.idx }) {
+            val block = buildString {
+                append("invoke-interface {v${site.elemReg}}, ${site.itemType}->getTitle()Ljava/lang/String;\n")
+                append("move-result-object v13\n")
+                titles.forEachIndexed { i, title ->
+                    append("const-string v15, \"$title\"\n")
+                    append("invoke-virtual {v13, v15}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z\n")
+                    append("move-result v15\n")
+                    append("if-nez v15, :pi_hidden_$i\n")
+                }
+                // nop pins the trailing label to a real instruction
+                append("goto/16 :pi_keep\n")
+                titles.forEachIndexed { i, _ ->
+                    append(":pi_hidden_$i\n")
+                    append("goto/16 :pi_skip\n")
+                }
+                append(":pi_keep\n")
+                append("nop\n")
+            }
+            dConv.addInstructionsWithLabels(
+                site.idx + 2,
+                block,
+                ExternalLabel("pi_skip", dImpl[site.loopHead])
+            )
+        }
+
+        // The fullscreen bottom tab bar uses the landscape converter loop,
+        // so it needs a separate title-based filter. The existing patch only handles
+        // portrait; side-sheet and peek lists are excluded because they aren't shown on phones.
+        val tabContainer = AdaptiveTabConverterFingerprint.method
+        val tabImpl = tabContainer.implementation!!.instructions
+        val castSites = tabImpl.withIndex().filter { (_, ins) ->
             ins.opcode == Opcode.CHECK_CAST &&
                 (ins as? ReferenceInstruction)?.reference.toString()
-                    .contains("VerticalPlayerControlWidget" + '$' + "SettingItem;")
+                    .contains("Lcom/hotstar/ui/model/widget/TabWidget;")
         }
-        require(settingSites.isNotEmpty()) { "VerticalControlAssembly: settings loop not found" }
-
-        for (site in settingSites.reversed()) {
-            val siteIdx = site.index
-            var head = -1
-            for (j in siteIdx downTo 0) {
-                val ins = v2Impl[j]
-                if (ins.opcode == Opcode.INVOKE_INTERFACE &&
-                    (ins as? ReferenceInstruction)?.reference.toString().contains("Iterator;->hasNext")
-                ) { head = j; break }
-            }
-            require(head >= 0) { "VerticalControlAssembly: loop head not found" }
-
-            val block = buildString {
-                append("invoke-virtual/range {v$workReg .. v$workReg}, Lcom/hotstar/ui/model/widget/VerticalPlayerControlWidget" + '$' + "SettingItem;->getButton()Lcom/hotstar/ui/model/feature/atom/Button;\n")
-                append("move-result-object v$workReg\n")
-                append("if-eqz v$workReg, :not_hidden\n")
-                append("invoke-virtual/range {v$workReg .. v$workReg}, Lcom/hotstar/ui/model/feature/atom/Button;->getData()Lcom/hotstar/ui/model/feature/atom/Button" + '$' + "Data;\n")
-                append("move-result-object v$workReg\n")
-                append("if-eqz v$workReg, :not_hidden\n")
-                append("invoke-virtual/range {v$workReg .. v$workReg}, Lcom/hotstar/ui/model/feature/atom/Button" + '$' + "Data;->getText()Ljava/lang/String;\n")
-                append("move-result-object v$workReg\n")
-                append("if-eqz v$workReg, :not_hidden\n")
-                titles.forEachIndexed { i, title ->
-                    append("const-string v$needleReg, \"$title\"\n")
-                    append("invoke-virtual/range {v$workReg .. v$needleReg}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z\n")
-                    append("move-result v$workReg\n")
-                    val next = if (i < titles.size - 1) ":hidden_${i + 1}" else ":not_hidden"
-                    append("if-eqz v$workReg, $next\n")
-                    append("goto/16 :loop_head\n")
-                    if (i < titles.size - 1) append(":hidden_${i + 1}\n")
-                }
-                append(":not_hidden\n")
-            }
-            v2Method.addInstructionsWithLabels(
-                siteIdx + 1,
-                block,
-                ExternalLabel("loop_head", v2Impl[head])
-            )
+        require(castSites.size >= 2) { "TabConverter: expected portrait and landscape casts" }
+        val landscapeSite = castSites[1].index
+        val itemReg = tabContainer.getInstruction<OneRegisterInstruction>(landscapeSite).registerA
+        var landscapeHead = -1
+        for (j in landscapeSite downTo 0) {
+            val ins = tabImpl[j]
+            if (ins.opcode == Opcode.INVOKE_INTERFACE &&
+                (ins as? ReferenceInstruction)?.reference.toString().contains("Iterator;->hasNext")
+            ) { landscapeHead = j; break }
         }
+        require(landscapeHead >= 0) { "TabConverter: landscape loop head not found" }
 
-        // Path 2 (legacy v1 menu bar): same title filter over the F5 items.
-        val menuMethod = PlayerMenuAssemblyFingerprint.method
-        val (_, menuRegs) = menuMethod.addFreeRegisters(2)
-        val menuTitleReg = menuRegs
-        val menuNeedleReg = menuRegs + 1
+        // The row's swiggy tab is titled "Order Food"
+        val landscapeTitles = titles.toMutableList()
+        if (hideShop == true && !landscapeTitles.contains("Order Food")) landscapeTitles.add("Order Food")
 
-        val menuImpl = menuMethod.implementation!!.instructions
-        val menuSites = menuImpl.withIndex().filter { (_, ins) ->
-            ins.opcode == Opcode.CHECK_CAST &&
-                (ins as? ReferenceInstruction)?.reference.toString().contains("LBd/F5;")
-        }
-        for (site in menuSites.reversed()) {
-            val siteIdx = site.index
-            val itemReg = menuMethod.getInstruction<OneRegisterInstruction>(siteIdx).registerA
-            var head = -1
-            for (j in siteIdx downTo 0) {
-                val ins = menuImpl[j]
-                if (ins.opcode == Opcode.INVOKE_INTERFACE &&
-                    (ins as? ReferenceInstruction)?.reference.toString().contains("Iterator;->hasNext")
-                ) { head = j; break }
+        val landscapeBlock = buildString {
+            append("invoke-virtual {v$itemReg}, Lcom/hotstar/ui/model/widget/TabWidget;->getData()Lcom/hotstar/ui/model/widget/TabWidget${'$'}Data;\n")
+            append("move-result-object v5\n")
+            append("invoke-virtual {v5}, Lcom/hotstar/ui/model/widget/TabWidget${'$'}Data;->getTitle()Ljava/lang/String;\n")
+            append("move-result-object v5\n")
+            landscapeTitles.forEachIndexed { i, title ->
+                append("const-string v6, \"$title\"\n")
+                append("invoke-virtual {v5, v6}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z\n")
+                append("move-result v6\n")
+                append("if-nez v6, :pl_hidden_$i\n")
             }
-            if (head < 0) continue
-
-            val block = buildString {
-                append("invoke-interface {v$itemReg}, LBd/F5;->getTitle()Ljava/lang/String;\n")
-                append("move-result-object v$menuTitleReg\n")
-                titles.forEachIndexed { i, title ->
-                    append("const-string v$menuNeedleReg, \"$title\"\n")
-                    append("invoke-virtual/range {v$menuTitleReg .. v$menuNeedleReg}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z\n")
-                    append("move-result v$menuTitleReg\n")
-                    val next = if (i < titles.size - 1) ":hidden_${i + 1}" else ":hidden_next"
-                    append("if-eqz v$menuTitleReg, $next\n")
-                    append("goto/16 :loop_head\n")
-                    if (i < titles.size - 1) append(":hidden_${i + 1}\n")
-                }
-                append(":hidden_next\n")
+            append("goto/16 :pl_keep\n")
+            landscapeTitles.forEachIndexed { i, _ ->
+                append(":pl_hidden_$i\n")
+                append("goto/16 :pl_skip\n")
             }
-            menuMethod.addInstructionsWithLabels(
-                siteIdx + 1,
-                block,
-                ExternalLabel("loop_head", menuImpl[head])
-            )
+            append(":pl_keep\n")
+            append("nop\n")
         }
+        tabContainer.addInstructionsWithLabels(
+            landscapeSite + 1,
+            landscapeBlock,
+            ExternalLabel("pl_skip", tabImpl[landscapeHead])
+        )
     }
 }
