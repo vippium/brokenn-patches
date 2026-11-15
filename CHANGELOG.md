@@ -1,3 +1,16 @@
+## [1.4.0-dev.2](https://github.com/vippium/brokenn-patches/compare/v1.4.0-dev.1...v1.4.0-dev.2) (2026-11-15)
+
+### ✨ New Features
+
+* add hide watch page elements patch ([82425af](https://github.com/vippium/brokenn-patches/commit/82425af686878b0dd921d4ecc13902d84626b096))
+* add player button hiding options ([787fa08](https://github.com/vippium/brokenn-patches/commit/787fa08ec35f6a5169dff5d19f6f5bd90d882680))
+* hide the ChatGPT suggestion tray and make the ask-pill click inert ([9febb3d](https://github.com/vippium/brokenn-patches/commit/9febb3d353219ea752d274ec8975336b39802527))
+* make player button hiding universal and cover the bottom-row tab bar ([35cc122](https://github.com/vippium/brokenn-patches/commit/35cc122b4875f5055eb23c40e400fe00b8bbcfd3))
+
+### 🐛 Bug Fixes
+
+* correct tray empty-list branch and gate ask actions before switch ([609c94a](https://github.com/vippium/brokenn-patches/commit/609c94ab45a39b45a778adfc142f6533d74e4f79))
+
 ## [1.4.0-dev.1](https://github.com/vippium/brokenn-patches/compare/v1.3.0...v1.4.0-dev.1) (2026-11-14)
 
 ### ✨ New Features

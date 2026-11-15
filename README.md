@@ -27,7 +27,7 @@
 ## <img src="https://cdn.simpleicons.org/android" height="20" /> Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.4.0-dev.1](https://github.com/vippium/brokenn-patches/releases/tag/v1.4.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;19 patches total
+> **[v1.4.0-dev.2](https://github.com/vippium/brokenn-patches/releases/tag/v1.4.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;21 patches total
 <details open>
 <summary>📦 Office Reader&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
 <br>
@@ -39,10 +39,10 @@
 | 5.0.4 |
 | :---: |
 
-| Patch | Description |
-|----------|:----------------:|
+| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
+|----------|----------------|-----------|
 | [AMOLED theme](#amoled-theme) | Makes dark mode pure black for AMOLED screens. Light mode stays normal. | • AMOLED color<br>• Blacken Status Bar<br>• Blacken Navigation Bar<br>• Blacken Surfaces |
-| [Unlock premium](#unlock-premium) | Unlocks premium features locally and cleans up the About screen (no rate prompt, no family-apps promos). |  |
+| [Unlock premium](#unlock-premium) | Unlocks premium and removes Family-apps promos from the About screens. |  |
 
 </details>
 
@@ -57,8 +57,8 @@
 | 3.6.1 Beta 2 |
 | :---: |
 
-| Patch | Description |
-|----------|:----------------:|
+| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
+|----------|----------------|-----------|
 | [Anti-delete messages](#anti-delete-messages) | Prevents server-deleted messages from being removed locally. |  |
 | [Anti-disappearing media](#anti-disappearing-media) | Keeps view-once and self-destructing media viewable forever. |  |
 | [Bypass content restrictions](#bypass-content-restrictions) | Bypasses restricted-content gates and channel no-forward checks. |  |
@@ -69,7 +69,7 @@
 </details>
 
 <details open>
-<summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;10 patches</summary>
+<summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;12 patches</summary>
 <br>
 
 **Package name:** `in.startv.hotstar`
@@ -79,13 +79,15 @@
 | 26.10.26.0 |
 | :---: |
 
-| Patch | Description |
-|----------|:----------------:|
+| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
+|----------|----------------|-----------|
 | [Bypass signature check](#bypass-signature-check) | Bypasses app signature verification to allow API access. |  |
 | [Enable all codecs](#enable-all-codecs) | Unlocks H.265, VP9, AV1 and 4K playback on capable devices. |  |
 | [Enable screen mirroring](#enable-screen-mirroring) | Allows playback while screen mirroring or HDMI is connected. |  |
 | [Enable screenshots](#enable-screenshots) | Allows screenshots and screen recording. |  |
 | [Force HDR10](#force-hdr10) | Enables HDR10 and HDR10+ playback on compatible devices. |  |
+| [Hide player buttons](#hide-player-buttons) | Hides selected buttons (Watch Next, Episodes, Shop, Speed, Rate, Next Episode) from the player settings sheet and the fullscreen bottom-row tab bar. | • Hide Watch Next<br>• Hide Episodes<br>• Hide Shop<br>• Hide Speed<br>• Hide Rate<br>• Hide Next Episode |
+| [Hide watch page elements](#hide-watch-page-elements) | Hides elements on the watch page: tabs (For You, Jeeto, Memes, Live Chat, brand tabs) and the sponsored pill row. Episodes stays. | • Hide For You tab<br>• Hide Jeeto tab<br>• Hide Memes tab<br>• Hide Live Chat tab<br>• Hide brand tabs<br>• Hide sponsored pills |
 | [Monochrome icon support](#monochrome-icon-support) | Adds a themed-icon version of the launcher icon for Android 13+. |  |
 | [Premium unlock](#premium-unlock) | Unlocks premium UI features, removes subscription nudges, and enables downloads. |  |
 | [Remove ChatGPT Voice Assistant](#remove-chatgpt-voice-assistant) | Strips out the integrated ChatGPT voice assistant module entirely. |  |
@@ -98,9 +100,9 @@
 <summary>🌐 Universal&nbsp;&nbsp;•&nbsp;&nbsp;1 patch</summary>
 <br>
 
-| Patch | Description |
-|----------|:----------------:|
-| [Disable Play Store updates](#disable-play-store-updates) | Disables Play Store updates by setting the version code to the maximum allowed. This patch may cause unexpected issues with apps installed by root mounting. |  |
+| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
+|----------|----------------|-----------|
+| [Disable Play Store updates](#disable-play-store-updates) | Disables Play Store updates by setting the version code to the maximum allowed. This patch may cause unexpected issues with some apps and does not work if the app is installed by root mounting |  |
 
 </details>
 
