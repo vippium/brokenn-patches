@@ -28,7 +28,7 @@ val removeVoiceAssistantPatch = bytecodePatch(
             return v0
         """)
 
-        // CVD orb in page protos: false makes mappers drop it (watch Ask pill, search-bar mic state).
+        // CVD orb in page protos: false makes mappers drop it.
         for (fingerprint in listOf(
             WatchPageCvdOrbFingerprint,
             ExplorePageCvdOrbFingerprint,
@@ -72,25 +72,25 @@ val removeVoiceAssistantPatch = bytecodePatch(
         }
 
 
-        // Ask-pill click: neuter the CVD-orb action handler so pressing the pill does nothing
-        // (its action opens the removed voice page, which crashes).
+        // Ask-pill click: neuter the CVD-orb action handler
         val click = AskActionClickFingerprint.method
         val clickInstrs = click.implementation!!.instructions
         val switchIdx = clickInstrs.indexOfFirst { it.opcode == Opcode.PACKED_SWITCH }
+        require(switchIdx >= 0) { "AskActionClick: packed-switch dispatch not found" }
         var unitIdx = -1
         for ((idx, ins) in clickInstrs.withIndex()) {
             if (idx <= switchIdx || ins.opcode != Opcode.SGET_OBJECT) continue
             val f = (ins as ReferenceInstruction).reference as? FieldReference
             if (f != null && f.definingClass == "Lkotlin/Unit;" && f.name == "a") { unitIdx = idx; break }
         }
+        require(unitIdx >= 0) { "AskActionClick: Unit return path not found" }
         click.addInstructionsWithLabels(
-            switchIdx + 1,
+            switchIdx,
             "goto/16 :skip_actions",
             ExternalLabel("skip_actions", clickInstrs[unitIdx])
         )
 
-        // Home suggestion tray (ChatGPT block): a staggered tray of TopicsPill chips is
-        // the "Not sure what to watch?" block - null so the dispatcher skips the whole tray.
+        // Home suggestion tray: a staggered tray of TopicsPill chips
         val tray = HomeSuggestionTrayFingerprint.method
         val (_, trayRegs) = tray.addFreeRegisters(3)
         val aReg = trayRegs
@@ -106,9 +106,7 @@ val removeVoiceAssistantPatch = bytecodePatch(
             move-result-object v$aReg
             invoke-interface/range {v$aReg .. v$aReg}, Ljava/util/List;->isEmpty()Z
             move-result v$bReg
-            if-nez v$bReg, :has_pill
-            goto/16 :not_pill
-            :has_pill
+            if-nez v$bReg, :not_pill
             const/4 v$bReg, 0x0
             invoke-interface/range {v$aReg .. v$bReg}, Ljava/util/List;->get(I)Ljava/lang/Object;
             move-result-object v$bReg
