@@ -5,12 +5,11 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.addFreeRegisters
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.util.findFreeRegister
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
 
@@ -58,8 +57,7 @@ val removeVoiceAssistantPatch = bytecodePatch(
 
         // Unknown-widget cut: rename the CVD wire names so the parser skips them.
         val typeMethod = CvdWidgetTypeFingerprint.method
-        // TrayFooterWidget = the Ask-more-on-Chatgpt footer under the home suggestion chips.
-        val wires = setOf("CVDHeroWidget", "CVDControlUnitWidget", "CVDOrbWidget", "TrayFooterWidget")
+        val wires = setOf("CVDHeroWidget", "CVDControlUnitWidget", "CVDOrbWidget")
         for ((index, instruction) in typeMethod.implementation!!.instructions.withIndex()) {
             val reference = (instruction as? ReferenceInstruction)?.reference
             if (instruction.opcode == Opcode.CONST_STRING && reference is StringReference) {
@@ -71,54 +69,61 @@ val removeVoiceAssistantPatch = bytecodePatch(
             }
         }
 
+        // Watch Ask pill: skip illustration pills whose lottie is the CVD ask; parser null-guards the result.
+        runCatching {
+            val parser = CvdSubNavParserFingerprint.method
+            val instrs = parser.implementation!!.instructions
+            val anchorIdx = CvdSubNavParserFingerprint.instructionMatches[1].index
+            val pillReg = parser.getInstruction<OneRegisterInstruction>(anchorIdx - 1).registerA
+            val b3Idx = (anchorIdx until instrs.size).first { i ->
+                instrs[i].opcode == Opcode.INVOKE_STATIC &&
+                    (instrs[i] as? ReferenceInstruction)?.reference.toString().contains("LBd/b3;->a(")
+            }
+            // Main list-add is the only one followed by a 16-bit goto (loop back-edge).
+            val skipIdx = instrs.indices.firstOrNull { i ->
+                i > anchorIdx && i + 1 < instrs.size &&
+                    instrs[i].opcode == Opcode.INVOKE_VIRTUAL &&
+                    (instrs[i] as? ReferenceInstruction)?.reference.toString().contains("ArrayList;->add") &&
+                    instrs[i + 1].opcode == Opcode.GOTO_16
+            }?.let { it + 1 } ?: error("CvdSubNavParser: main list-add not found")
 
-        // Ask-pill click: neuter the CVD-orb action handler
-        val click = AskActionClickFingerprint.method
-        val clickInstrs = click.implementation!!.instructions
-        val switchIdx = clickInstrs.indexOfFirst { it.opcode == Opcode.PACKED_SWITCH }
-        require(switchIdx >= 0) { "AskActionClick: packed-switch dispatch not found" }
-        var unitIdx = -1
-        for ((idx, ins) in clickInstrs.withIndex()) {
-            if (idx <= switchIdx || ins.opcode != Opcode.SGET_OBJECT) continue
-            val f = (ins as ReferenceInstruction).reference as? FieldReference
-            if (f != null && f.definingClass == "Lkotlin/Unit;" && f.name == "a") { unitIdx = idx; break }
-        }
-        require(unitIdx >= 0) { "AskActionClick: Unit return path not found" }
-        click.addInstructionsWithLabels(
-            switchIdx,
-            "goto/16 :skip_actions",
-            ExternalLabel("skip_actions", clickInstrs[unitIdx])
-        )
+            val itReg = parser.findFreeRegister(b3Idx)
+            val tmpReg = parser.findFreeRegister(b3Idx, itReg)
+            val strReg = parser.findFreeRegister(b3Idx, itReg, tmpReg)
 
-        // Home suggestion tray: a staggered tray of TopicsPill chips
-        val tray = HomeSuggestionTrayFingerprint.method
-        val (_, trayRegs) = tray.addFreeRegisters(3)
-        val aReg = trayRegs
-        val bReg = trayRegs + 1
-        val cReg = trayRegs + 2
-        val firstInsn = tray.implementation!!.instructions[0]
-        tray.addInstructionsWithLabels(
-            0,
+            val block = """
+                invoke-virtual {v$pillReg}, Lcom/hotstar/ui/model/widget/IllustrationPillWidget;->getData()Lcom/hotstar/ui/model/widget/IllustrationPillWidget${'$'}Data;
+                move-result-object v$itReg
+                invoke-virtual {v$itReg}, Lcom/hotstar/ui/model/widget/IllustrationPillWidget${'$'}Data;->getSegmentsList()Ljava/util/List;
+                move-result-object v$itReg
+                invoke-interface {v$itReg}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+                move-result-object v$itReg
+                :seg_loop
+                invoke-interface {v$itReg}, Ljava/util/Iterator;->hasNext()Z
+                move-result v$tmpReg
+                if-eqz v$tmpReg, :not_ask
+                invoke-interface {v$itReg}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+                move-result-object v$tmpReg
+                check-cast v$tmpReg, Lcom/hotstar/ui/model/widget/IllustrationPillWidget${'$'}Segment;
+                invoke-virtual {v$tmpReg}, Lcom/hotstar/ui/model/widget/IllustrationPillWidget${'$'}Segment;->getIllustration()Lcom/hotstar/ui/model/feature/image/Illustration;
+                move-result-object v$tmpReg
+                invoke-virtual {v$tmpReg}, Lcom/hotstar/ui/model/feature/image/Illustration;->getLottie()Lcom/hotstar/ui/model/feature/image/Lottie;
+                move-result-object v$tmpReg
+                invoke-virtual {v$tmpReg}, Lcom/hotstar/ui/model/feature/image/Lottie;->getName()Ljava/lang/String;
+                move-result-object v$tmpReg
+                const-string v$strReg, "cvd_ask"
+                invoke-virtual {v$tmpReg, v$strReg}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+                move-result v$tmpReg
+                if-eqz v$tmpReg, :seg_loop
+                const/4 v4, 0x0
+                goto/16 :skip_ask
+                :not_ask
             """
-            invoke-virtual/range {p0 .. p0}, Lcom/hotstar/ui/model/widget/StaggeredTrayWidget;->getData()Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Data;
-            move-result-object v$aReg
-            invoke-virtual/range {v$aReg .. v$aReg}, Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Data;->getItemsList()Ljava/util/List;
-            move-result-object v$aReg
-            invoke-interface/range {v$aReg .. v$aReg}, Ljava/util/List;->isEmpty()Z
-            move-result v$bReg
-            if-nez v$bReg, :not_pill
-            const/4 v$bReg, 0x0
-            invoke-interface/range {v$aReg .. v$bReg}, Ljava/util/List;->get(I)Ljava/lang/Object;
-            move-result-object v$bReg
-            check-cast v$bReg, Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Item;
-            invoke-virtual/range {v$bReg .. v$bReg}, Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Item;->hasTopicsPill()Z
-            move-result v$bReg
-            if-eqz v$bReg, :not_pill
-            const/4 v$cReg, 0x0
-            return-object v$cReg
-            :not_pill
-            """.trimIndent(),
-            ExternalLabel("method_start", firstInsn)
-        )
+            parser.addInstructionsWithLabels(
+                b3Idx,
+                block,
+                ExternalLabel("skip_ask", instrs[skipIdx])
+            )
+        }
     }
 }
