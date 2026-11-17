@@ -1,3 +1,15 @@
+## [1.4.0](https://github.com/vippium/brokenn-patches/compare/v1.3.0...v1.4.0) (2026-11-17)
+
+### ✨ New Features
+* **jiohotstar:** add `hide watch page elements` patch ([82425af](https://github.com/vippium/brokenn-patches/commit/82425af686878b0dd921d4ecc13902d84626b096))
+* **jiohotstar:** add `player button hiding` options ([787fa08](https://github.com/vippium/brokenn-patches/commit/787fa08ec35f6a5169dff5d19f6f5bd90d882680))
+* **officereader:** add unlock premium and AMOLED theme patches ([00c5aee](https://github.com/vippium/brokenn-patches/commit/00c5aeea95929f8bb618cfd5cabf086da7ce89fd))
+
+### 🐛 Bug Fixes
+* **jiohotstar:** null the ChatGPT suggestion tray in its converter [skip ci] ([9b15a2c](https://github.com/vippium/brokenn-patches/commit/9b15a2c25b7ed7f2ad8aad6a691a26096cd5ce37))
+* **jiohotstar/Remove ChatGPT Voice Assistant:** drop home chatgpt suggestion tray at the dispatcher ([e00485e](https://github.com/vippium/brokenn-patches/commit/e00485eee45ce2f9616bdeb4906bc4a9a796634e))
+* **jiohotstar/Enable screenshots:** disable secure window flags, AB switch and all secure video surfaces ([c858e5e](https://github.com/vippium/brokenn-patches/commit/c858e5e5bb4d02909a4d9324ece83fad3ba9913a))
+
 ## [1.4.0-dev.3](https://github.com/vippium/brokenn-patches/compare/v1.4.0-dev.2...v1.4.0-dev.3) (2026-11-17)
 
 ### 🐛 Bug Fixes
