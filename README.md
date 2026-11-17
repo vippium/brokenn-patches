@@ -58,7 +58,7 @@
 | :---: |
 
 | Patch | Description |
-|:----------|:----------------:|
+|----------|:----------------:|
 | [Anti-delete messages](#anti-delete-messages) | Prevents server-deleted messages from being removed locally. |  |
 | [Anti-disappearing media](#anti-disappearing-media) | Keeps view-once and self-destructing media viewable forever. |  |
 | [Bypass content restrictions](#bypass-content-restrictions) | Bypasses restricted-content gates and channel no-forward checks. |  |
@@ -80,7 +80,7 @@
 | :---: |
 
 | Patch | Description |
-|:----------|:----------------:|
+|----------|:----------------:|
 | [Bypass signature check](#bypass-signature-check) | Bypasses app signature verification to allow API access. |  |
 | [Enable all codecs](#enable-all-codecs) | Unlocks H.265, VP9, AV1 and 4K playback on capable devices. |  |
 | [Enable screen mirroring](#enable-screen-mirroring) | Allows playback while screen mirroring or HDMI is connected. |  |
@@ -101,8 +101,8 @@
 <br>
 
 | Patch | Description |
-|:----------|:----------------:|
-| [Disable Play Store updates](#disable-play-store-updates) | Disables Play Store updates by setting the version code to the maximum allowed. This patch may cause unexpected issues with some apps and does not work if the app is installed by root mounting |  |
+|----------|:----------------:|
+| [Disable Play Store updates](#disable-play-store-updates) | Disables Play Store updates by setting the version code to the maximum allowed. This patch may cause unexpected issues with apps installed by root mounting. |  |
 
 </details>
 
