@@ -10,6 +10,7 @@ import app.morphe.patcher.util.findFreeRegister
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
 
@@ -124,6 +125,33 @@ val removeVoiceAssistantPatch = bytecodePatch(
                 block,
                 ExternalLabel("skip_ask", instrs[skipIdx])
             )
+        }
+
+        // Home ChatGPT suggestion tray ("Not sure what to watch?"): the staggered-tray converter
+        // call is the only thing that builds it. Overriding the converter result with null reuses
+        // the dispatcher's own unknown-widget path, so the tray is skipped without any caller
+        // seeing a widget shape it does not already handle.
+        StaggeredTrayConvertFingerprint.matchAllOrNull()?.forEach { candidate ->
+            runCatching {
+                val method = candidate.method
+                val instructions = method.implementation!!.instructions.toList()
+                val convertIndex = instructions.indexOfFirst { instruction ->
+                    instruction.opcode == Opcode.INVOKE_STATIC &&
+                        (instruction as? ReferenceInstruction)?.reference?.let { reference ->
+                            reference is MethodReference &&
+                                reference.parameterTypes ==
+                                listOf("Lcom/hotstar/ui/model/widget/StaggeredTrayWidget;")
+                        } == true
+                }
+                if (convertIndex < 0 || convertIndex + 1 >= instructions.size) return@runCatching
+                if (instructions[convertIndex + 1].opcode != Opcode.MOVE_RESULT_OBJECT) return@runCatching
+
+                val resultReg = method.getInstruction<OneRegisterInstruction>(convertIndex + 1).registerA
+                method.replaceInstruction(
+                    convertIndex + 1,
+                    if (resultReg <= 15) "const/4 v$resultReg, 0x0" else "const/16 v$resultReg, 0x0"
+                )
+            }
         }
     }
 }
