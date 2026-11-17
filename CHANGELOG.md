@@ -1,3 +1,9 @@
+## [1.4.0-dev.3](https://github.com/vippium/brokenn-patches/compare/v1.4.0-dev.2...v1.4.0-dev.3) (2026-11-17)
+
+### 🐛 Bug Fixes
+* jiohotstar/Remove ChatGPT Voice Assistant: drop home chatgpt suggestion tray at the dispatcher ([e00485e](https://github.com/vippium/brokenn-patches/commit/e00485eee45ce2f9616bdeb4906bc4a9a796634e))
+* jiohotstar/Enable screenshots: disable secure window flags, AB switch and all secure video surfaces ([c858e5e](https://github.com/vippium/brokenn-patches/commit/c858e5e5bb4d02909a4d9324ece83fad3ba9913a))
+
 ## [1.4.0-dev.2](https://github.com/vippium/brokenn-patches/compare/v1.4.0-dev.1...v1.4.0-dev.2) (2026-11-15)
 
 ### ✨ New Features
