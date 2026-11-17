@@ -14,7 +14,7 @@ import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
 @Suppress("unused")
 val hideWatchPageElementsPatch = bytecodePatch(
     name = "Hide watch page elements",
-    description = "Hides elements on the watch page: tabs (For You, Jeeto, Memes, Live Chat, brand tabs) and the sponsored pill row. Episodes stays."
+    description = "Hides watch page tabs (except Episodes) and the floating sponsored pill."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
@@ -36,11 +36,11 @@ val hideWatchPageElementsPatch = bytecodePatch(
     )
     val hideBrandTabs by booleanOption(
         key = "hide_brand_tabs", title = "Hide brand tabs",
-        description = "Removes sponsored brand tabs (Shop, Order Food) from the watch-page tab strip.", default = false
+        description = "Removes sponsored brand tabs (Shop, Order Food, etc.) from the watch-page tab strip.", default = false
     )
     val hideSponsoredPills by booleanOption(
         key = "hide_sponsored_pills", title = "Hide sponsored pills",
-        description = "Removes the sponsored pills (Shop, Order Food) from the watch-page pill row.", default = false
+        description = "Removes the floatingsponsored pill from the watch-page.", default = false
     )
 
     execute {

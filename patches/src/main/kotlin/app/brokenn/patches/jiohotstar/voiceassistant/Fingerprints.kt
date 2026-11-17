@@ -73,20 +73,11 @@ object CvdSubNavParserFingerprint : Fingerprint(
     )
 )
 
-// Widget dispatcher arm that converts the home staggered tray into the ChatGPT suggestion
-// block. Anchored on the proto widget type, which is not obfuscated.
-object StaggeredTrayConvertFingerprint : Fingerprint(
-    custom = { method, _ -> method.convertsStaggeredTray() }
+// The home suggestion tray converter: StaggeredTrayWidget -> its BFF model.
+object HomeSuggestionTrayFingerprint : Fingerprint(
+    parameters = listOf("Lcom/hotstar/ui/model/widget/StaggeredTrayWidget;"),
+    filters = listOf(
+        string("getTrayHeader(...)"),
+        string("getItemsList(...)")
+    )
 )
-
-private const val STAGGERED_TRAY =
-    "Lcom/hotstar/ui/model/widget/StaggeredTrayWidget;"
-
-/** True when [method] calls a converter that takes a staggered tray widget. */
-private fun Method.convertsStaggeredTray(): Boolean =
-    implementation?.instructions?.any { instruction ->
-        instruction is ReferenceInstruction &&
-            (instruction.reference as? MethodReference)?.parameterTypes?.let { types ->
-                types.size == 1 && types[0] == STAGGERED_TRAY
-            } == true
-    } == true

@@ -16,7 +16,6 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
 
-private val jul = java.util.logging.Logger.getLogger("RemoveChatGPTVoiceAssistant")
 
 @Suppress("unused")
 val removeVoiceAssistantPatch = bytecodePatch(
@@ -131,68 +130,36 @@ val removeVoiceAssistantPatch = bytecodePatch(
             )
         }
 
-        StaggeredTrayConvertFingerprint.matchAllOrNull()?.forEach { candidate ->
-            runCatching {
-                val definingClass = candidate.method.definingClass
-                if ("\$Builder;" in definingClass) return@runCatching
-
-                val method = mutableClassDefBy(definingClass).methods.first {
-                    it.name == candidate.method.name &&
-                        it.parameterTypes == candidate.method.parameterTypes
-                }
-                val instructions = method.implementation!!.instructions.toList()
-                val convertIndex = instructions.indexOfFirst { instruction ->
-                    instruction.opcode == Opcode.INVOKE_STATIC &&
-                        (instruction as? ReferenceInstruction)?.reference?.let { reference ->
-                            reference is MethodReference &&
-                                reference.parameterTypes ==
-                                listOf("Lcom/hotstar/ui/model/widget/StaggeredTrayWidget;")
-                        } == true
-                }
-                if (convertIndex < 0 || convertIndex + 1 >= instructions.size) return@runCatching
-                if (instructions[convertIndex + 1].opcode != Opcode.MOVE_RESULT_OBJECT) return@runCatching
-                if (convertIndex + 2 >= instructions.size) return@runCatching
-
-                // The tray argument of the converter call (35c keeps the single arg in C; 3rc in start).
-                val trayReg = when (val invoke = instructions[convertIndex]) {
-                    is FiveRegisterInstruction -> invoke.registerC
-                    is RegisterRangeInstruction -> invoke.startRegister
-                    else -> return@runCatching
-                }
-                val resultReg = method.getInstruction<OneRegisterInstruction>(convertIndex + 1).registerA
-                val t1 = method.findFreeRegister(convertIndex + 2)
-                val t2 = method.findFreeRegister(convertIndex + 2, t1)
-
-                fun regInvoke(op: String, reg: Int, target: String) =
-                    if (reg <= 15) "$op {v$reg}, $target" else "$op/range {v$reg .. v$reg}, $target"
-
-                val block = """
-                    ${regInvoke("invoke-virtual", trayReg, "Lcom/hotstar/ui/model/widget/StaggeredTrayWidget;->getData()Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Data;")}
-                    move-result-object v$t1
-                    ${regInvoke("invoke-virtual", t1, "Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Data;->getItemsList()Ljava/util/List;")}
-                    move-result-object v$t1
-                    ${regInvoke("invoke-interface", t1, "Ljava/util/List;->iterator()Ljava/util/Iterator;")}
-                    move-result-object v$t1
-                    ${regInvoke("invoke-interface", t1, "Ljava/util/Iterator;->hasNext()Z")}
-                    move-result v$t2
-                    if-eqz v$t2, :keep_tray
-                    ${regInvoke("invoke-interface", t1, "Ljava/util/Iterator;->next()Ljava/lang/Object;")}
-                    move-result-object v$t1
-                    check-cast v$t1, Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Item;
-                    ${regInvoke("invoke-virtual", t1, "Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Item;->hasTopicsPill()Z")}
-                    move-result v$t2
-                    if-eqz v$t2, :keep_tray
-                    ${if (resultReg <= 15) "const/4 v$resultReg, 0x0" else "const/16 v$resultReg, 0x0"}
-                """
-                method.addInstructionsWithLabels(
-                    convertIndex + 2,
-                    block,
-                    ExternalLabel("keep_tray", instructions[convertIndex + 2])
-                )
-                jul.info("Guarded ChatGPT suggestion tray drop at $definingClass.${candidate.method.name}")
-            }.onFailure {
-                jul.warning("Suggestion tray guard failed for ${candidate.method.definingClass}: ${it.message}")
-            }
+        // Home ChatGPT suggestion tray: null the staggered-tray converter result when the
+        // tray's first item is a TopicsPill chip. The parser null-guards the result, so the tray is dropped.
+        val tray = HomeSuggestionTrayFingerprint.method
+        val trayImpl = tray.implementation!!.instructions
+        val listIdx = trayImpl.indexOfFirst { ins ->
+            ins.opcode == Opcode.INVOKE_VIRTUAL &&
+                (ins as? ReferenceInstruction)?.reference.toString()
+                    .contains("StaggeredTrayWidget${'$'}Data;->getItemsList")
         }
+        require(listIdx > 0) { "SuggestionTray: getItemsList not found" }
+        val keepInsn = trayImpl[listIdx + 2]
+
+        tray.addInstructionsWithLabels(
+            listIdx + 2,
+            """
+            invoke-interface {v2}, Ljava/util/List;->isEmpty()Z
+            move-result v3
+            if-nez v3, :keep_tray
+            const/4 v3, 0x0
+            invoke-interface {v2, v3}, Ljava/util/List;->get(I)Ljava/lang/Object;
+            move-result-object v3
+            check-cast v3, Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Item;
+            invoke-virtual {v3}, Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Item;->hasTopicsPill()Z
+            move-result v3
+            if-eqz v3, :keep_tray
+            const/4 v0, 0x0
+            return-object v0
+            """.trimIndent(),
+            ExternalLabel("keep_tray", keepInsn)
+        )
+
     }
 }

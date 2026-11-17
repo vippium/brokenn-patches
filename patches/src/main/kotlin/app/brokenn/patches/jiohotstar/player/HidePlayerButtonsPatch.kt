@@ -14,7 +14,7 @@ import app.brokenn.patches.jiohotstar.watchpage.AdaptiveTabConverterFingerprint
 @Suppress("unused")
 val hidePlayerButtonsPatch = bytecodePatch(
     name = "Hide player buttons",
-    description = "Hides selected buttons (Watch Next, Episodes, Shop, Speed, Rate, Next Episode) from the player settings sheet and the fullscreen bottom-row tab bar."
+    description = "Hides selected buttons from the fullscreen player's bottom bar."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
