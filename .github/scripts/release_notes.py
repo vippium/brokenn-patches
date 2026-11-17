@@ -51,6 +51,28 @@ CONFIG = {
             "match": r"make the ask-pill click inert",
             "drop": True,
         },
+        {
+            # Intermediate fix for the tray approach that was reverted and
+            # reimplemented at the dispatcher; noise in consolidated notes.
+            "match": r"^correct tray empty-list branch",
+            "drop": True,
+        },
+        {
+            "match": r"^add hide watch page elements patch",
+            "scope": "jiohotstar",
+            "subject": "add `hide watch page elements` patch",
+        },
+        {
+            "match": r"^add player button hiding options",
+            "scope": "jiohotstar",
+            "subject": "add `player button hiding` options",
+        },
+        {
+            # Superseded follow-up to the player button hiding options; not
+            # worth its own bullet in the consolidated notes.
+            "match": r"^make player button hiding universal",
+            "drop": True,
+        },
     ],
     # Subjects (regex, case-insensitive) dropped from the notes entirely.
     "drop_patterns": [],
@@ -106,7 +128,7 @@ def parse_commits(commit_lines):
 
 
 def apply_rewrites(commit):
-    """Return (section_override, label, subject) or None to drop the commit."""
+    """Return (section, label, subject, scope) or None to drop the commit."""
     for rule in CONFIG["rewrites"]:
         if re.search(rule["match"], commit["subject"], re.I):
             if rule.get("drop"):
@@ -115,8 +137,9 @@ def apply_rewrites(commit):
                 rule.get("section"),
                 rule.get("label"),
                 rule.get("subject", commit["subject"]),
+                rule.get("scope"),
             )
-    return (None, None, commit["subject"])
+    return (None, None, commit["subject"], None)
 
 
 def commit_scope(hash_, commits):
@@ -141,14 +164,14 @@ def render(commits, from_tag, version):
         rewritten = apply_rewrites(commit)
         if rewritten is None:
             continue
-        section, label, subject = rewritten
+        section, label, subject, scope_override = rewritten
         # Explicit section overrides win over the commit's own type and the hidden list.
         effective_type = section or commit["type"]
         if effective_type is None or effective_type in cfg["hidden_types"]:
             continue
         if effective_type not in groups:
             continue
-        groups[effective_type].append((label, subject, commit["hash"]))
+        groups[effective_type].append((label, subject, commit["hash"], scope_override))
 
     if from_tag:
         compare = f"https://github.com/{REPO_SLUG}/compare/{from_tag}...v{version}"
@@ -168,9 +191,10 @@ def render(commits, from_tag, version):
         if not items:
             continue
         lines.extend(["", f"### {header}"])
-        for label, subject, hash_ in items:
-            scope = f"**{commit_scope(hash_, commits)}:** " if not label else ""
-            prefix = f"{label}: " if label else scope
+        for label, subject, hash_, scope_override in items:
+            own_scope = commit_scope(hash_, commits)
+            shown_scope = scope_override or own_scope
+            prefix = f"**{label}:** " if label else (f"**{shown_scope}:** " if shown_scope else "")
             revert = "Revert " if commit_is_revert(hash_, commits) else ""
             link = f"[{hash_[:7]}]({COMMIT_URL.format(hash=hash_)})"
             lines.append(f"* {revert}{prefix}{subject} ({link})")
