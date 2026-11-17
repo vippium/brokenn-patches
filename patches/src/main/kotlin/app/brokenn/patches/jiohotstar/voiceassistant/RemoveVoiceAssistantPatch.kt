@@ -8,10 +8,15 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.findFreeRegister
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
+
+private val jul = java.util.logging.Logger.getLogger("RemoveChatGPTVoiceAssistant")
 
 @Suppress("unused")
 val removeVoiceAssistantPatch = bytecodePatch(
@@ -27,7 +32,7 @@ val removeVoiceAssistantPatch = bytecodePatch(
             return v0
         """)
 
-        // CVD orb in page protos: false makes mappers drop it (watch Ask pill, search-bar mic state).
+        // CVD orb in page protos: false makes mappers drop it.
         for (fingerprint in listOf(
             WatchPageCvdOrbFingerprint,
             ExplorePageCvdOrbFingerprint,
@@ -124,6 +129,70 @@ val removeVoiceAssistantPatch = bytecodePatch(
                 block,
                 ExternalLabel("skip_ask", instrs[skipIdx])
             )
+        }
+
+        StaggeredTrayConvertFingerprint.matchAllOrNull()?.forEach { candidate ->
+            runCatching {
+                val definingClass = candidate.method.definingClass
+                if ("\$Builder;" in definingClass) return@runCatching
+
+                val method = mutableClassDefBy(definingClass).methods.first {
+                    it.name == candidate.method.name &&
+                        it.parameterTypes == candidate.method.parameterTypes
+                }
+                val instructions = method.implementation!!.instructions.toList()
+                val convertIndex = instructions.indexOfFirst { instruction ->
+                    instruction.opcode == Opcode.INVOKE_STATIC &&
+                        (instruction as? ReferenceInstruction)?.reference?.let { reference ->
+                            reference is MethodReference &&
+                                reference.parameterTypes ==
+                                listOf("Lcom/hotstar/ui/model/widget/StaggeredTrayWidget;")
+                        } == true
+                }
+                if (convertIndex < 0 || convertIndex + 1 >= instructions.size) return@runCatching
+                if (instructions[convertIndex + 1].opcode != Opcode.MOVE_RESULT_OBJECT) return@runCatching
+                if (convertIndex + 2 >= instructions.size) return@runCatching
+
+                // The tray argument of the converter call (35c keeps the single arg in C; 3rc in start).
+                val trayReg = when (val invoke = instructions[convertIndex]) {
+                    is FiveRegisterInstruction -> invoke.registerC
+                    is RegisterRangeInstruction -> invoke.startRegister
+                    else -> return@runCatching
+                }
+                val resultReg = method.getInstruction<OneRegisterInstruction>(convertIndex + 1).registerA
+                val t1 = method.findFreeRegister(convertIndex + 2)
+                val t2 = method.findFreeRegister(convertIndex + 2, t1)
+
+                fun regInvoke(op: String, reg: Int, target: String) =
+                    if (reg <= 15) "$op {v$reg}, $target" else "$op/range {v$reg .. v$reg}, $target"
+
+                val block = """
+                    ${regInvoke("invoke-virtual", trayReg, "Lcom/hotstar/ui/model/widget/StaggeredTrayWidget;->getData()Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Data;")}
+                    move-result-object v$t1
+                    ${regInvoke("invoke-virtual", t1, "Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Data;->getItemsList()Ljava/util/List;")}
+                    move-result-object v$t1
+                    ${regInvoke("invoke-interface", t1, "Ljava/util/List;->iterator()Ljava/util/Iterator;")}
+                    move-result-object v$t1
+                    ${regInvoke("invoke-interface", t1, "Ljava/util/Iterator;->hasNext()Z")}
+                    move-result v$t2
+                    if-eqz v$t2, :keep_tray
+                    ${regInvoke("invoke-interface", t1, "Ljava/util/Iterator;->next()Ljava/lang/Object;")}
+                    move-result-object v$t1
+                    check-cast v$t1, Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Item;
+                    ${regInvoke("invoke-virtual", t1, "Lcom/hotstar/ui/model/widget/StaggeredTrayWidget${'$'}Item;->hasTopicsPill()Z")}
+                    move-result v$t2
+                    if-eqz v$t2, :keep_tray
+                    ${if (resultReg <= 15) "const/4 v$resultReg, 0x0" else "const/16 v$resultReg, 0x0"}
+                """
+                method.addInstructionsWithLabels(
+                    convertIndex + 2,
+                    block,
+                    ExternalLabel("keep_tray", instructions[convertIndex + 2])
+                )
+                jul.info("Guarded ChatGPT suggestion tray drop at $definingClass.${candidate.method.name}")
+            }.onFailure {
+                jul.warning("Suggestion tray guard failed for ${candidate.method.definingClass}: ${it.message}")
+            }
         }
     }
 }

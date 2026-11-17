@@ -2,6 +2,9 @@ package app.brokenn.patches.jiohotstar.voiceassistant
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 // Search-bar mic gate; false hides the primary mic branch.
 object VoiceSearchEnabledFingerprint : Fingerprint(
@@ -69,3 +72,21 @@ object CvdSubNavParserFingerprint : Fingerprint(
         string("getIllustrationPill(...)")
     )
 )
+
+// Widget dispatcher arm that converts the home staggered tray into the ChatGPT suggestion
+// block. Anchored on the proto widget type, which is not obfuscated.
+object StaggeredTrayConvertFingerprint : Fingerprint(
+    custom = { method, _ -> method.convertsStaggeredTray() }
+)
+
+private const val STAGGERED_TRAY =
+    "Lcom/hotstar/ui/model/widget/StaggeredTrayWidget;"
+
+/** True when [method] calls a converter that takes a staggered tray widget. */
+private fun Method.convertsStaggeredTray(): Boolean =
+    implementation?.instructions?.any { instruction ->
+        instruction is ReferenceInstruction &&
+            (instruction.reference as? MethodReference)?.parameterTypes?.let { types ->
+                types.size == 1 && types[0] == STAGGERED_TRAY
+            } == true
+    } == true
