@@ -36,3 +36,22 @@ object TopBarScrollFingerprint : Fingerprint(
         literal(-50)
     )
 )
+
+// The header (logo bar + status-bar band) composable that animates its expand/collapse;
+// only the animating overload calls the tween factory, the sibling does not.
+object HeaderTransitionFingerprint : Fingerprint(
+    returnType = "V",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
+    parameters = listOf(
+        "L",
+        "Landroidx/compose/ui/e;",
+        "Lcom/hotstar/bff/models/widget/BffBrandedLogoHeaderWidget;",
+        "L",
+        "L",
+        "Landroidx/compose/runtime/b;",
+        "I"
+    ),
+    filters = listOf(
+        methodCall(definingClass = "LA/n;", name = "c")
+    )
+)
