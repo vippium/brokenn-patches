@@ -15,13 +15,14 @@ import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
 @Suppress("unused")
 val removeTopBarSwitcherPatch = bytecodePatch(
     name = "Remove top bar switcher",
-    description = "Removes the JioHotstar/Tadka switcher from the top of Home."
+    description = "Removes the JioHotstar/Tadka switcher from the top of Home and snaps the header expand/collapse on tab switches."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
@@ -119,7 +120,7 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             "const v$containerHeightRegister, 0x41C80000" // 25.0f
         )
 
-        val expandedTargetBits = 0x3EEB851F // 0.46f
+        val expandedTargetBits = 0x3EA41A42 // 25f / 78f: animated branch lands exactly on the 25f static height
         var topBarHeightIndex = addFloatIndex + 1
         var scannedHeight = 0
         while (scannedHeight <= 60) {
@@ -278,5 +279,38 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             "TopBar scroll: no neg-int + if-le first-item show branch found (fingerprint matched the wrong method?)"
         }
         scrollMethod.replaceInstruction(firstItemShowBranchIndex, "nop")
+
+        // Snap the header logo bar's expand/collapse tween: during tab switches the expanding
+        // header shoves the outgoing page's content down, which reads as a vertical jerk.
+        val headerMethod = HeaderTransitionFingerprint.method
+        val headerTweenIndices = buildList {
+            var i = 0
+            while (i < 400) {
+                val instr = try {
+                    headerMethod.getInstruction<Instruction>(i)
+                } catch (e: Exception) {
+                    break
+                }
+                val ref = (instr as? ReferenceInstruction)?.reference as? MethodReference
+                if (instr.opcode == Opcode.INVOKE_STATIC &&
+                    ref != null && ref.definingClass == "LA/n;" && ref.name == "c"
+                ) {
+                    add(i)
+                }
+                i++
+            }
+        }
+        require(headerTweenIndices.isNotEmpty()) {
+            "TopBar header: no tween factory calls found (LA/n renamed?)"
+        }
+        // Zero the duration register between the const and each invoke, like the top bar height above.
+        headerTweenIndices.sortedDescending().forEach { index ->
+            val reg = when (val invoke = headerMethod.getInstruction<Instruction>(index)) {
+                is FiveRegisterInstruction -> invoke.registerC
+                is RegisterRangeInstruction -> invoke.startRegister
+                else -> throw IllegalStateException("TopBar header: unexpected tween invoke format")
+            }
+            headerMethod.addInstructions(index, "const/4 v$reg, 0x0")
+        }
     }
 }
