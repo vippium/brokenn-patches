@@ -3,12 +3,13 @@ package app.brokenn.patches.shared
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -40,7 +41,7 @@ fun Method.constructsType(type: String): Boolean = type in typeRefKeys()
 
 fun Method.readsField(fieldKey: String): Boolean = fieldKey in fieldRefKeys()
 
-fun Method.isStatic(): Boolean = accessFlags and 0x0008 != 0
+fun Method.isStatic(): Boolean = AccessFlags.STATIC.isSet(accessFlags)
 
 fun ClassDef.classStrings(): Set<String> = methods.flatMap { it.stringConstants() }.toSet()
 
@@ -70,13 +71,21 @@ fun Method.instructionIndices(predicate: (Instruction) -> Boolean): List<Int> =
 
 // Insert const/4 0x0 into the duration register of every tween-factory call so
 // the animation snaps instead of tweening. The duration is the invoke's first register.
-fun MutableMethod.zeroTweenDurations(factoryClass: String, factoryMethod: String, failMessage: String) {
+// [Constraint] pass [fromIndex]/[toIndexExclusive] to scope the scan to the animation's
+// instruction window; an unscoped scan would also zero unrelated tweens in the method.
+fun MutableMethod.zeroTweenDurations(
+    factoryClass: String,
+    factoryMethod: String,
+    failMessage: String,
+    fromIndex: Int = 0,
+    toIndexExclusive: Int = Int.MAX_VALUE,
+) {
     val indices = instructionIndices { ins ->
         ins.opcode == Opcode.INVOKE_STATIC &&
             ((ins as? ReferenceInstruction)?.reference as? MethodReference)?.let {
                 it.definingClass == factoryClass && it.name == factoryMethod
             } == true
-    }
+    }.filter { it in fromIndex until toIndexExclusive }
     require(indices.isNotEmpty()) { failMessage }
     indices.sortedDescending().forEach { index ->
         val reg = when (val invoke = getInstruction<Instruction>(index)) {
