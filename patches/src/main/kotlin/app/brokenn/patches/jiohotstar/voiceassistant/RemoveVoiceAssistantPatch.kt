@@ -21,6 +21,7 @@ import app.brokenn.patches.jiohotstar.shared.Constants.ILLUSTRATION_PILL_SEGMENT
 import app.brokenn.patches.jiohotstar.shared.Constants.ILLUSTRATION_PILL_WIDGET
 import app.brokenn.patches.jiohotstar.shared.Constants.LOTTIE
 import app.brokenn.patches.shared.instrs
+import app.brokenn.patches.shared.instructionIndices
 import app.brokenn.patches.shared.referenceText
 
 
@@ -68,16 +69,16 @@ val removeVoiceAssistantPatch = bytecodePatch(
 
         // Unknown-widget cut: rename the CVD wire names so the parser skips them.
         val typeMethod = CvdWidgetTypeFingerprint.method
+        val typeImpl = typeMethod.instrs()
         val wires = setOf("CVDHeroWidget", "CVDControlUnitWidget", "CVDOrbWidget")
-        for ((index, instruction) in typeMethod.instrs().withIndex()) {
-            val reference = (instruction as? ReferenceInstruction)?.reference
-            if (instruction.opcode == Opcode.CONST_STRING && reference is StringReference) {
-                val wire = reference.string
-                if (wire in wires) {
-                    val reg = typeMethod.getInstruction<OneRegisterInstruction>(index).registerA
-                    typeMethod.replaceInstruction(index, "const-string v$reg, \"${wire}Removed\"")
-                }
-            }
+        // replaceInstruction is 1:1, so snapshot indices stay valid across the loop.
+        typeMethod.instructionIndices { instruction ->
+            instruction.opcode == Opcode.CONST_STRING &&
+                (instruction as? ReferenceInstruction)?.reference.let { it is StringReference && it.string in wires }
+        }.forEach { index ->
+            val wire = (typeImpl[index] as ReferenceInstruction).reference as StringReference
+            val reg = typeMethod.getInstruction<OneRegisterInstruction>(index).registerA
+            typeMethod.replaceInstruction(index, "const-string v$reg, \"${wire.string}Removed\"")
         }
 
         // Watch Ask pill: skip illustration pills whose lottie is the CVD ask; parser null-guards the result.

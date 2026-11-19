@@ -30,4 +30,8 @@ object Constants {
     const val LOTTIE = "Lcom/hotstar/ui/model/feature/image/Lottie;"
     const val BFF_PILL_WIDGET = "Lcom/hotstar/bff/models/widget/BffIllustrationPillWidget;"
     const val BFF_PILL_SUB_MENU_ITEM = "Lcom/hotstar/bff/models/widget/BffIllustrationPillSubMenuItem;"
+
+    // The obfuscated Compose tween factory every nav/top-bar animation goes through.
+    const val TWEEN_FACTORY_CLASS = "LA/n;"
+    const val TWEEN_FACTORY_METHOD = "c"
 }
