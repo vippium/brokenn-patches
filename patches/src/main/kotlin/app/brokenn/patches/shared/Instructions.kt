@@ -29,11 +29,11 @@ fun Method.stringConstants(): Set<String> =
     instrs().mapNotNull { (it as? ReferenceInstruction)?.reference as? StringReference }
         .map { it.string }.toSet()
 
-fun Method.fieldRefKeys(): Set<String> =
+private fun Method.fieldRefKeys(): Set<String> =
     instrs().mapNotNull { (it as? ReferenceInstruction)?.reference as? FieldReference }
         .map { "${it.definingClass}->${it.name}:${it.type}" }.toSet()
 
-fun Method.typeRefKeys(): Set<String> =
+private fun Method.typeRefKeys(): Set<String> =
     instrs().mapNotNull { (it as? ReferenceInstruction)?.reference as? TypeReference }
         .map { it.type }.toSet()
 

@@ -1,6 +1,8 @@
 package app.brokenn.patches.jiohotstar.topbar
 
 import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
+import app.brokenn.patches.jiohotstar.shared.Constants.TWEEN_FACTORY_CLASS
+import app.brokenn.patches.jiohotstar.shared.Constants.TWEEN_FACTORY_METHOD
 import app.brokenn.patches.shared.firstInstructionIndex
 import app.brokenn.patches.shared.instrs
 import app.brokenn.patches.shared.instructionIndices
@@ -22,9 +24,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
-
-private const val TWEEN_FACTORY_CLASS = "LA/n;"
-private const val TWEEN_FACTORY_METHOD = "c"
 
 @Suppress("unused")
 val removeTopBarSwitcherPatch = bytecodePatch(

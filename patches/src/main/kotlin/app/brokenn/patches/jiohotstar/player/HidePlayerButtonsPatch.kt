@@ -5,6 +5,7 @@ import app.brokenn.patches.jiohotstar.shared.Constants.TAB_WIDGET
 import app.brokenn.patches.jiohotstar.shared.Constants.TAB_WIDGET_DATA
 import app.brokenn.patches.jiohotstar.watchpage.AdaptiveTabConverterFingerprint
 import app.brokenn.patches.shared.instrs
+import app.brokenn.patches.shared.instructionIndices
 import app.brokenn.patches.shared.prevInstructionIndex
 import app.brokenn.patches.shared.referenceText
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -109,19 +110,20 @@ val hidePlayerButtonsPatch = bytecodePatch(
         // The fullscreen bottom tab bar rides the landscape converter loop; side-sheet and
         // peek lists are phone-invisible, so only the landscape cast is filtered.
         val tabContainer = AdaptiveTabConverterFingerprint.method
-        val tabImpl = tabContainer.instrs()
-        val castSites = tabImpl.withIndex().filter { (_, ins) ->
+        val castSites = tabContainer.instructionIndices { ins ->
             ins.opcode == Opcode.CHECK_CAST &&
                 ins.referenceText()?.contains(TAB_WIDGET) == true
         }
         require(castSites.size >= 2) { "TabConverter: expected portrait and landscape casts" }
-        val landscapeSite = castSites[1].index
+        val landscapeSite = castSites[1]
         val itemReg = tabContainer.getInstruction<OneRegisterInstruction>(landscapeSite).registerA
         val landscapeHead = tabContainer.prevInstructionIndex(landscapeSite) { ins ->
             ins.opcode == Opcode.INVOKE_INTERFACE &&
                 ins.referenceText()?.contains("Iterator;->hasNext") == true
         }
         require(landscapeHead >= 0) { "TabConverter: landscape loop head not found" }
+        // Snapshot before the insert below shifts indices; the label anchors to the object.
+        val tabImpl = tabContainer.instrs()
 
         // The row's swiggy tab is titled "Order Food"
         val landscapeTitles = titles.toMutableList()

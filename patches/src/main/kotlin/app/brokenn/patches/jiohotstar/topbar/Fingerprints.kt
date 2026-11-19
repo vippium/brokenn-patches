@@ -1,5 +1,6 @@
 package app.brokenn.patches.jiohotstar.topbar
 
+import app.brokenn.patches.jiohotstar.shared.Constants
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
@@ -51,6 +52,6 @@ internal object HeaderTransitionFingerprint : Fingerprint(
         "I"
     ),
     filters = listOf(
-        methodCall(definingClass = "LA/n;", name = "c")
+        methodCall(definingClass = Constants.TWEEN_FACTORY_CLASS, name = Constants.TWEEN_FACTORY_METHOD)
     )
 )
