@@ -98,11 +98,15 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             "const v$containerHeightRegister, 0x41C80000" // 25.0f
         )
 
+        // [Constraint] The 25f insert above shifts every instruction after addFloatIndex by
+        // +1 in the live method, so indices from here on must come from a post-insert snapshot:
+        // a pre-insert index replaces the branch guard one slot early instead of the 1.0f target.
+        val containerImplAfterInsert = containerMethod.instrs()
         val expandedTargetBits = 0x3EA41A42 // 25f / 78f: animated branch lands exactly on the 25f static height
-        val topBarHeightIndex = TopBarContainerFingerprint.stringMatches.first().index
-        val oneFloatIndices = containerImpl.withIndex()
+        val topBarHeightIndex = TopBarContainerFingerprint.stringMatches.first().index + 1
+        val oneFloatIndices = containerImplAfterInsert.withIndex()
             .filter { (i, ins) ->
-                i in (addFloatIndex + 1) until topBarHeightIndex &&
+                i in (addFloatIndex + 2) until topBarHeightIndex &&
                     ins.opcode == Opcode.CONST_HIGH16 &&
                     (ins as NarrowLiteralInstruction).narrowLiteral == 0x3f800000
             }
@@ -122,7 +126,7 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         containerMethod.zeroTweenDurations(
             TWEEN_FACTORY_CLASS, TWEEN_FACTORY_METHOD,
             "TopBar container: no animation duration calls found (LA/n renamed?)",
-            fromIndex = addFloatIndex + 1,
+            fromIndex = addFloatIndex + 2,
             toIndexExclusive = topBarHeightIndex,
         )
 
