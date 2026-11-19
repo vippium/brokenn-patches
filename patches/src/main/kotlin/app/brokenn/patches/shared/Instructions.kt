@@ -53,7 +53,9 @@ fun Method.firstInstructionIndex(predicate: (Instruction) -> Boolean): Int =
 // matching the predicate, or -1.
 fun Method.nextInstructionIndex(from: Int, limit: Int = Int.MAX_VALUE, predicate: (Instruction) -> Boolean): Int {
     val impl = instrs()
-    val end = minOf(impl.size, from + 1 + limit)
+    // [Constraint] from + 1 + limit overflows Int for the default limit, so widen to Long
+    // before clamping — an overflowed negative end makes the scan silently return -1.
+    val end = minOf(impl.size.toLong(), from + 1L + limit).toInt()
     for (i in from + 1 until end) if (predicate(impl[i])) return i
     return -1
 }
