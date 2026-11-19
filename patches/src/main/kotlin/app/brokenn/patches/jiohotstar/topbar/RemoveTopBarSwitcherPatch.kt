@@ -118,9 +118,12 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             "const v$expandedRegister, $expandedTargetBits"
         )
 
+        // Scoped to the animateFloatAsState window: only the TopBarHeight tweens get zeroed.
         containerMethod.zeroTweenDurations(
             TWEEN_FACTORY_CLASS, TWEEN_FACTORY_METHOD,
-            "TopBar container: no animation duration calls found (LA/n renamed?)"
+            "TopBar container: no animation duration calls found (LA/n renamed?)",
+            fromIndex = addFloatIndex + 1,
+            toIndexExclusive = topBarHeightIndex,
         )
 
         val sgetDIndices = containerMethod.instructionIndices { instr ->
