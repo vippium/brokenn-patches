@@ -34,4 +34,14 @@ object Constants {
     // The obfuscated Compose tween factory every nav/top-bar animation goes through.
     const val TWEEN_FACTORY_CLASS = "LA/n;"
     const val TWEEN_FACTORY_METHOD = "c"
+
+    // Extension classes, merged from extensions/brokenn-settings.mpe.
+    const val SETTINGS_PACKAGE = "Lapp/brokenn/extension/jiohotstar/settings"
+    const val BROKENN_PREFS_CLASS = "$SETTINGS_PACKAGE/BrokennPrefs;"
+    const val BROKENN_STATUS_CLASS = "$SETTINGS_PACKAGE/BrokennStatus;"
+
+    /** invoke-static {vArgReg}, BrokennPrefs->method(String)Z / move-result vResultReg */
+    fun prefsStringCall(method: String, argReg: String, resultReg: String) =
+        "invoke-static {v$argReg}, $BROKENN_PREFS_CLASS->$method(Ljava/lang/String;)Z\n" +
+            "move-result v$resultReg\n"
 }
