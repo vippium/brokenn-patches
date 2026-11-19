@@ -75,6 +75,8 @@ fun Method.instructionIndices(predicate: (Instruction) -> Boolean): List<Int> =
 // the animation snaps instead of tweening. The duration is the invoke's first register.
 // [Constraint] pass [fromIndex]/[toIndexExclusive] to scope the scan to the animation's
 // instruction window; an unscoped scan would also zero unrelated tweens in the method.
+// [Constraint] inserts shift every later index in the window, so callers must re-scan
+// (or use fingerprint matches) for anything after this call, never stale indices.
 fun MutableMethod.zeroTweenDurations(
     factoryClass: String,
     factoryMethod: String,
@@ -83,7 +85,7 @@ fun MutableMethod.zeroTweenDurations(
     toIndexExclusive: Int = Int.MAX_VALUE,
 ) {
     val indices = instructionIndices { ins ->
-        ins.opcode == Opcode.INVOKE_STATIC &&
+        (ins.opcode == Opcode.INVOKE_STATIC || ins.opcode == Opcode.INVOKE_STATIC_RANGE) &&
             ((ins as? ReferenceInstruction)?.reference as? MethodReference)?.let {
                 it.definingClass == factoryClass && it.name == factoryMethod
             } == true
@@ -95,6 +97,13 @@ fun MutableMethod.zeroTweenDurations(
             is RegisterRangeInstruction -> invoke.startRegister
             else -> throw IllegalStateException("$failMessage: unexpected tween invoke format")
         }
-        addInstructions(index, "const/4 v$reg, 0x0")
+        // const/4 encodes only v0-v15; range invokes can start higher, so widen the
+        // encoding to match the register (const/16 covers v0-255, const the rest).
+        val zero = when {
+            reg <= 15 -> "const/4 v$reg, 0x0"
+            reg <= 255 -> "const/16 v$reg, 0x0"
+            else -> "const v$reg, 0x0"
+        }
+        addInstructions(index, zero)
     }
 }
