@@ -132,7 +132,7 @@ public final class BrokennPrefs {
     private static String normalizeTitle(String title) {
         if (title == null) return "";
         return title.replace('\u2019', '\'').replace('\u00A0', ' ')
-            .trim().toLowerCase().replaceAll(" +", " ");
+            .trim().toLowerCase(java.util.Locale.ROOT).replaceAll(" +", " ");
     }
 
     /** True when sponsored brand tabs (Shop, Order Food, ...) should be dropped. */
