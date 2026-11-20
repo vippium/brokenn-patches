@@ -10,10 +10,7 @@ internal object BrokennStatusLoadFingerprint : Fingerprint(
     name = "load",
 )
 
-/**
- * Marks a patch as included (Piko-style): injects its enable call at the top of
- * BrokennStatus.load(), so the flag is true only when this patch was applied.
- */
+// Marks a patch as included: injects its enable call at the top of BrokennStatus.load().
 fun enableStatus(functionName: String) {
     BrokennStatusLoadFingerprint.method.addInstruction(
         0,
