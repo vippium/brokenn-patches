@@ -125,13 +125,18 @@ public class BrokennSettingsActivity extends Activity {
         }
         if (showPlayer) {
             LinearLayout playerCard = featureCard(root, "Hide player buttons",
-                "Removes the selected buttons from fullscreen player.");
+                "Removes the selected buttons from the player's bottom and top bars.");
             addToggle(playerCard, "Watch Next", "Removes the Watch Next button.", "hide_player_watch_next", false);
             addToggle(playerCard, "Episodes", "Removes the Episodes button.", "hide_player_episodes", false);
             addToggle(playerCard, "Shop", "Removes the Shop / Order Food button.", "hide_player_shop", false);
             addToggle(playerCard, "Speed", "Removes the playback speed button.", "hide_player_speed", false);
             addToggle(playerCard, "Rate", "Removes the rate button.", "hide_player_rate", false);
             addToggle(playerCard, "Next Episode", "Removes the next episode button.", "hide_player_next_episode", false);
+            addToggle(playerCard, "Back", "Removes the back button from the top bar.", "hide_player_top_back", false);
+            addToggle(playerCard, "Settings", "Removes the settings gear from the top bar.", "hide_player_top_settings", false);
+            addToggle(playerCard, "Fullscreen", "Removes the fullscreen / exit fullscreen button from the top bar.", "hide_player_top_fullscreen", false);
+            addToggle(playerCard, "Lock", "Removes the lock button from the top bar.", "hide_player_top_lock", false);
+            addToggle(playerCard, "Cast", "Removes the cast button from the top bar.", "hide_player_top_cast", false);
             removeTrailingDivider(playerCard);
         }
 

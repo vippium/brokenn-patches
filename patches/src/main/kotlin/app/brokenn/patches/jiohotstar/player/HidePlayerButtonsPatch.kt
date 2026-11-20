@@ -13,15 +13,17 @@ import app.brokenn.patches.shared.prevInstructionIndex
 import app.brokenn.patches.shared.referenceText
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 @Suppress("unused")
 val hidePlayerButtonsPatch = bytecodePatch(
     name = "Hide player buttons",
-    description = "Hides selected buttons from the fullscreen player's bottom bar."
+    description = "Hides selected buttons from the video player."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
@@ -102,6 +104,40 @@ val hidePlayerButtonsPatch = bytecodePatch(
             landscapeSite + 1,
             landscapeBlock,
             ExternalLabel("pl_skip", tabImpl[landscapeHead])
+        )
+
+        val topBar = PlayerTopBarFingerprint.method
+        val appends = topBar.instructionIndices { ins ->
+            ins.opcode == Opcode.INVOKE_VIRTUAL &&
+                ins.referenceText()?.let { it.contains("->add(Ljava/lang/Object;)Z") && !it.contains("ArrayList") } == true
+        }
+        require(appends.size >= 4) { "PlayerTopBar: button append sites not found (${appends.size})" }
+        for (idx in appends.sortedDescending()) {
+            val ins = topBar.getInstruction<FiveRegisterInstruction>(idx)
+            val listReg = ins.registerC
+            val itemReg = ins.registerD
+            require(listReg < 16 && itemReg < 16) { "PlayerTopBar: append registers exceed the 4-bit form" }
+            topBar.replaceInstruction(
+                idx,
+                "invoke-static {v$listReg, v$itemReg}, ${Constants.BROKENN_PREFS_CLASS}->" +
+                    "addTopBarItem(Ljava/lang/Object;Ljava/lang/Object;)V"
+            )
+        }
+
+        val backArrow = PlayerBackButtonFingerprint.method
+        val backImpl = backArrow.instrs()
+        val backParamRegisters = backArrow.parameterTypes.sumOf { if (it == "J" || it == "D") 2 else 1 }
+        val backRegisterCount = backArrow.implementation!!.registerCount
+        require(backRegisterCount > backParamRegisters) { "PlayerBackButton: no local register free" }
+        backArrow.addInstructionsWithLabels(
+            0,
+            buildString {
+                append("invoke-static {}, ${Constants.BROKENN_PREFS_CLASS}->isPlayerBackHidden()Z\n")
+                append("move-result v0\n")
+                append("if-eqz v0, :pb_keep\n")
+                append("return-void\n")
+            },
+            ExternalLabel("pb_keep", backImpl[0])
         )
     }
 }

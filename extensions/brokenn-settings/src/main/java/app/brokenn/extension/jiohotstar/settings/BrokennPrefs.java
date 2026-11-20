@@ -51,6 +51,35 @@ public final class BrokennPrefs {
         SharedPreferences p = prefs();
         return p != null && p.getBoolean(key, false);
     }
+
+    public static void addTopBarItem(Object listObj, Object item) {
+        if (item != null && isSet(topBarKey(String.valueOf(item)))) return;
+        try {
+            ((java.util.List) listObj).add(item);
+        } catch (Throwable t) {
+            android.util.Log.i("Brokenn", "top bar add failed: " + t);
+        }
+    }
+
+    private static String topBarKey(String label) {
+        if (label.startsWith("Setting(")) return "hide_player_top_settings";
+        if (label.equals("Lock")) return "hide_player_top_lock";
+        if (label.equals("Landscape")) return "hide_player_top_fullscreen";
+        if (label.equals("Portrait")) return "hide_player_top_fullscreen";
+        if (label.startsWith("MaxViewGoLandscape(")) return "hide_player_top_fullscreen";
+        if (label.startsWith("Cast(data=")) return "hide_player_top_cast";
+        return null;
+    }
+
+    public static boolean isPlayerBackHidden() {
+        return isSet("hide_player_top_back");
+    }
+
+    private static boolean isSet(String key) {
+        if (key == null) return false;
+        SharedPreferences p = prefs();
+        return p != null && p.getBoolean(key, false);
+    }
     // Drops trays whose header title is in the hidden list; same list when nothing matches.
     // [Implementation] BffTabbedFeedWidget.d -> header title field b, stable in the pinned dexes.
     public static java.util.List filterShelfList(java.util.List listObj) {
