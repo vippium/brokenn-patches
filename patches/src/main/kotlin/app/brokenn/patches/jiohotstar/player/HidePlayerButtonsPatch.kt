@@ -1,5 +1,6 @@
 package app.brokenn.patches.jiohotstar.player
 
+import app.brokenn.patches.jiohotstar.settings.openBrokennSettingsPatch
 import app.brokenn.patches.jiohotstar.shared.Constants
 import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
 import app.brokenn.patches.jiohotstar.shared.Constants.TAB_WIDGET
@@ -23,6 +24,8 @@ val hidePlayerButtonsPatch = bytecodePatch(
     description = "Hides selected buttons from the fullscreen player's bottom bar."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
+
+    dependsOn(openBrokennSettingsPatch)
 
     execute {
         enableStatus("hidePlayerButtons")

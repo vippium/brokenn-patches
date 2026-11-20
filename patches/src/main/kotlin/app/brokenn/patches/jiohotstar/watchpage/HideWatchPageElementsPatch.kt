@@ -1,5 +1,6 @@
 package app.brokenn.patches.jiohotstar.watchpage
 
+import app.brokenn.patches.jiohotstar.settings.openBrokennSettingsPatch
 import app.brokenn.patches.jiohotstar.shared.Constants
 import app.brokenn.patches.jiohotstar.shared.Constants.BFF_PILL_SUB_MENU_ITEM
 import app.brokenn.patches.jiohotstar.shared.Constants.BFF_PILL_WIDGET
@@ -28,6 +29,8 @@ val hideWatchPageElementsPatch = bytecodePatch(
     description = "Hides selected tabs and sponsored elements from the watch page."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
+
+    dependsOn(openBrokennSettingsPatch)
 
     execute {
         enableStatus("hideWatchPageElements")
