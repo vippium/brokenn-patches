@@ -27,7 +27,7 @@
 ## <img src="https://cdn.simpleicons.org/android" height="20" /> Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.5.0-dev.1](https://github.com/vippium/brokenn-patches/releases/tag/v1.5.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;23 patches total
+> **[v1.5.0-dev.2](https://github.com/vippium/brokenn-patches/releases/tag/v1.5.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;23 patches total
 <details open>
 <summary>📦 Office Reader&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
 <br>
@@ -66,7 +66,7 @@
 | [Enable screenshots](#enable-screenshots) | Allows screenshots and screen recording, including during playback. Will not work on DRM-protected content (Widevine L1). |  |
 | [Feed filter](#feed-filter) | Removes selected home feed trays by title, configured in Brokenn settings |  |
 | [Force HDR10](#force-hdr10) | Enables HDR10 and HDR10+ playback on compatible devices. |  |
-| [Hide player buttons](#hide-player-buttons) | Hides selected buttons from the fullscreen player's bottom bar. |  |
+| [Hide player buttons](#hide-player-buttons) | Hides selected buttons from the video player. |  |
 | [Hide watch page elements](#hide-watch-page-elements) | Hides selected tabs and sponsored elements from the watch page. |  |
 | [Monochrome icon support](#monochrome-icon-support) | Adds a themed-icon version of the launcher icon for Android 13+. |  |
 | [Premium unlock](#premium-unlock) | Unlocks premium UI features, removes subscription nudges, and enables downloads. |  |
