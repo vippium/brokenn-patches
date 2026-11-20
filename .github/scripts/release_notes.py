@@ -35,6 +35,14 @@ CONFIG = {
     #   drop     -> remove the commit from the notes entirely
     "rewrites": [
         {
+            "match": r"^require the settings patch for runtime-controlled hiding",
+            "drop": True,
+        },
+        {
+            "match": r"^route the back arrow through the restart prompt",
+            "drop": True,
+        },
+        {
             "match": r"^drive player button hiding and watch page tabs from runtime settings",
             "drop": True,
         },
