@@ -1,3 +1,12 @@
+## [1.5.0-dev.1](https://github.com/vippium/brokenn-patches/compare/v1.4.1-dev.1...v1.5.0-dev.1) (2026-11-20)
+
+### ✨ New Features
+* **jiohotstar/feed filter:** add `Feed filter` patch that removes home feed trays by title ([e3fd704](https://github.com/vippium/brokenn-patches/commit/e3fd704dff9e018b861a4d623029ceeee852bd17))
+* **jiohotstar/brokenn settings:** add a hidden settings page, opened by double-tapping the Home tab ([e4b25c7](https://github.com/vippium/brokenn-patches/commit/e4b25c794fa595bd04da8b36bc94bff7425a18da))
+
+### 🐛 Bug Fixes
+* **jiohotstar:** declare vibrate and handle predictive back in brokenn settings ([68ee113](https://github.com/vippium/brokenn-patches/commit/68ee113c163e5211c67289e18560bcfe49cb0a38))
+
 ## [1.4.1-dev.1](https://github.com/vippium/brokenn-patches/compare/v1.4.0...v1.4.1-dev.1) (2026-11-19)
 
 ### 🐛 Bug Fixes
