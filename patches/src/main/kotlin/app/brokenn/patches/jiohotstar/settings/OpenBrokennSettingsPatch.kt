@@ -18,6 +18,7 @@ import org.w3c.dom.Element
 
 private const val NAV_HOOK_CLASS = "Lapp/brokenn/extension/jiohotstar/settings/NavHook;"
 private const val SETTINGS_ACTIVITY = "app.brokenn.extension.jiohotstar.settings.BrokennSettingsActivity"
+private const val VIBRATE_PERMISSION = "android.permission.VIBRATE"
 
 /** Declares the settings activity so NavHook can launch it. */
 private val brokennSettingsManifestPatch = resourcePatch {
@@ -27,18 +28,31 @@ private val brokennSettingsManifestPatch = resourcePatch {
                 ?: error("AndroidManifest.xml: no <application> element")
 
             val activities = application.getElementsByTagName("activity")
+            var declared = false
             for (i in 0 until activities.length) {
                 val activity = activities.item(i) as? Element ?: continue
-                if (activity.getAttribute("android:name") == SETTINGS_ACTIVITY) return@use
+                if (activity.getAttribute("android:name") == SETTINGS_ACTIVITY) declared = true
             }
 
-            val activity = manifest.createElement("activity")
-            activity.setAttribute("android:name", SETTINGS_ACTIVITY)
-            activity.setAttribute("android:label", "Brokenn settings")
-            activity.setAttribute("android:exported", "false")
-            activity.setAttribute("android:theme", "@android:style/Theme.Material.NoActionBar")
-            activity.setAttribute("android:screenOrientation", "portrait")
-            application.appendChild(activity)
+            if (!declared) {
+                val activity = manifest.createElement("activity")
+                activity.setAttribute("android:name", SETTINGS_ACTIVITY)
+                activity.setAttribute("android:label", "Brokenn settings")
+                activity.setAttribute("android:exported", "false")
+                activity.setAttribute("android:theme", "@android:style/Theme.Material.NoActionBar")
+                activity.setAttribute("android:screenOrientation", "portrait")
+                application.appendChild(activity)
+            }
+
+            val permissions = manifest.getElementsByTagName("uses-permission")
+            for (i in 0 until permissions.length) {
+                val permission = permissions.item(i) as? Element ?: continue
+                if (permission.getAttribute("android:name") == VIBRATE_PERMISSION) return@use
+            }
+
+            val vibrate = manifest.createElement("uses-permission")
+            vibrate.setAttribute("android:name", VIBRATE_PERMISSION)
+            manifest.insertBefore(vibrate, application)
         }
     }
 }

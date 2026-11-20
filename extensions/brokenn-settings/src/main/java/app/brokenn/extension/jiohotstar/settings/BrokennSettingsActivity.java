@@ -40,6 +40,7 @@ public class BrokennSettingsActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         prefs = getSharedPreferences("brokenn_prefs", MODE_PRIVATE);
+        registerBackHandling();
 
         if (android.os.Build.VERSION.SDK_INT >= 21) {
             getWindow().setStatusBarColor(0x00000000);
@@ -90,7 +91,7 @@ public class BrokennSettingsActivity extends Activity {
             @Override
             public void onClick(View v) {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                onBackPressed();
+                handleBack();
             }
         });
         appBar.addView(backHolder);
@@ -502,13 +503,30 @@ public class BrokennSettingsActivity extends Activity {
 
     /** Patches read preferences only on reassembly, so offer a restart on leave. */
     @Override
+    @android.annotation.SuppressLint("GestureBackNavigation")
     public void onBackPressed() {
+        handleBack();
+    }
+
+    private void handleBack() {
         if (!dirty) {
-            super.onBackPressed();
+            finish();
             return;
         }
         dirty = false;
         showRestartDialog();
+    }
+
+    private void registerBackHandling() {
+        if (android.os.Build.VERSION.SDK_INT < 33) return;
+        getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+            android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+            new android.window.OnBackInvokedCallback() {
+                @Override
+                public void onBackInvoked() {
+                    handleBack();
+                }
+            });
     }
 
     /** Restart prompt in the app's own AlertDialog so it matches the system look. */
