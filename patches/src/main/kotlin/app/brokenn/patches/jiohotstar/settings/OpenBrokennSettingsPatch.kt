@@ -55,14 +55,12 @@ val openBrokennSettingsPatch = bytecodePatch(
     extendWith("extensions/brokenn-settings.mpe")
 
     execute {
-        // 1. Locate the HSBottomNavigation composable.
+        // Locate the HSBottomNavigation click dispatcher.
         val composable = HSBottomNavigationFingerprint.method
         val composableInsns = composable.instructionsOrNull?.toList()
             ?: error("HSBottomNavigation composable has no instructions")
 
-        // The shared click dispatcher uses <init>(I, Object, Object).
-        // Scan a small window for the case key and resolve the class dynamically
-        // to remain compatible with class renames.
+        // Dispatcher is <init>(I, Object, Object); resolve the class dynamically for renames.
         var dispatcherType: String? = null
         discovery@ for (i in 0 until composableInsns.size) {
                 if (composableInsns[i].opcode != Opcode.NEW_INSTANCE) continue
@@ -81,9 +79,7 @@ val openBrokennSettingsPatch = bytecodePatch(
         val insns = dispatcher.instructionsOrNull?.toList()
             ?: error("Click dispatcher has no instructions")
 
-        // 3. The nav-item case is the switch's default path: the payload is cast to the
-        //    item model, then handed to the captured Function1. Match that shape:
-        //    IGET_OBJECT / CHECK_CAST Function1 / IGET_OBJECT / CHECK_CAST item / invoke.
+        // Default case: IGET_OBJECT / CHECK_CAST Function1 / IGET_OBJECT / CHECK_CAST item / invoke.
         var itemReg = -1
         var hookIndex = -1
         for (i in 3 until insns.size) {
@@ -112,8 +108,7 @@ val openBrokennSettingsPatch = bytecodePatch(
         val lambdaReg = (insns[hookIndex - 3] as OneRegisterInstruction).registerA
         val freeReg = dispatcher.findFreeRegister(hookIndex, itemReg, lambdaReg)
 
-        // 4. Guard the dispatch: a consumed click (double-tap on Home) opens the
-        //    Brokenn settings screen and skips the original navigation.
+        // Guard the dispatch: a consumed tap opens settings and skips navigation.
         dispatcher.addInstructionsWithLabels(
             hookIndex,
             """

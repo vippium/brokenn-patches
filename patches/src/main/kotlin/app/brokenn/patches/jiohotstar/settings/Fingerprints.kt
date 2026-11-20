@@ -5,10 +5,7 @@ import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
-/**
- * The HSBottomNavigation composable. Anchored on the Compose compiler-emitted
- * composable name, which survives obfuscation.
- */
+// The HSBottomNavigation composable; anchored on its compiler-emitted name.
 object HSBottomNavigationFingerprint : Fingerprint(
     custom = { method, _ -> method.containsString("\$this\$HSBottomNavigation") }
 )

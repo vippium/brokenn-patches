@@ -7,16 +7,11 @@ import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 
-/**
- * Hook injected into the bottom navigation click dispatcher.
- *
- * Detects a double-tap on the Home tab and opens the Brokenn settings screen
- * instead of dispatching the second click. Single taps are unaffected.
- */
+// Nav click hook: a double-tap on Home opens Brokenn settings, single taps pass through.
 @SuppressWarnings("unused")
 public final class NavHook {
 
-    /** Second Home tap within this window (ms) opens the settings screen. */
+    // Second Home tap within this window (ms) opens settings.
     private static final long DOUBLE_TAP_MS = 200L;
 
     private static long lastHomeTapAt = 0L;
@@ -25,12 +20,7 @@ public final class NavHook {
     private NavHook() {
     }
 
-    /**
-     * Injection point. Called right before the nav item click is dispatched.
-     *
-     * @param item the clicked navigation item (obfuscated model with a getTitle() method)
-     * @return true when the click was consumed (settings screen opened)
-     */
+    // Called before the nav click is dispatched; true when the tap was consumed.
     public static boolean intercept(Object item) {
         try {
             if (item == null) {

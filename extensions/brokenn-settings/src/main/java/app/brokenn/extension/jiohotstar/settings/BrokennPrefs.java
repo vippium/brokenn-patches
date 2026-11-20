@@ -3,13 +3,7 @@ package app.brokenn.extension.jiohotstar.settings;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-/**
- * Runtime settings store read by injected patch code.
- *
- * Values live in SharedPreferences "brokenn_prefs", written by
- * {@link BrokennSettingsActivity}. All readers fail open (return false)
- * so navigation/rendering never breaks if the context is unavailable.
- */
+// Runtime settings in SharedPreferences "brokenn_prefs"; every reader fails open.
 public final class BrokennPrefs {
     private BrokennPrefs() {}
 
@@ -57,16 +51,8 @@ public final class BrokennPrefs {
         SharedPreferences p = prefs();
         return p != null && p.getBoolean(key, false);
     }
-    /**
-     * Drops home feed tray widgets whose header title matches the hidden-shelf
-     * list. Called on the feed assembler's widget list right before it is
-     * consumed, so both the parallel-stream and iterator paths are covered;
-     * returns the filtered list (the same instance when nothing is hidden).
-     *
-     * [Implementation] reflects on BffTabbedFeedWidget.d (BffTabbedFeedHeader)
-     * and reads the header's title from field b — class and field names are
-     * stable in the pinned app version's dexes.
-     */
+    // Drops trays whose header title is in the hidden list; same list when nothing matches.
+    // [Implementation] BffTabbedFeedWidget.d -> header title field b, stable in the pinned dexes.
     public static java.util.List filterShelfList(java.util.List listObj) {
 
         java.util.List<?> list = (java.util.List<?>) listObj;
@@ -98,12 +84,7 @@ public final class BrokennPrefs {
         return keep;
     }
 
-    /**
-     * True when any plausible title string inside the widget's model tree
-     * matches the hidden list. Tray headers come in several variants
-     * (regular/surface/filter) with the title at different depths, so the
-     * walk is generic instead of model-specific.
-     */
+    // True when any plausible title in the widget model tree matches the hidden list.
     private static boolean isHiddenWidget(Object widget, java.util.List<String> needles) {
         java.util.ArrayList<String> found = new java.util.ArrayList<String>();
         collectStrings(widget, found, 0);
@@ -113,11 +94,7 @@ public final class BrokennPrefs {
         return false;
     }
 
-    /**
-     * Collects candidate title strings from the object tree: String fields
-     * that are neither empty, URLs, nor UUIDs, plus nested model objects up
-     * to depth 3. Static fields and collections are skipped.
-     */
+    // Candidate titles: non-empty String fields that are not URLs or UUIDs, nested to depth 3.
     private static void collectStrings(Object obj, java.util.List<String> out, int depth) {
         if (obj == null || depth > 3 || out.size() > 24) return;
         Class<?> c = obj.getClass();

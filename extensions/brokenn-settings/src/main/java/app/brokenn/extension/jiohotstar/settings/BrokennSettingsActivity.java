@@ -20,13 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-/**
- * Hidden Brokenn settings screen for JioHotstar.
- *
- * Built entirely in code (no resources) so the extension dex stays
- * self-contained. Toggle rows persist to SharedPreferences under
- * "brokenn_prefs" so patches read them at runtime.
- */
+// Hidden settings screen, built in code (no resources); rows persist to "brokenn_prefs".
 @SuppressWarnings("unused")
 public class BrokennSettingsActivity extends Activity {
 
@@ -39,8 +33,7 @@ public class BrokennSettingsActivity extends Activity {
 
     private SharedPreferences prefs;
 
-    /** True when any setting changed since the activity opened; a restart
-     *  prompt is shown on leave so changes take effect immediately. */
+    /** True when a setting changed since open, so leaving prompts a restart. */
     private boolean dirty;
 
     @Override
@@ -55,9 +48,7 @@ public class BrokennSettingsActivity extends Activity {
             getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
 
-        // JioHotstar-style top sheet: vertical gradient covering the upper half,
-        // blue at top through purple, fading to fully transparent at its bottom
-        // edge so it melts into the grey background with no hard line.
+        // Top sheet: blue-to-purple gradient fading out inside the upper half.
         android.widget.FrameLayout frame = new android.widget.FrameLayout(this);
         frame.setBackgroundColor(BG);
 
@@ -81,8 +72,7 @@ public class BrokennSettingsActivity extends Activity {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(20), dp(8), dp(20), dp(20));
 
-        // App bar: back chevron + "Brokenn settings" title, pinned above the scroll
-        // so it stays visible all the time.
+        // Pinned app bar: back chevron and title.
         final int barHeight = dp(88);
         LinearLayout appBar = new LinearLayout(this);
         appBar.setOrientation(LinearLayout.HORIZONTAL);
@@ -125,8 +115,7 @@ public class BrokennSettingsActivity extends Activity {
         rootTransition.setDuration(220);
         root.setLayoutTransition(rootTransition);
 
-        // WATCH PAGE: one glass card per feature group, rows with descriptions.
-        // Cards only render for patches the user actually included (BrokennStatus).
+        // One glass card per feature group; cards only render for included patches.
         BrokennStatus.load();
         boolean showPlayer = BrokennStatus.hidePlayerButtons;
         boolean showTabs = BrokennStatus.hideWatchPageElements;
@@ -198,15 +187,11 @@ public class BrokennSettingsActivity extends Activity {
         return card;
     }
 
-    /**
-     * Adds a collapsible feature card: a header row (bold title + gray description on
-     * the left, chevron on the right aligned with the row controls) that toggles the
-     * content below. Returns the content container for the toggle rows.
-     */
+    /** Collapsible card with a title/description header and chevron; returns the content container. */
     private LinearLayout featureCard(LinearLayout parent, String heading, String description) {
         LinearLayout card = newCard(parent);
 
-        // Animate open/close: LayoutTransition animates child visibility changes.
+        // LayoutTransition animates the child visibility change.
         LayoutTransition cardTransition = new LayoutTransition();
         cardTransition.setDuration(220);
         card.setLayoutTransition(cardTransition);
@@ -220,8 +205,7 @@ public class BrokennSettingsActivity extends Activity {
         LinearLayout header = new LinearLayout(this);
         header.setOrientation(LinearLayout.HORIZONTAL);
         header.setGravity(Gravity.CENTER_VERTICAL);
-        // Same horizontal padding as toggle rows so the chevron lines up with the
-        // check/cross buttons.
+        // Row padding so the chevron lines up with the check/cross buttons.
         header.setPadding(dp(20), dp(10), dp(20), dp(10));
         header.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -274,10 +258,7 @@ public class BrokennSettingsActivity extends Activity {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
         card.setBackground(cardBackground());
-        // Rows carry all padding themselves so their ripple fills the card
-        // edge-to-edge; the card clips them to its rounded outline. The outline
-        // is forced opaque because the translucent background alone would
-        // yield an outline that Android refuses to clip children to.
+        // Rows pad themselves so ripples fill the card; the outline must be opaque or clipping is refused.
         if (android.os.Build.VERSION.SDK_INT >= 21) {
             card.setOutlineProvider(new android.view.ViewOutlineProvider() {
                 @Override
@@ -297,8 +278,7 @@ public class BrokennSettingsActivity extends Activity {
 
     private GradientDrawable cardBackground() {
         GradientDrawable drawable = new GradientDrawable();
-        // Glass: translucent fill lets the ambient gradient glow through,
-        // hairline white stroke reads as a glass edge.
+        // Glass: translucent fill over the gradient, hairline white stroke.
         drawable.setColor(0x9E17171E);
         drawable.setCornerRadius(dp(16));
         drawable.setStroke(dp(1), 0x2EFFFFFF);
@@ -326,8 +306,7 @@ public class BrokennSettingsActivity extends Activity {
                 if (clipboard != null) {
                     android.content.ClipData clip =
                         android.content.ClipData.newPlainText("Brokenn", value);
-                    // Marked sensitive so Android 13+ skips its own "Copied"
-                    // preview chip and only our toast shows.
+                    // Sensitive: skips Android 13+'s own clipboard chip.
                     if (android.os.Build.VERSION.SDK_INT >= 33) {
                         android.os.PersistableBundle extras = new android.os.PersistableBundle();
                         extras.putBoolean("android.content.extra.IS_SENSITIVE", true);
@@ -428,10 +407,7 @@ public class BrokennSettingsActivity extends Activity {
         return n + (n == 1 ? " tray" : " trays");
     }
 
-    /**
-     * Popup editor for the hidden tray titles: a multi-line input with one tray
-     * title per line, plus Cancel and OK buttons. OK persists to "hidden_shelves".
-     */
+    /** Editor for hidden tray titles, one per line; OK persists to "hidden_shelves". */
     private void showFeedFilterDialog(final TextView valueText) {
         final android.app.Dialog dialog = new android.app.Dialog(this);
         dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
@@ -524,10 +500,7 @@ public class BrokennSettingsActivity extends Activity {
         dialog.show();
     }
 
-    /**
-     * Leaving with unsaved-effect changes: ask whether to restart now, since
-     * most patches only read preferences when the feed/player reassembles.
-     */
+    /** Patches read preferences only on reassembly, so offer a restart on leave. */
     @Override
     public void onBackPressed() {
         if (!dirty) {
@@ -538,8 +511,7 @@ public class BrokennSettingsActivity extends Activity {
         showRestartDialog();
     }
 
-    /** Popup asking whether to restart the app right away. Uses the app's
-     *  own AlertDialog so it matches the system look. */
+    /** Restart prompt in the app's own AlertDialog so it matches the system look. */
     private void showRestartDialog() {
         new android.app.AlertDialog.Builder(this)
             .setTitle("Restart needed")
@@ -617,9 +589,7 @@ public class BrokennSettingsActivity extends Activity {
         }
     }
 
-    /** Check/cross circle button: outlined circle with a gray 00d7 when off,
-     *  accent-filled circle with a white 2713 when on; the glyph pops in with a
-     *  rotate+scale entrance on every toggle. */
+    /** Check/cross circle button; the glyph pops in with a rotate+scale entrance. */
     private final class ToggleView extends View {
         interface OnChange { void onChange(boolean checked); }
 
@@ -755,8 +725,7 @@ public class BrokennSettingsActivity extends Activity {
         }
     }
 
-    /** Press feedback: a subtle ripple so taps feel acknowledged. Rectangular
-     *  for rows (the card's rounded outline clips it), oval for round buttons. */
+    /** Ripple press feedback: rectangular for rows (card clips it), oval for buttons. */
     private void addRipple(View view, boolean oval) {
         if (android.os.Build.VERSION.SDK_INT < 21) return;
         GradientDrawable mask = new GradientDrawable();

@@ -16,8 +16,7 @@ object Constants {
     )
 
     // Stable (non-renamed) app classes referenced by fingerprints and emitted smali.
-    // [Implementation] inner-class types are built from a semicolon-free base so the
-    // outer type's ';' never lands inside the composed name (TabWidget$Data, not TabWidget;$Data).
+    // [Implementation] inner-class types build from a semicolon-free base (TabWidget$Data).
     private const val TAB_WIDGET_BASE = "Lcom/hotstar/ui/model/widget/TabWidget"
     private const val ILLUSTRATION_PILL_BASE = "Lcom/hotstar/ui/model/widget/IllustrationPillWidget"
     const val TAB_WIDGET = "$TAB_WIDGET_BASE;"
