@@ -90,7 +90,7 @@ public class BrokennSettingsActivity extends Activity {
             @Override
             public void onClick(View v) {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                finish();
+                onBackPressed();
             }
         });
         appBar.addView(backHolder);
