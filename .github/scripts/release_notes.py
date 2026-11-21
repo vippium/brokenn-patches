@@ -35,6 +35,300 @@ CONFIG = {
     #   drop     -> remove the commit from the notes entirely
     "rewrites": [
         {
+            "match": r"^require the settings patch for runtime-controlled hiding",
+            "drop": True,
+        },
+        {
+            "match": r"^route the back arrow through the restart prompt",
+            "drop": True,
+        },
+        {
+            "match": r"^drive player button hiding and watch page tabs from runtime settings",
+            "drop": True,
+        },
+        {
+            "match": r"^restart prompt on leave and toggle haptics",
+            "drop": True,
+        },
+        {
+            "match": r"^ripple press feedback, about copy, double\-tap haptic",
+            "drop": True,
+        },
+        {
+            "match": r"^lock brokenn settings to portrait",
+            "drop": True,
+        },
+        {
+            "match": r"^full process restart via foreground launch then exit",
+            "drop": True,
+        },
+        {
+            "match": r"^feed filter requires exact title match",
+            "drop": True,
+        },
+        {
+            "match": r"^move feed filter hook to the live tray assembler",
+            "drop": True,
+        },
+        {
+            "match": r"^edge\-to\-edge ripples clipped by opaque card outline",
+            "drop": True,
+        },
+        {
+            "match": r"^resolve page font via typeface\.default",
+            "drop": True,
+        },
+        {
+            "match": r"^revert to system font on settings page",
+            "drop": True,
+        },
+        {
+            "match": r"^use embedded inter font with system font fallback",
+            "drop": True,
+        },
+        {
+            "match": r"^restart via foreground task relaunch for android 15",
+            "drop": True,
+        },
+        {
+            "match": r"^clearer labels and crisp double\-tap haptic",
+            "drop": True,
+        },
+        {
+            "match": r"^full\-width ripples, native restart dialog, single copy toast",
+            "drop": True,
+        },
+        {
+            "match": r"^generic title walk for feed tray filter",
+            "drop": True,
+        },
+        {
+            "match": r"^match tray hook descriptors to extension signatures",
+            "drop": True,
+        },
+        {
+            "match": r"^filter tray titles on the merged feed widget list",
+            "drop": True,
+        },
+        {
+            "match": r"^revert header animation and merge the tray filter",
+            "drop": True,
+        },
+        {
+            "match": r"^wordmark in content with fading pinned header",
+            "drop": True,
+        },
+        {
+            "match": r"^centered wordmark header that compacts on scroll",
+            "drop": True,
+        },
+        {
+            "match": r"^scroll\-morphing header and trailing divider cleanup",
+            "drop": True,
+        },
+        {
+            "match": r"^flatten feed filter row and rename about labels",
+            "drop": True,
+        },
+        {
+            "match": r"^feed filter dialog and drop the for\-you tab gesture",
+            "drop": True,
+        },
+        {
+            "match": r"^open settings via double\-tap on the For You tab",
+            "drop": True,
+        },
+        {
+            "match": r"^add gear tab to the top bar after For You",
+            "drop": True,
+        },
+        {
+            "match": r"^hide home feed shelves by title",
+            "drop": True,
+        },
+        {
+            "match": r"^restore widget\-type constants lost in the settings merge",
+            "drop": True,
+        },
+        {
+            "match": r"^guard nextInstructionIndex against int overflow",
+            "drop": True,
+        },
+        {
+            "match": r"^flatten header expand/collapse to remove tab\-switch push",
+            "drop": True,
+        },
+        {
+            "match": r"^match top bar animated height to 25f static height",
+            "drop": True,
+        },
+        {
+            "match": r"^drop trailing dividers and update home placeholder",
+            "drop": True,
+        },
+        {
+            "match": r"^collapse cards by default and animate siblings",
+            "drop": True,
+        },
+        {
+            "match": r"^collapse feature cards and pin settings app bar",
+            "drop": True,
+        },
+        {
+            "match": r"^restyle settings to grouped morphe style cards",
+            "drop": True,
+        },
+        {
+            "match": r"^draw settings gradient via linear shader",
+            "drop": True,
+        },
+        {
+            "match": r"^use half screen vertical gradient sheet on settings",
+            "drop": True,
+        },
+        {
+            "match": r"^fade ambient glow radially and soften glass cards",
+            "drop": True,
+        },
+        {
+            "match": r"^make settings cards translucent glass style",
+            "drop": True,
+        },
+        {
+            "match": r"^add jiohotstar style ambient gradient to settings",
+            "drop": True,
+        },
+        {
+            "match": r"^shrink cross and check glyph size",
+            "drop": True,
+        },
+        {
+            "match": r"^shrink check cross buttons",
+            "drop": True,
+        },
+        {
+            "match": r"^replace toggles with animated check cross buttons",
+            "drop": True,
+        },
+        {
+            "match": r"^revert toggles to google style without icons",
+            "drop": True,
+        },
+        {
+            "match": r"^swap toggle icon cleanly and sync animation timing",
+            "drop": True,
+        },
+        {
+            "match": r"^use fixed size for toggle icons",
+            "drop": True,
+        },
+        {
+            "match": r"^stabilize toggle animation and center icons",
+            "drop": True,
+        },
+        {
+            "match": r"^restyle toggles as google expressive switches",
+            "drop": True,
+        },
+        {
+            "match": r"^replace switches with drawn material style toggles",
+            "drop": True,
+        },
+        {
+            "match": r"^shrink chevron and bump accordion label size",
+            "drop": True,
+        },
+        {
+            "match": r"^reduce header top padding and bump wordmark",
+            "drop": True,
+        },
+        {
+            "match": r"^draw accordion chevrons as vector with rotation",
+            "drop": True,
+        },
+        {
+            "match": r"^correct wordmark spelling to brokenn",
+            "drop": True,
+        },
+        {
+            "match": r"^bump brokenn wordmark",
+            "drop": True,
+        },
+        {
+            "match": r"^intro script heavy wordmark with header divider",
+            "drop": True,
+        },
+        {
+            "match": r"^use inter for settings and simplify brand wordmark",
+            "drop": True,
+        },
+        {
+            "match": r"^render brokenn wordmark in intro script font",
+            "drop": True,
+        },
+        {
+            "match": r"^split settings into white smallcaps line under brand",
+            "drop": True,
+        },
+        {
+            "match": r"^center header row with flower emoji and swapped sizes",
+            "drop": True,
+        },
+        {
+            "match": r"^animate sibling cards during accordion changes",
+            "drop": True,
+        },
+        {
+            "match": r"^use thin chevron glyphs for accordion arrows",
+            "drop": True,
+        },
+        {
+            "match": r"^animate accordions and space out accordion cards",
+            "drop": True,
+        },
+        {
+            "match": r"^nest feature accordions under home and watch page sections",
+            "drop": True,
+        },
+        {
+            "match": r"^group toggles into watch page and home feed accordions",
+            "drop": True,
+        },
+        {
+            "match": r"^move about last with app and patches versions",
+            "drop": True,
+        },
+        {
+            "match": r"^add collapsible sections with settings toggles",
+            "drop": True,
+        },
+        {
+            "match": r"^add top spacing to brokenn settings header",
+            "drop": True,
+        },
+        {
+            "match": r"^restyle settings header to match brokenn branding",
+            "drop": True,
+        },
+        {
+            "match": r"^set brokenn settings double\-tap window to 200ms",
+            "drop": True,
+        },
+        {
+            "match": r"^tighten double\-tap to 50ms and polish settings screen",
+            "drop": True,
+        },
+        {
+            "match": r"^add brokenn settings page via double-tap on home",
+            "label": "jiohotstar/brokenn settings",
+            "subject": "add a hidden settings page, opened by double-tapping the Home tab",
+        },
+        {
+            "match": r"^split feed filter into standalone patch",
+            "label": "jiohotstar/feed filter",
+            "subject": "add `Feed filter` patch that removes home feed trays by title",
+        },
+        {
             "match": r"drop home chatgpt suggestion tray at the dispatcher",
             "section": "fix",
             "label": "jiohotstar/Remove ChatGPT Voice Assistant",

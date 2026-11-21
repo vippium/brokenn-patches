@@ -27,7 +27,7 @@
 ## <img src="https://cdn.simpleicons.org/android" height="20" /> Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.4.1](https://github.com/vippium/brokenn-patches/releases/tag/v1.4.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;21 patches total
+> **[v1.5.0-dev.2](https://github.com/vippium/brokenn-patches/releases/tag/v1.5.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;23 patches total
 <details open>
 <summary>📦 Office Reader&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
 <br>
@@ -43,6 +43,36 @@
 |:----------|:----------------:|
 | [AMOLED theme](#amoled-theme) | Makes dark mode pure black for AMOLED screens. Light mode stays normal. | • AMOLED color<br>• Blacken Status Bar<br>• Blacken Navigation Bar<br>• Blacken Surfaces |
 | [Unlock premium](#unlock-premium) | Unlocks premium and removes Family-apps promos from the About screens. |  |
+
+</details>
+
+<details open>
+<summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;14 patches</summary>
+<br>
+
+**Package name:** `in.startv.hotstar`
+
+**🎯 Supported versions:**
+
+| 26.10.26.0 |
+| :---: |
+
+| Patch | Description |
+|:----------|:----------------:|
+| [Add Brokenn settings](#add-brokenn-settings) | Adds a hidden settings page, opened by double-tapping the Home tab button. |  |
+| [Bypass signature check](#bypass-signature-check) | Bypasses app signature verification to allow API access. |  |
+| [Enable all codecs](#enable-all-codecs) | Unlocks H.265, VP9, AV1 and 4K playback on capable devices. |  |
+| [Enable screen mirroring](#enable-screen-mirroring) | Allows playback while screen mirroring or HDMI is connected. |  |
+| [Enable screenshots](#enable-screenshots) | Allows screenshots and screen recording, including during playback. Will not work on DRM-protected content (Widevine L1). |  |
+| [Feed filter](#feed-filter) | Removes selected home feed trays by title, configured in Brokenn settings |  |
+| [Force HDR10](#force-hdr10) | Enables HDR10 and HDR10+ playback on compatible devices. |  |
+| [Hide player buttons](#hide-player-buttons) | Hides selected buttons from the video player. |  |
+| [Hide watch page elements](#hide-watch-page-elements) | Hides selected tabs and sponsored elements from the watch page. |  |
+| [Monochrome icon support](#monochrome-icon-support) | Adds a themed-icon version of the launcher icon for Android 13+. |  |
+| [Premium unlock](#premium-unlock) | Unlocks premium UI features, removes subscription nudges, and enables downloads. |  |
+| [Remove ChatGPT Voice Assistant](#remove-chatgpt-voice-assistant) | Strips out the integrated ChatGPT voice assistant module entirely. |  |
+| [Remove ads](#remove-ads) | Removes pre-roll, mid-roll, live-match and home-feed ads. |  |
+| [Remove top bar switcher](#remove-top-bar-switcher) | Removes the JioHotstar/Tadka switcher from the top of Home and snaps the header expand/collapse on tab switches. |  |
 
 </details>
 
@@ -65,34 +95,6 @@
 | [Enable premium](#enable-premium) | Unlocks premium feature UI and shows the premium badge on self only. |  |
 | [Hide typing indicator](#hide-typing-indicator) | Prevents typing status from being sent to other users. |  |
 | [Remove sponsored messages](#remove-sponsored-messages) | Stops sponsored messages from being fetched and shown in channels. |  |
-
-</details>
-
-<details open>
-<summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;12 patches</summary>
-<br>
-
-**Package name:** `in.startv.hotstar`
-
-**🎯 Supported versions:**
-
-| 26.10.26.0 |
-| :---: |
-
-| Patch | Description |
-|:----------|:----------------:|
-| [Bypass signature check](#bypass-signature-check) | Bypasses app signature verification to allow API access. |  |
-| [Enable all codecs](#enable-all-codecs) | Unlocks H.265, VP9, AV1 and 4K playback on capable devices. |  |
-| [Enable screen mirroring](#enable-screen-mirroring) | Allows playback while screen mirroring or HDMI is connected. |  |
-| [Enable screenshots](#enable-screenshots) | Allows screenshots and screen recording, including during playback. Will not work on DRM-protected content (Widevine L1). |  |
-| [Force HDR10](#force-hdr10) | Enables HDR10 and HDR10+ playback on compatible devices. |  |
-| [Hide player buttons](#hide-player-buttons) | Hides selected buttons from the fullscreen player's bottom bar. | • Hide Watch Next<br>• Hide Episodes<br>• Hide Shop<br>• Hide Speed<br>• Hide Rate<br>• Hide Next Episode |
-| [Hide watch page elements](#hide-watch-page-elements) | Hides watch page tabs (except Episodes) and the floating sponsored pill. | • Hide For You tab<br>• Hide Jeeto tab<br>• Hide Memes tab<br>• Hide Live Chat tab<br>• Hide brand tabs<br>• Hide sponsored pills |
-| [Monochrome icon support](#monochrome-icon-support) | Adds a themed-icon version of the launcher icon for Android 13+. |  |
-| [Premium unlock](#premium-unlock) | Unlocks premium UI features, removes subscription nudges, and enables downloads. |  |
-| [Remove ChatGPT Voice Assistant](#remove-chatgpt-voice-assistant) | Strips out the integrated ChatGPT voice assistant module entirely. |  |
-| [Remove ads](#remove-ads) | Removes pre-roll, mid-roll, live-match and home-feed ads. |  |
-| [Remove top bar switcher](#remove-top-bar-switcher) | Removes the JioHotstar/Tadka switcher from the top of Home and snaps the header expand/collapse on tab switches. |  |
 
 </details>
 

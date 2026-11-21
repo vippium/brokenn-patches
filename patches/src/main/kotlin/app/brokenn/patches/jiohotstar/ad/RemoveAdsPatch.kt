@@ -1,6 +1,7 @@
 package app.brokenn.patches.jiohotstar.ad
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.util.returnEarly
 import app.morphe.patcher.patch.bytecodePatch
 import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
 
@@ -12,6 +13,7 @@ val removeAdsPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
     execute {
+        // Neutralise the ad metadata: force all-optional params and an empty name.
         AdMetadataConstructorFingerprint.method.addInstructions(0, """
             const/4 p1, 0x1
             const/4 p2, 0x1
@@ -21,13 +23,8 @@ val removeAdsPatch = bytecodePatch(
             const-string p6, ""
         """)
 
-        WatchLiveAdsInitFingerprint.method.addInstructions(0, """
-            return-void
-        """)
-
-        DisplayAdComposableFingerprint.method.addInstructions(0, """
-            return-void
-        """)
+        WatchLiveAdsInitFingerprint.method.returnEarly()
+        DisplayAdComposableFingerprint.method.returnEarly()
 
         SgaiPrefetcherGetAdFingerprint.method.addInstructions(0, """
             invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
