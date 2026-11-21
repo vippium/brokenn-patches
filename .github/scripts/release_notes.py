@@ -321,7 +321,11 @@ CONFIG = {
         {
             "match": r"^add brokenn settings page via double-tap on home",
             "label": "jiohotstar/brokenn settings",
-            "subject": "add a hidden settings page, opened by double-tapping the Home tab",
+            "subject": "add a hidden settings page, opened by double-tapping the Profile tab",
+        },
+        {
+            "match": r"^open brokenn settings on (home long press|profile double tap)",
+            "drop": True,
         },
         {
             "match": r"^split feed filter into standalone patch",
