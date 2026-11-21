@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-11-15T10:19:52",
-  "description": "## [1.4.0-dev.2](https://github.com/vippium/brokenn-patches/compare/v1.4.0-dev.1...v1.4.0-dev.2) (2026-11-15)\n\n### ✨ New Features\n\n* add hide watch page elements patch ([82425af](https://github.com/vippium/brokenn-patches/commit/82425af686878b0dd921d4ecc13902d84626b096))\n* add player button hiding options ([787fa08](https://github.com/vippium/brokenn-patches/commit/787fa08ec35f6a5169dff5d19f6f5bd90d882680))\n* hide the ChatGPT suggestion tray and make the ask-pill click inert ([9febb3d](https://github.com/vippium/brokenn-patches/commit/9febb3d353219ea752d274ec8975336b39802527))\n* make player button hiding universal and cover the bottom-row tab bar ([35cc122](https://github.com/vippium/brokenn-patches/commit/35cc122b4875f5055eb23c40e400fe00b8bbcfd3))\n\n### 🐛 Bug Fixes\n\n* correct tray empty-list branch and gate ask actions before switch ([609c94a](https://github.com/vippium/brokenn-patches/commit/609c94ab45a39b45a778adfc142f6533d74e4f79))",
-  "download_url": "https://github.com/vippium/brokenn-patches/releases/download/v1.4.0-dev.2/patches-1.4.0-dev.2.mpp",
+  "created_at": "2026-11-19T11:19:26",
+  "description": "## [1.4.1](https://github.com/vippium/brokenn-patches/compare/v1.4.0...v1.4.1) (2026-11-19)\n\n### 🐛 Bug Fixes\n* **shared:** encode zeroed tween duration register by width and match range invokes ([2cce056](https://github.com/vippium/brokenn-patches/commit/2cce056a40285f82578084b55493deb962fcca70))\n* **jiohotstar/remove-topbar-switcher:** compute target-branch index after the 25f insert ([9b5b9ec](https://github.com/vippium/brokenn-patches/commit/9b5b9ec5c390cb91d0fc5378b9f737f7dcd6e218))\n* **shared:** guard nextInstructionIndex against int overflow ([01eb604](https://github.com/vippium/brokenn-patches/commit/01eb6048f43ae74c15eb2e9521e466c0a9f17924))\n* **jiohotstar/remove-topbar-switcher:** snap header expand/collapse to stop tab-switch jump [skip ci] ([d0fc69b](https://github.com/vippium/brokenn-patches/commit/d0fc69b0cf101206af64ef12fdc3ef79710a45ce))",
+  "download_url": "https://github.com/vippium/brokenn-patches/releases/download/v1.4.1/patches-1.4.1.mpp",
   "signature_download_url": "",
-  "version": "1.4.0-dev.2"
+  "version": "1.4.1"
 }
