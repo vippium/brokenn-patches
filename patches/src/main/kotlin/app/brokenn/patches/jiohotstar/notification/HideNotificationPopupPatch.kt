@@ -16,8 +16,8 @@ private const val COMPOSER = "Landroidx/compose/runtime/b;"
 
 @Suppress("unused")
 val hideNotificationPopupPatch = bytecodePatch(
-    name = "Hide notification popup",
-    description = "Removes the \"Never miss out on latest content\" popup. Notifications can still be " +
+    name = "Disable notification permission prompt",
+    description = "Disables the recurring notification permission nag shown every few app launches " +
         "enabled from My Space."
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
