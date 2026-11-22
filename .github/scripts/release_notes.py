@@ -361,6 +361,11 @@ CONFIG = {
             "subject": "add `hide watch page elements` patch",
         },
         {
+            "match": r"^hide the notification popup",
+            "scope": "jiohotstar",
+            "subject": "add `hide notification popup` patch",
+        },
+        {
             "match": r"^add player button hiding options",
             "scope": "jiohotstar",
             "subject": "add `player button hiding` options",
