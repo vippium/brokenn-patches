@@ -362,8 +362,8 @@ CONFIG = {
         },
         {
             "match": r"^hide the notification popup",
-            "scope": "jiohotstar",
-            "subject": "add `hide notification popup` patch",
+            "label": "jiohotstar",
+            "subject": "add `Disable notification permission prompt` patch",
         },
         {
             "match": r"^add player button hiding options",
