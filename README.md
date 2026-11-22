@@ -27,7 +27,7 @@
 ## <img src="https://cdn.simpleicons.org/android" height="20" /> Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.5.0-dev.2](https://github.com/vippium/brokenn-patches/releases/tag/v1.5.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;23 patches total
+> **[v1.5.0-dev.3](https://github.com/vippium/brokenn-patches/releases/tag/v1.5.0-dev.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;24 patches total
 <details open>
 <summary>📦 Office Reader&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
 <br>
@@ -47,7 +47,7 @@
 </details>
 
 <details open>
-<summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;14 patches</summary>
+<summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;15 patches</summary>
 <br>
 
 **Package name:** `in.startv.hotstar`
@@ -59,8 +59,9 @@
 
 | Patch | Description |
 |:----------|:----------------:|
-| [Add Brokenn settings](#add-brokenn-settings) | Adds a hidden settings page, opened by double-tapping the Home tab button. |  |
+| [Add Brokenn settings](#add-brokenn-settings) | Adds a hidden settings page, opened by double-tapping the Profile tab button. |  |
 | [Bypass signature check](#bypass-signature-check) | Bypasses app signature verification to allow API access. |  |
+| [Disable notification permission prompt](#disable-notification-permission-prompt) | Disables the recurring notification permission nag shown every few app launches enabled from My Space. |  |
 | [Enable all codecs](#enable-all-codecs) | Unlocks H.265, VP9, AV1 and 4K playback on capable devices. |  |
 | [Enable screen mirroring](#enable-screen-mirroring) | Allows playback while screen mirroring or HDMI is connected. |  |
 | [Enable screenshots](#enable-screenshots) | Allows screenshots and screen recording, including during playback. Will not work on DRM-protected content (Widevine L1). |  |

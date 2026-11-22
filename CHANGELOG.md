@@ -1,3 +1,19 @@
+## [1.5.0-dev.3](https://github.com/vippium/brokenn-patches/compare/v1.5.0-dev.2...v1.5.0-dev.3) (2026-11-22)
+
+### ✨ New Features
+* **jiohotstar:** add `Disable notification permission prompt` patch ([5181f38](https://github.com/vippium/brokenn-patches/commit/5181f3880e889a28e92216086706e3332b8beaef))
+
+### 🔧 Improvements
+* **dependencies:** update morphe-gradle-plugin to 2.1.1 ([e2780e8](https://github.com/vippium/brokenn-patches/commit/e2780e86f30c469ed225ba8b668a5511de20506d))
+* **dependencies:** update morphe-patcher to 2.5.0 ([87def26](https://github.com/vippium/brokenn-patches/commit/87def26b574591e75b305b046f36460f6fff46d7))
+
+### ♻️ Refactored
+* **jiohotstar/brokenn settings:** move settings access from the Home tab to the My Space tab ([670ad2a](https://github.com/vippium/brokenn-patches/commit/670ad2a02acbcf2a4b0d078f9f1ee9f59e89ab23))
+
+### 🐛 Bug Fixes
+* **jiohotstar:** cancel the pending profile tap when another tab is tapped ([dd6c194](https://github.com/vippium/brokenn-patches/commit/dd6c19438d8f15779e6b5f2164b11629fa24d349))
+* **octogram:** stop showing the premium badge on non-premium users ([4d1518f](https://github.com/vippium/brokenn-patches/commit/4d1518fc6d5e91a2b0304384c4adb9e81e30cb43))
+
 ## [1.5.0-dev.2](https://github.com/vippium/brokenn-patches/compare/v1.5.0-dev.1...v1.5.0-dev.2) (2026-11-20)
 
 ### ✨ New Features
