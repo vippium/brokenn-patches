@@ -33,6 +33,7 @@ public final class NavPress {
         } catch (Throwable ignored) {
         }
         if (!profile) {
+            cancelPending();
             return invoke(lambda, item);
         }
         try {
@@ -49,6 +50,11 @@ public final class NavPress {
             return invoke(lambda, item);
         }
         return null;
+    }
+
+    private static void cancelPending() {
+        lastProfileTap = 0L;
+        handler.removeCallbacksAndMessages(null);
     }
 
     private static final class DeferredTap implements Runnable {
