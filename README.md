@@ -1,6 +1,6 @@
 <div align="center">
 
-![Repository Card](.github/assets/repo_card.png)
+![Repository Card](.github/assets/repo_banner.gif)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://www.shieldcn.dev/github/release/vippium/brokenn-patches.svg?include_prereleases&amp;variant=ghost&amp;size=sm&amp;mode=dark&amp;font=jetbrains-mono&amp;logo=ri%3ATbBrandGithubFilled">
