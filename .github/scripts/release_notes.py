@@ -364,6 +364,17 @@ CONFIG = {
             "subject": "add `hide watch page elements` patch",
         },
         {
+            "match": r"^update morphe-gradle-plugin to",
+            "section": "perf",
+            "label": "dependencies",
+            "subject": "update morphe-gradle-plugin to 2.1.1",
+        },
+        {
+            "match": r"^update morphe-patcher to",
+            "section": "perf",
+            "label": "dependencies",
+        },
+        {
             "match": r"^keep the premium badge off other users",
             "label": "octogram",
             "subject": "stop showing the premium badge on non-premium users",
