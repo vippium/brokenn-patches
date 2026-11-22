@@ -23,6 +23,7 @@ CONFIG = {
     "sections": [
         ("feat", "✨ New Features"),
         ("perf", "🔧 Improvements"),
+        ("change", "♻️ Refactored"),
         ("fix", "🐛 Bug Fixes"),
         ("bump", "🚀 Updated App Support"),
     ],
@@ -325,7 +326,9 @@ CONFIG = {
         },
         {
             "match": r"^open brokenn settings on (home long press|profile double tap)",
-            "drop": True,
+            "section": "change",
+            "label": "jiohotstar/brokenn settings",
+            "subject": "move settings access from the Home tab to the My Space tab",
         },
         {
             "match": r"^split feed filter into standalone patch",
@@ -359,6 +362,11 @@ CONFIG = {
             "match": r"^add hide watch page elements patch",
             "scope": "jiohotstar",
             "subject": "add `hide watch page elements` patch",
+        },
+        {
+            "match": r"^keep the premium badge off other users",
+            "label": "octogram",
+            "subject": "stop showing the premium badge on non-premium users",
         },
         {
             "match": r"^hide the notification popup",
