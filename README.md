@@ -27,7 +27,7 @@
 ## <img src="https://cdn.simpleicons.org/android" height="20" /> Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.5.0](https://github.com/vippium/brokenn-patches/releases/tag/v1.5.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;30 patches total
+> **[v1.6.0-dev.1](https://github.com/vippium/brokenn-patches/releases/tag/v1.6.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;31 patches total
 <details open>
 <summary>📦 Office Reader&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
 <br>
@@ -47,7 +47,7 @@
 </details>
 
 <details open>
-<summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;15 patches</summary>
+<summary>📦 JioHotstar&nbsp;&nbsp;•&nbsp;&nbsp;16 patches</summary>
 <br>
 
 **Package name:** `in.startv.hotstar`
@@ -74,6 +74,7 @@
 | [Remove ChatGPT AI assistant](#remove-chatgpt-ai-assistant) | Strips out the integrated ChatGPT AI module entirely. |  |
 | [Remove ads](#remove-ads) | Removes pre-roll, mid-roll, live-match and home-feed ads. |  |
 | [Remove top bar switcher](#remove-top-bar-switcher) | Removes the JioHotstar/Tadka switcher from the top of Home and snaps the header expand/collapse on tab switches. |  |
+| [Use system font](#use-system-font) | Replaces the bundled Inter typeface with your device's system font |  |
 
 </details>
 

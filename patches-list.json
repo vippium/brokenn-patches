@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.5.0",
+  "version": "1.6.0-dev.1",
   "patches": [
     {
       "name": "AMOLED theme",
@@ -824,6 +824,33 @@
           "targets": [
             {
               "version": "5.0.4",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Use system font",
+      "description": "Replaces the bundled Inter typeface with your device's system font",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "in.startv.hotstar",
+          "name": "JioHotstar",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#1A237E",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "26.10.26.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
