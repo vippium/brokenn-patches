@@ -27,7 +27,7 @@
 ## <img src="https://cdn.simpleicons.org/android" height="20" /> Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.5.0-dev.3](https://github.com/vippium/brokenn-patches/releases/tag/v1.5.0-dev.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;24 patches total
+> **[v1.5.0-dev.4](https://github.com/vippium/brokenn-patches/releases/tag/v1.5.0-dev.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;30 patches total
 <details open>
 <summary>📦 Office Reader&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
 <br>
@@ -71,7 +71,7 @@
 | [Hide watch page elements](#hide-watch-page-elements) | Hides selected tabs and sponsored elements from the watch page. |  |
 | [Monochrome icon support](#monochrome-icon-support) | Adds a themed-icon version of the launcher icon for Android 13+. |  |
 | [Premium unlock](#premium-unlock) | Unlocks premium UI features, removes subscription nudges, and enables downloads. |  |
-| [Remove ChatGPT Voice Assistant](#remove-chatgpt-voice-assistant) | Strips out the integrated ChatGPT voice assistant module entirely. |  |
+| [Remove ChatGPT AI assistant](#remove-chatgpt-ai-assistant) | Strips out the integrated ChatGPT AI module entirely. |  |
 | [Remove ads](#remove-ads) | Removes pre-roll, mid-roll, live-match and home-feed ads. |  |
 | [Remove top bar switcher](#remove-top-bar-switcher) | Removes the JioHotstar/Tadka switcher from the top of Home and snaps the header expand/collapse on tab switches. |  |
 
@@ -96,6 +96,28 @@
 | [Enable premium](#enable-premium) | Unlocks premium feature UI and shows the premium badge on self only. |  |
 | [Hide typing indicator](#hide-typing-indicator) | Prevents typing status from being sent to other users. |  |
 | [Remove sponsored messages](#remove-sponsored-messages) | Stops sponsored messages from being fetched and shown in channels. |  |
+
+</details>
+
+<details open>
+<summary>📦 Picasso&nbsp;&nbsp;•&nbsp;&nbsp;6 patches</summary>
+<br>
+
+**Package name:** `com.offshore.picasso`
+
+**🎯 Supported versions:**
+
+| 10.14.5 |
+| :---: |
+
+| Patch | Description |
+|:----------|:----------------:|
+| [Bypass VPN check](#bypass-vpn-check) | Skips the network interface check that blocks the app on a VPN or proxy. |  |
+| [Disable analytics](#disable-analytics) | Turns off Firebase Analytics collection and Crashlytics reporting. |  |
+| [Disable update prompt](#disable-update-prompt) | Skips the launch version check that shows the update dialog. |  |
+| [Remove ads](#remove-ads) | Removes banner, native, interstitial and rewarded ads. |  |
+| [Remove unused permissions](#remove-unused-permissions) | Removes phone state, advertising id, install referrer and badge permissions. |  |
+| [Skip login](#skip-login) | Treats the app as signed in and never shows the login screen. |  |
 
 </details>
 

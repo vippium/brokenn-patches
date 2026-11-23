@@ -1,3 +1,15 @@
+## [1.5.0-dev.4](https://github.com/vippium/brokenn-patches/compare/v1.5.0-dev.3...v1.5.0-dev.4) (2026-11-23)
+
+### 📦 New app support
+
+* **picasso:** add Picasso patches
+
+### 🔧 Improvements
+* **jiohotstar/Remove voice assistant:** refactored to cover remaining entry points ([3281a7c](https://github.com/vippium/brokenn-patches/commit/3281a7c417390e7931dff0e3d27ec5cfda3fbcf3))
+
+### 🐛 Bug Fixes
+* **jiohotstar/Remove ads:** removed ad markers on the seekbar ([d1437d1](https://github.com/vippium/brokenn-patches/commit/d1437d170afc5b6471a717da8b2e69d37501f011))
+
 ## [1.5.0-dev.3](https://github.com/vippium/brokenn-patches/compare/v1.5.0-dev.2...v1.5.0-dev.3) (2026-11-22)
 
 ### ✨ New Features
