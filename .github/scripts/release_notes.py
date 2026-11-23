@@ -395,12 +395,33 @@ CONFIG = {
             "match": r"^make player button hiding universal",
             "drop": True,
         },
+        {
+            "match": r"^add `Remove ads`, `Disable update prompt`",
+            "drop": True,
+        },
+        {
+            "match": r"^stop painting ad markers on the seekbar",
+            "label": "jiohotstar/Remove ads",
+            "subject": "removed ad markers on the seekbar",
+        },
+        {
+            "match": r"^shut every remaining voice assistant entry point",
+            "section": "perf",
+            "label": "jiohotstar/Remove voice assistant",
+            "subject": "refactored to cover remaining entry points",
+        },
     ],
     # Subjects (regex, case-insensitive) dropped from the notes entirely.
     "drop_patterns": [],
     # Extra markdown: inserted after the heading / appended after the sections.
     "prepend_notes": "",
     "append_notes": "",
+    # Version-scoped highlights, rendered right under the heading.
+    "highlights": {
+        "1.5.0-dev.4": """### 📦 New app support
+
+* **picasso:** add Picasso patches""",
+    },
 }
 
 SUBJECT_RE = re.compile(r"^(?P<type>\w+)(?:\((?P<scope>[^)]+)\))?(?P<bang>!)?: (?P<subject>.+)$")
@@ -503,6 +524,10 @@ def render(commits, from_tag, version):
 
     if cfg["prepend_notes"]:
         lines.extend(["", cfg["prepend_notes"]])
+
+    highlights = cfg["highlights"].get(version)
+    if highlights:
+        lines.extend(["", highlights])
 
     if breaking:
         lines.extend(["", "### ⚠️ BREAKING CHANGES"])
