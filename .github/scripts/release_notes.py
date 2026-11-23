@@ -322,7 +322,7 @@ CONFIG = {
         {
             "match": r"^add brokenn settings page via double-tap on home",
             "label": "jiohotstar/brokenn settings",
-            "subject": "add a hidden settings page, opened by double-tapping the Profile tab",
+            "subject": "add a hidden settings page with runtime toggles",
         },
         {
             "match": r"^open brokenn settings on (home long press|profile double tap)",
@@ -376,7 +376,7 @@ CONFIG = {
         },
         {
             "match": r"^keep the premium badge off other users",
-            "label": "octogram",
+            "label": "octogram/unlock premium",
             "subject": "stop showing the premium badge on non-premium users",
         },
         {
@@ -400,14 +400,24 @@ CONFIG = {
             "drop": True,
         },
         {
+            "match": r"^declare vibrate and handle predictive back",
+            "label": "jiohotstar/brokenn settings",
+            "subject": "declare vibrate and handle predictive back",
+        },
+        {
+            "match": r"^hide player top bar buttons",
+            "label": "jiohotstar/hide player buttons",
+            "subject": "hide the top bar buttons",
+        },
+        {
             "match": r"^stop painting ad markers on the seekbar",
             "label": "jiohotstar/Remove ads",
             "subject": "removed ad markers on the seekbar",
         },
         {
             "match": r"^shut every remaining voice assistant entry point",
-            "section": "perf",
-            "label": "jiohotstar/Remove voice assistant",
+            "section": "change",
+            "label": "jiohotstar/Remove ChatGPT AI assistant",
             "subject": "refactored to cover remaining entry points",
         },
     ],
