@@ -1,13 +1,11 @@
 package app.brokenn.patches.jiohotstar.topbar
 
 import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
-import app.brokenn.patches.jiohotstar.shared.Constants.TWEEN_FACTORY_CLASS
-import app.brokenn.patches.jiohotstar.shared.Constants.TWEEN_FACTORY_METHOD
-import app.brokenn.patches.shared.firstInstructionIndex
 import app.brokenn.patches.shared.instrs
 import app.brokenn.patches.shared.instructionIndices
 import app.brokenn.patches.shared.nextInstructionIndex
 import app.brokenn.patches.shared.zeroTweenDurations
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
@@ -27,55 +25,62 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 @Suppress("unused")
 val removeTopBarSwitcherPatch = bytecodePatch(
     name = "Remove top bar switcher",
-    description = "Removes the JioHotstar/Tadka switcher from the top of Home and snaps the header expand/collapse on tab switches."
+    description = "Removes the JioHotstar/Tadka switcher from the top of Home"
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
     execute {
-        val contentMethod = TopBarContentFingerprint.method
+        val (tweenFactoryClass, tweenFactoryMethod) = discoverTweenFactory()
 
-        // The TopBar class is only reachable through its shared j()F height accessor.
-        var topBarClass: String? = null
-        val contentCallIndices = contentMethod.instructionIndices { instr ->
-            val ref = (instr as? ReferenceInstruction)?.reference as? MethodReference
-            if (ref != null && instr.opcode == Opcode.INVOKE_STATIC &&
-                ref.name == "j" && ref.returnType == "F"
-            ) {
-                require(topBarClass == null || topBarClass == ref.definingClass) {
-                    "TopBar content: multiple distinct j()F calls in e() — ambiguous"
-                }
-                topBarClass = ref.definingClass
-            }
-            ref != null && ref.definingClass.startsWith("Lr0/")
+        val containerMethod = TopBarContainerFingerprint.method
+        val topBarClass = containerMethod.definingClass
+        val containerImpl = containerMethod.instrs()
+
+        val heightAccessorIndices = containerMethod.instructionIndices { instr ->
+            instr.opcode == Opcode.INVOKE_STATIC &&
+                (instr as? ReferenceInstruction)?.reference?.let { ref ->
+                    ref is MethodReference && ref.definingClass == topBarClass && ref.returnType == "F"
+                } == true
         }
-        require(topBarClass != null) {
-            "TopBar content: no TopBar;->j() call found in e() (fingerprint matched the wrong method?)"
+        require(heightAccessorIndices.size == 1) {
+            "TopBar container: expected one own-class height accessor call, found ${heightAccessorIndices.size}"
         }
-        require(contentCallIndices.size == 1) {
-            "TopBar content: expected one Lr0/ pills call in e() — ambiguous, refusing to guess"
+        val containerHeightCallIndex = heightAccessorIndices.first()
+        val heightAccessor = (containerMethod.getInstruction<Instruction>(containerHeightCallIndex)
+            as ReferenceInstruction).reference as MethodReference
+
+        val contentMethod = mutableClassDefBy(topBarClass).methods.singleOrNull { candidate ->
+            candidate.name != containerMethod.name &&
+                candidate.parameterTypes.toList() != containerMethod.parameterTypes.toList() &&
+                candidate.implementation?.instructions?.any { instr ->
+                    instr.opcode == Opcode.INVOKE_STATIC &&
+                        (instr as? ReferenceInstruction)?.reference.let { ref ->
+                            ref is MethodReference && ref.definingClass == heightAccessor.definingClass &&
+                                ref.name == heightAccessor.name &&
+                                ref.parameterTypes.toList() == heightAccessor.parameterTypes.toList()
+                        }
+                } == true
+        } ?: throw PatchException("TopBar content: height accessor caller not found or ambiguous")
+
+        val switcherCallIndices = contentMethod.instructionIndices { instr ->
+            (instr as? ReferenceInstruction)?.reference?.let { ref ->
+                ref is MethodReference && ref.returnType == "Ljava/lang/Object;" &&
+                    ref.parameterTypes.toList() ==
+                        listOf("Ljava/lang/Object;", "Ljava/lang/Object;", "Ljava/lang/Object;")
+            } == true
         }
-        val contentCallIndex = contentCallIndices.first()
+        require(switcherCallIndices.size == 1) {
+            "TopBar content: expected one switcher dispatch call, found ${switcherCallIndices.size}"
+        }
+        val contentCallIndex = switcherCallIndices.first()
         val afterContent = contentMethod.getInstruction<Instruction>(contentCallIndex + 1)
         require(afterContent.opcode != Opcode.MOVE_RESULT &&
             afterContent.opcode != Opcode.MOVE_RESULT_OBJECT &&
             afterContent.opcode != Opcode.MOVE_RESULT_WIDE
         ) {
-            "TopBar content: pills call result is used — removing it is not safe"
+            "TopBar content: switcher call result is used — removing it is not safe"
         }
         contentMethod.removeInstruction(contentCallIndex)
-
-        val containerMethod = TopBarContainerFingerprint.method
-        val containerImpl = containerMethod.instrs()
-
-        val containerHeightCallIndex = containerMethod.firstInstructionIndex { instr ->
-            instr.opcode == Opcode.INVOKE_STATIC &&
-                ((instr as? ReferenceInstruction)?.reference as? MethodReference)?.let {
-                    it.name == "j" && it.returnType == "F" && it.definingClass == topBarClass
-                } == true
-        }
-        require(containerHeightCallIndex >= 0) {
-            "TopBar container: no TopBar;->j() call found in b() (fingerprint matched the wrong method?)"
-        }
 
         val addFloatIndex = containerMethod.nextInstructionIndex(containerHeightCallIndex, limit = 20) { instr ->
             instr.opcode == Opcode.ADD_FLOAT || instr.opcode == Opcode.ADD_FLOAT_2ADDR
@@ -93,14 +98,11 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         }
         containerMethod.addInstructions(
             addFloatIndex + 1,
-            "const v$containerHeightRegister, 0x41C80000" // 25.0f
+            "const v$containerHeightRegister, 0x41C80000"
         )
 
-        // [Constraint] The 25f insert above shifts every instruction after addFloatIndex by
-        // +1 in the live method, so indices from here on must come from a post-insert snapshot:
-        // a pre-insert index replaces the branch guard one slot early instead of the 1.0f target.
         val containerImplAfterInsert = containerMethod.instrs()
-        val expandedTargetBits = 0x3EA41A42 // 25f / 78f: animated branch lands exactly on the 25f static height
+        val expandedTargetBits = 0x3EA41A42
         val topBarHeightIndex = TopBarContainerFingerprint.stringMatches.first().index + 1
         val oneFloatIndices = containerImplAfterInsert.withIndex()
             .filter { (i, ins) ->
@@ -120,10 +122,9 @@ val removeTopBarSwitcherPatch = bytecodePatch(
             "const v$expandedRegister, $expandedTargetBits"
         )
 
-        // Scoped to the animateFloatAsState window: only the TopBarHeight tweens get zeroed.
         containerMethod.zeroTweenDurations(
-            TWEEN_FACTORY_CLASS, TWEEN_FACTORY_METHOD,
-            "TopBar container: no animation duration calls found (LA/n renamed?)",
+            tweenFactoryClass, tweenFactoryMethod,
+            "TopBar container: no animation duration calls found",
             fromIndex = addFloatIndex + 2,
             toIndexExclusive = topBarHeightIndex,
         )
@@ -131,21 +132,19 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         val sgetDIndices = containerMethod.instructionIndices { instr ->
             instr.opcode == Opcode.SGET &&
                 ((instr as? ReferenceInstruction)?.reference as? FieldReference)?.let {
-                    it.name == "d" && it.type == "F"
+                    it.type == "F" && it.definingClass == topBarClass
                 } == true
         }
         require(sgetDIndices.isNotEmpty()) {
-            "TopBar container: sget of d:F not found in b()"
+            "TopBar container: no static float field read found in b()"
         }
         require(sgetDIndices.size == 1) {
-            "TopBar container: more than one sget of d:F in b() — ambiguous, refusing to guess"
+            "TopBar container: more than one static float field read in b() — ambiguous, refusing to guess"
         }
         val sgetDRegister = containerMethod
             .getInstruction<OneRegisterInstruction>(sgetDIndices.first()).registerA
         containerMethod.addInstructions(sgetDIndices.first() + 1, "const v$sgetDRegister, 0x00000000")
 
-        // The scroll listener's (true,false) show pair drives the first-item re-hide;
-        // the neg-int/if-le site is its gate.
         val scrollMethod = TopBarScrollFingerprint.method
 
         data class BoolCall(val index: Int, val receiver: Int, val arg: Int, val value: Int)
@@ -197,10 +196,27 @@ val removeTopBarSwitcherPatch = bytecodePatch(
         }
         scrollMethod.replaceInstruction(firstItemShowBranchIndex, "nop")
 
-        // Snaps the header expand/collapse so tab switches do not push page content.
-        HeaderTransitionFingerprint.method.zeroTweenDurations(
-            TWEEN_FACTORY_CLASS, TWEEN_FACTORY_METHOD,
-            "TopBar header: no tween factory calls found (LA/n renamed?)"
+        findHeaderTransitionMethod(tweenFactoryClass, tweenFactoryMethod).zeroTweenDurations(
+            tweenFactoryClass, tweenFactoryMethod,
+            "TopBar header: no tween factory calls found"
         )
+
+        val menuTabSelector = MenuTabSelectorFingerprint.method
+        val flagReadIndices = menuTabSelector.instructionIndices { instr ->
+            instr.opcode == Opcode.IGET_BOOLEAN &&
+                (instr as? ReferenceInstruction)?.reference?.let { ref ->
+                    ref is FieldReference && ref.name == "e" && (
+                        ref.definingClass == "Lcom/hotstar/bff/models/widget/BffMenuWidgetTab;" ||
+                            ref.definingClass == "Lcom/hotstar/bff/models/widget/BffMenuItemWidgetData;"
+                        )
+                } == true
+        }
+        require(flagReadIndices.isNotEmpty()) {
+            "TopBar landing: no server-marked tab flag reads found (fingerprint matched the wrong method?)"
+        }
+        flagReadIndices.forEach { index ->
+            val reg = menuTabSelector.getInstruction<OneRegisterInstruction>(index).registerA
+            menuTabSelector.replaceInstruction(index, "const/4 v$reg, 0x0")
+        }
     }
 }
