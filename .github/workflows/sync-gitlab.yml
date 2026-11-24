@@ -14,11 +14,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.repository.default_branch }}
 
       - name: Fetch all remote refs
         run: |
-          # Remove default origin tracking to prevent mirror conflicts
-          git fetch --prune origin "+refs/heads/*:refs/heads/*" "+refs/tags/*:refs/tags/*"
+          git fetch --prune --update-head-ok origin "+refs/heads/*:refs/heads/*" "+refs/tags/*:refs/tags/*"
 
       - name: Mirror to GitLab
         env:
@@ -27,6 +27,4 @@ jobs:
         run: |
           AUTH_URL=$(echo "$GITLAB_URL" | sed "s|https://|https://oauth2:${GITLAB_TOKEN}@|")
           git remote add gitlab "$AUTH_URL"
-          
-          # Pushes all branches, tags, and deletes removed refs on GitLab
-          git push gitlab --mirror
+          git push gitlab --prune "+refs/heads/*:refs/heads/*" "+refs/tags/*:refs/tags/*"
