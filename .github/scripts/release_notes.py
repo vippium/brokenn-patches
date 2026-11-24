@@ -553,6 +553,10 @@ def render(commits, from_tag, version):
         compare = f"https://github.com/{REPO_SLUG}/commits/v{version}"
     lines = [f"## [{version}]({compare}) ({date.today().isoformat()})"]
 
+    if custom:
+        lines.extend(["", custom])
+        return "\n".join(lines).strip() + "\n"
+
     if cfg["prepend_notes"]:
         lines.extend(["", cfg["prepend_notes"]])
 
@@ -579,10 +583,6 @@ def render(commits, from_tag, version):
 
     if cfg["append_notes"]:
         lines.extend(["", cfg["append_notes"]])
-
-    if custom:
-        lines.extend(["", custom])
-        return "\n".join(lines).strip() + "\n"
 
     return "\n".join(lines).strip() + "\n"
 
