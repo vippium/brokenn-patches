@@ -8,6 +8,11 @@ entry. The commit range is passed by the releaserc via lodash templates:
     python3 .github/scripts/release_notes.py "${lastRelease.gitTag}" "${nextRelease.version}"
 
 Edit CONFIG to add/delete/reword sections without touching the logic below.
+
+Hand-written notes: put the release body in NOTES.md at the repo root. When it
+has content (HTML comments are stripped), the generated commit sections are
+replaced by that file verbatim; the version heading and compare link are still
+added automatically. The release pipeline clears the file after consuming it.
 """
 import os
 import re
@@ -509,8 +514,24 @@ def commit_is_revert(hash_, commits):
     return False
 
 
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+NOTES_FILE = os.path.join(REPO_ROOT, "NOTES.md")
+
+
+def load_custom_notes():
+    try:
+        with open(NOTES_FILE, encoding="utf-8") as fh:
+            content = fh.read()
+    except OSError:
+        return None
+    content = re.sub("<!--.*?-->", "", content, flags=re.S)
+    content = re.sub("\n{3,}", "\n\n", content).strip()
+    return content or None
+
+
 def render(commits, from_tag, version):
     cfg = CONFIG
+    custom = load_custom_notes()
     breaking = [c for c in commits if c["breaking"]]
     groups = {key: [] for key, _ in cfg["sections"]}
     for commit in commits:
@@ -558,6 +579,10 @@ def render(commits, from_tag, version):
 
     if cfg["append_notes"]:
         lines.extend(["", cfg["append_notes"]])
+
+    if custom:
+        lines.extend(["", custom])
+        return "\n".join(lines).strip() + "\n"
 
     return "\n".join(lines).strip() + "\n"
 
