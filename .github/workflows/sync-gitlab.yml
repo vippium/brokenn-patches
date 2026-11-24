@@ -1,0 +1,32 @@
+name: Mirror Everything to GitLab
+
+on:
+  push:
+    branches: [ '**' ] # Triggers on every branch creation or commit
+    tags: [ '*' ]      # Triggers on every tag creation or update
+  delete:              # Triggers whenever any branch or tag is deleted on GitHub
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch all remote refs
+        run: |
+          # Remove default origin tracking to prevent mirror conflicts
+          git fetch --prune origin "+refs/heads/*:refs/heads/*" "+refs/tags/*:refs/tags/*"
+
+      - name: Mirror to GitLab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GITLAB_URL: ${{ secrets.GITLAB_URL }}
+        run: |
+          AUTH_URL=$(echo "$GITLAB_URL" | sed "s|https://|https://oauth2:${GITLAB_TOKEN}@|")
+          git remote add gitlab "$AUTH_URL"
+          
+          # Pushes all branches, tags, and deletes removed refs on GitLab
+          git push gitlab --mirror
