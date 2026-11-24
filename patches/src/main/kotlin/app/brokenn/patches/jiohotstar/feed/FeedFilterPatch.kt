@@ -12,13 +12,11 @@ import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 internal object TraySpaceAssemblerFingerprint : Fingerprint(
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
-    returnType = "Lzd/K;",
     parameters = listOf("Lcom/hotstar/bff/api/v2/Space;"),
+    strings = listOf("getWidgetWrappersList(...)", "getTitle(...)"),
 )
 
 @Suppress("unused")
@@ -34,14 +32,13 @@ val feedFilterPatch = bytecodePatch(
         enableStatus("feedFilter")
 
         val trayAssembler = TraySpaceAssemblerFingerprint.method
-        val trayInstanceofIndex = trayAssembler.instructionIndices { instr ->
-            instr.opcode == Opcode.INSTANCE_OF && run {
-                val ref = (instr as? ReferenceInstruction)?.reference as? TypeReference
-                ref?.type == "LBd/O8;"
-            }
-        }.firstOrNull() ?: throw IllegalStateException(
-            "Feed filter: tray widget instanceof not found (shape changed?)"
+        val trayInstanceofIndices = trayAssembler.instructionIndices { instr ->
+            instr.opcode == Opcode.INSTANCE_OF
+        }
+        if (trayInstanceofIndices.size != 1) throw IllegalStateException(
+            "Feed filter: expected exactly one instanceof in the tray assembler, found ${trayInstanceofIndices.size} (shape changed?)"
         )
+        val trayInstanceofIndex = trayInstanceofIndices.single()
         val trayCastIndex = trayAssembler.instructionIndices { instr ->
             instr.opcode == Opcode.CHECK_CAST
         }.filter { it < trayInstanceofIndex }.maxOrNull() ?: throw IllegalStateException(
