@@ -3,6 +3,8 @@ package app.brokenn.patches.jiohotstar.notification
 import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
 import app.brokenn.patches.shared.hasStringConstant
 import app.brokenn.patches.shared.instrs
+import app.brokenn.patches.shared.redefinesRegister
+import app.brokenn.patches.shared.touchedRegisters
 import app.brokenn.patches.shared.referenceText
 import app.brokenn.patches.shared.stringConstants
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -131,48 +133,14 @@ private fun BytecodePatchContext.forceCapExhausted(): Int {
     return forced
 }
 
-// Opcodes whose first register operand is a destination, so touching it redefines the
-// register instead of reading its old value.
-private val WRITES_FIRST_REGISTER = setOf(
-    Opcode.CONST_4, Opcode.CONST_16, Opcode.CONST, Opcode.CONST_HIGH16,
-    Opcode.CONST_WIDE, Opcode.CONST_WIDE_16, Opcode.CONST_WIDE_32, Opcode.CONST_WIDE_HIGH16,
-    Opcode.MOVE, Opcode.MOVE_FROM16, Opcode.MOVE_16,
-    Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16,
-    Opcode.MOVE_WIDE, Opcode.MOVE_WIDE_FROM16, Opcode.MOVE_WIDE_16,
-    Opcode.MOVE_EXCEPTION, Opcode.MOVE_RESULT, Opcode.MOVE_RESULT_OBJECT, Opcode.MOVE_RESULT_WIDE,
-    Opcode.NEW_INSTANCE, Opcode.NEW_ARRAY, Opcode.CHECK_CAST, Opcode.ARRAY_LENGTH,
-    Opcode.INSTANCE_OF,
-    Opcode.IGET, Opcode.IGET_BOOLEAN, Opcode.IGET_BYTE, Opcode.IGET_CHAR, Opcode.IGET_SHORT,
-    Opcode.IGET_OBJECT, Opcode.IGET_WIDE,
-    Opcode.SGET, Opcode.SGET_BOOLEAN, Opcode.SGET_BYTE, Opcode.SGET_CHAR, Opcode.SGET_SHORT,
-    Opcode.SGET_OBJECT, Opcode.SGET_WIDE,
-)
-
-private fun touchedRegisters(instruction: Instruction): List<Int> = when (instruction) {
-    is RegisterRangeInstruction ->
-        (instruction.startRegister until instruction.startRegister + instruction.registerCount).toList()
-    is FiveRegisterInstruction ->
-        listOf(
-            instruction.registerC, instruction.registerD, instruction.registerE,
-            instruction.registerF, instruction.registerG,
-        ).take(instruction.registerCount)
-    is ThreeRegisterInstruction ->
-        listOf(instruction.registerA, instruction.registerB, instruction.registerC)
-    is TwoRegisterInstruction -> listOf(instruction.registerA, instruction.registerB)
-    is OneRegisterInstruction -> listOf(instruction.registerA)
-    else -> emptyList()
-}
-
 private fun requireRegisterDeadAfter(
     method: MutableMethod,
     siteIndex: Int,
     register: Int,
 ) {
     method.implementation!!.instructions.drop(siteIndex + 1).forEach { instruction ->
-        val registers = touchedRegisters(instruction)
-        if (register !in registers) return@forEach
-        val redefines = instruction.opcode in WRITES_FIRST_REGISTER && registers.first() == register
-        if (!redefines) {
+        if (register !in instruction.touchedRegisters()) return@forEach
+        if (!instruction.redefinesRegister(register)) {
             throw PatchException("Frequency cap decision register is read after the store")
         }
         return

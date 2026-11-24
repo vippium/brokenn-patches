@@ -9,8 +9,11 @@ import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
@@ -51,6 +54,40 @@ fun ClassDef.hasStringConstant(value: String): Boolean = methods.any { method ->
     method.implementation?.instructions?.any { instruction ->
         (instruction as? ReferenceInstruction)?.reference.let { it as? StringReference }?.string == value
     } == true
+}
+
+// Opcodes whose first register operand is a destination, so touching it redefines the
+// register instead of reading its old value.
+private val WRITES_FIRST_REGISTER = setOf(
+    Opcode.CONST_4, Opcode.CONST_16, Opcode.CONST, Opcode.CONST_HIGH16,
+    Opcode.CONST_WIDE, Opcode.CONST_WIDE_16, Opcode.CONST_WIDE_32, Opcode.CONST_WIDE_HIGH16,
+    Opcode.MOVE, Opcode.MOVE_FROM16, Opcode.MOVE_16,
+    Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16,
+    Opcode.MOVE_WIDE, Opcode.MOVE_WIDE_FROM16, Opcode.MOVE_WIDE_16,
+    Opcode.MOVE_EXCEPTION, Opcode.MOVE_RESULT, Opcode.MOVE_RESULT_OBJECT, Opcode.MOVE_RESULT_WIDE,
+    Opcode.NEW_INSTANCE, Opcode.NEW_ARRAY, Opcode.CHECK_CAST, Opcode.ARRAY_LENGTH,
+    Opcode.INSTANCE_OF,
+    Opcode.IGET, Opcode.IGET_BOOLEAN, Opcode.IGET_BYTE, Opcode.IGET_CHAR, Opcode.IGET_SHORT,
+    Opcode.IGET_OBJECT, Opcode.IGET_WIDE,
+    Opcode.SGET, Opcode.SGET_BOOLEAN, Opcode.SGET_BYTE, Opcode.SGET_CHAR, Opcode.SGET_SHORT,
+    Opcode.SGET_OBJECT, Opcode.SGET_WIDE,
+)
+
+// True when the instruction redefines [register] instead of reading its old value.
+fun Instruction.redefinesRegister(register: Int): Boolean =
+    opcode in WRITES_FIRST_REGISTER && touchedRegisters().firstOrNull() == register
+
+// Every register an instruction mentions, in operand order. For invokes with a register
+// count operand, only the argument registers are listed.
+fun Instruction.touchedRegisters(): List<Int> = when (this) {
+    is RegisterRangeInstruction ->
+        (startRegister until startRegister + registerCount).toList()
+    is FiveRegisterInstruction ->
+        listOf(registerC, registerD, registerE, registerF, registerG).take(registerCount)
+    is ThreeRegisterInstruction -> listOf(registerA, registerB, registerC)
+    is TwoRegisterInstruction -> listOf(registerA, registerB)
+    is OneRegisterInstruction -> listOf(registerA)
+    else -> emptyList()
 }
 
 // Index of the first instruction matching the predicate, or -1.
