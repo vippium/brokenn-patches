@@ -45,6 +45,14 @@ fun Method.isStatic(): Boolean = AccessFlags.STATIC.isSet(accessFlags)
 
 fun ClassDef.classStrings(): Set<String> = methods.flatMap { it.stringConstants() }.toSet()
 
+// Early-exit check for one string constant, far cheaper than building the full set when
+// scanning every class of every dex for a single anchor.
+fun ClassDef.hasStringConstant(value: String): Boolean = methods.any { method ->
+    method.implementation?.instructions?.any { instruction ->
+        (instruction as? ReferenceInstruction)?.reference.let { it as? StringReference }?.string == value
+    } == true
+}
+
 // Index of the first instruction matching the predicate, or -1.
 fun Method.firstInstructionIndex(predicate: (Instruction) -> Boolean): Int =
     instrs().indexOfFirst(predicate)
