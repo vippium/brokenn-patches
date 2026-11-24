@@ -35,8 +35,6 @@ val hideWatchPageElementsPatch = bytecodePatch(
     execute {
         enableStatus("hideWatchPageElements")
 
-        // Tab visibility is controlled at runtime by BrokennPrefs, without re-patching.
-        // Brand tabs use the ad_identifier=*BrandTab marker; content tabs use title-based filtering.
         val tabContainer = AdaptiveTabConverterFingerprint.method
         val tabImpl = tabContainer.instrs()
         val castIdx = tabImpl.indexOfFirst { ins ->
@@ -53,7 +51,6 @@ val hideWatchPageElementsPatch = bytecodePatch(
         require(tabHead >= 0) { "TabConverter: loop head not found" }
 
         val block = buildString {
-            // v4/v5 are the loop's scratch registers, reused for the title below.
             append("invoke-static {}, ${Constants.BROKENN_PREFS_CLASS}->hideBrandTabs()Z\n")
             append("move-result v5\n")
             append("if-eqz v5, :tab_titles\n")
@@ -77,7 +74,6 @@ val hideWatchPageElementsPatch = bytecodePatch(
             append(Constants.prefsStringCall("isTabHidden", "4", "5"))
             append("if-eqz v5, :tab_keep\n")
             append("goto/16 :tab_skip\n")
-            // nop anchors the trailing label; a block-final label would resolve to the external target.
             append(":tab_keep\n")
             append("nop\n")
         }
@@ -87,8 +83,6 @@ val hideWatchPageElementsPatch = bytecodePatch(
             ExternalLabel("tab_skip", tabImpl[tabHead])
         )
 
-        // Pills: converter drops swiggy/instamart segments at the source; the parser skips empty pills.
-        // Uses the loop's own scratch registers — addFreeRegisters + labeled insertion loses the block.
         run {
             val conv = PillConverterFingerprint.method
 
@@ -129,7 +123,6 @@ val hideWatchPageElementsPatch = bytecodePatch(
                 append("if-eqz v6, :sw_ok\n")
                 append("const/4 v4, 0x0\n")
                 append("goto/16 :sw_skip\n")
-                // nop anchors the trailing label; a block-final label would resolve to the external target.
                 append(":sw_ok\n")
                 append("nop\n")
             }
@@ -157,7 +150,6 @@ val hideWatchPageElementsPatch = bytecodePatch(
             }
             require(head2 >= 0) { "SubNavParser: loop head not found" }
 
-            // Reuses the wrapper register as scratch, ensuring verifier-safe initialization.
             parser.addInstructionsWithLabels(
                 convIdx + 2,
                 """

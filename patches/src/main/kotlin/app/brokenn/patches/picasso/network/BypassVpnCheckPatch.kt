@@ -9,7 +9,6 @@ import app.morphe.patcher.util.returnEarly
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
-// Interface names the checker looks for, kept here to recognise the class it lives in.
 private const val DIALOG_PARAMS = "Landroid/app/Activity;,Ljava/lang/String;,Ljava/lang/String;"
 
 @Suppress("unused")
@@ -20,8 +19,7 @@ val bypassVpnCheckPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_PICASSO)
 
     execute {
-        // Every screen runs the same probe on resume, which makes onResume the place to
-        // read the probe off instead of hardcoding its obfuscated class.
+
         val resume = mutableClassDefBy(MAIN_ACTIVITY).methods.firstOrNull { it.name == "onResume" }
             ?: throw PatchException("MainActivity.onResume not found")
 

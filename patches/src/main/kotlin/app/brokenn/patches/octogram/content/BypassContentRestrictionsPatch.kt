@@ -19,7 +19,7 @@ val bypassContentRestrictionsPatch = bytecodePatch(
         val platformCheckers = mutableListOf<ClassDef>()
         val noForwardCheckers = mutableListOf<ClassDef>()
         classDefForEach { c ->
-            // R8-extracted platform helper shared by getRestrictionReason and isSensitive.
+
             c.methods.forEach { m ->
                 val strings = m.stringConstants()
                 if (m.returnType == "Z" && m.parameters.toList() == listOf("Ljava/lang/String;") &&
@@ -28,7 +28,7 @@ val bypassContentRestrictionsPatch = bytecodePatch(
                     platformCheckers.add(c)
                 }
             }
-            // isChatNoForwards(Chat): reads the kept Chat.noforwards field.
+
             if (c.methods.any {
                     it.returnType == "Z" &&
                         it.parameters.toList() == listOf("Lorg/telegram/tgnet/TLRPC\$Chat;") &&
@@ -48,7 +48,7 @@ val bypassContentRestrictionsPatch = bytecodePatch(
                 it.returnType == "Z" && it.parameters.toList() == listOf("Ljava/lang/String;") &&
                     setOf("all", "android", "android-all").all { s -> s in it.stringConstants() }
             }.forEach { m ->
-                // False = no platform restriction ever matches.
+
                 m.addInstructions(0, """
                     const/4 v0, 0x0
                     return v0

@@ -35,9 +35,6 @@ val hidePlayerButtonsPatch = bytecodePatch(
     execute {
         enableStatus("hidePlayerButtons")
 
-        // BrokennPrefs controls which buttons hide at runtime — no re-patch needed.
-        // Filters control-menu items by title. Reverse-order patching keeps indices
-        // stable for safe register reassignment.
         val dConv = PlayerWidgetConverterFingerprint.method
         val dImpl = dConv.instrs()
 
@@ -53,21 +50,17 @@ val hidePlayerButtonsPatch = bytecodePatch(
                     l.referenceText()?.contains("Iterator;->hasNext") == true
             }
             require(head >= 0) { "PlayerWidgetConverter: loop head not found" }
-            // item type comes from the invoke's return type — never hardcode R8 names
             Site(idx, elemReg, head, ref.substringAfterLast(')'))
         }
         require(sites.isNotEmpty()) { "PlayerWidgetConverter: menu item sites not found" }
 
         for (site in sites.sortedByDescending { it.idx }) {
-            // The skip label jumps back to the loop head, so the scratch registers must be
-            // redefined before any read on both sides of the injection point.
             requireRegistersSafeInLoop(dImpl, site.idx + 2, site.loopHead, listOf(13, 15), "PlayerWidgetConverter")
             val block = buildString {
                 append("invoke-interface {v${site.elemReg}}, ${site.itemType}->getTitle()Ljava/lang/String;\n")
                 append("move-result-object v13\n")
                 append(Constants.prefsStringCall("isPlayerButtonHidden", "13", "15"))
                 append("if-nez v15, :pi_skip\n")
-                // nop pins the trailing label to a real instruction
                 append(":pi_keep\n")
                 append("nop\n")
             }
@@ -78,9 +71,6 @@ val hidePlayerButtonsPatch = bytecodePatch(
             )
         }
 
-        // The fullscreen bottom tab bar rides the landscape converter loop; side-sheet and
-        // peek lists are phone-invisible, so only the landscape cast is filtered. The loop
-        // is named by its own getter, never by position among the four tab lists.
         val tabContainer = AdaptiveTabConverterFingerprint.method
         val tabImpl = tabContainer.instrs()
         val landscapeMarker = tabImpl.indexOfFirst { ins ->
@@ -104,8 +94,6 @@ val hidePlayerButtonsPatch = bytecodePatch(
         }
         require(landscapeHead >= 0) { "TabConverter: landscape loop head not found" }
 
-        // The skip label jumps back to the loop head, so the scratch registers must be
-        // redefined before any read on both sides of the injection point.
         requireRegistersSafeInLoop(tabImpl, landscapeSite + 1, landscapeHead, listOf(5, 6), "TabConverter")
 
         val landscapeBlock = buildString {
@@ -160,10 +148,6 @@ val hidePlayerButtonsPatch = bytecodePatch(
     }
 }
 
-
-// A register injected inside a loop is safe only when the loop body redefines it before
-// any read, on both sides of the injection point - the skip label jumps back to the head,
-// so a live register would feed a stale value into the next iteration.
 private fun requireRegistersSafeInLoop(
     impl: List<com.android.tools.smali.dexlib2.iface.instruction.Instruction>,
     injectIndex: Int,

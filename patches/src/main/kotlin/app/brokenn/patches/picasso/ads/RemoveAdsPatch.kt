@@ -15,15 +15,12 @@ import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
-// Ad formats the server can arm, plus the unit ids only read once an ad is requested.
 private val AD_SWITCHES = listOf("bannerAd", "interstitialAd", "nativeAd", "rewordAd")
 private val AD_UNIT_IDS = listOf("bannerAdId", "interstitialAdId", "nativeAdId", "rewordAdId")
 private val AD_FIELDS = (AD_SWITCHES + AD_UNIT_IDS).map { "$ADS_CONFIG->$it:Ljava/lang/String;" }
 
 private val AD_WRAPPERS = listOf(BANNER_ADS, INTERSTITIAL_ADS, NATIVE_ADS, REWARDED_ADS)
 
-// Wrappers consume the switches through getters, so an ad request shows up as a call
-// on the config type rather than as a field read.
 private fun Method.touchesAdsConfig(): Boolean = instrs().any { instruction ->
     val reference = (instruction as? ReferenceInstruction)?.reference
     reference is MethodReference && reference.definingClass == ADS_CONFIG
@@ -37,7 +34,7 @@ val removeAdsPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_PICASSO)
 
     execute {
-        // Layer 1: the server switches every format reads before requesting an ad.
+
         val config = mutableClassDefBy(ADS_CONFIG)
         var switchesCleared = 0
         config.methods.toList().forEach { method ->
@@ -51,7 +48,6 @@ val removeAdsPatch = bytecodePatch(
             throw PatchException("Expected ${AD_FIELDS.size} ad config getters, cleared $switchesCleared")
         }
 
-        // Layer 2: the wrappers themselves, so a stale config can never render an ad.
         var wrappersStubbed = 0
         for (type in AD_WRAPPERS) {
             val wrapper = mutableClassDefBy(type)

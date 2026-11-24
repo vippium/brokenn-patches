@@ -30,8 +30,7 @@ val useSystemFontPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
     execute {
-        // The generic font family table: its initializer builds the "sans-serif" family
-        // next to the other Android generics, so the string triple identifies it alone.
+
         var tableClass: ClassDef? = null
         classDefForEach { candidate ->
             if (tableClass != null) return@classDefForEach
@@ -44,7 +43,6 @@ val useSystemFontPatch = bytecodePatch(
         val table = tableClass ?: throw PatchException("Generic font family table not found")
         val familyType = table.type
 
-        // The field the initializer fills right after building the "sans-serif" family.
         val initializer = table.methods.first { it.name == "<clinit>" }
         val instructions = initializer.instrs()
         val sansSerifStart = instructions.indexOfFirst { instruction ->
@@ -59,7 +57,6 @@ val useSystemFontPatch = bytecodePatch(
         }
         val systemFont = "${sansSerifField.definingClass}->${sansSerifField.name}:${sansSerifField.type}"
 
-        // The one family holder the typography reads, picked by locale in its own initializer.
         var holderClass: ClassDef? = null
         classDefForEach { candidate ->
             if (holderClass != null) return@classDefForEach
@@ -83,7 +80,6 @@ val useSystemFontPatch = bytecodePatch(
         }
         if (familyReadIndex < 0) throw PatchException("Locale font family read not found")
 
-        // Point the locale family at the generic sans-serif family, i.e. the device font.
         val register = getter.getInstruction<OneRegisterInstruction>(familyReadIndex).registerA
         getter.replaceInstruction(familyReadIndex, "sget-object v$register, $systemFont")
     }

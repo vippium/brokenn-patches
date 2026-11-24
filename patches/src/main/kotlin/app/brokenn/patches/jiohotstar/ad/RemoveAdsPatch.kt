@@ -19,7 +19,7 @@ val removeAdsPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
     execute {
-        // Neutralise the ad metadata: force all-optional params and an empty name.
+
         AdMetadataConstructorFingerprint.method.addInstructions(0, """
             const/4 p1, 0x1
             const/4 p2, 0x1
@@ -43,8 +43,6 @@ val removeAdsPatch = bytecodePatch(
             return-object v0
         """)
 
-        // The seekbar ticks are drawn from the ad-break cue-point intervention, not from the
-        // ad payload, so the converter has to see an empty list to stop painting them.
         val cuePoints = AdCuePointsConverterFingerprint.method
         val fetchIndex = cuePoints.firstInstructionIndex {
             it.referenceText() == CUE_POINTS_GETTER

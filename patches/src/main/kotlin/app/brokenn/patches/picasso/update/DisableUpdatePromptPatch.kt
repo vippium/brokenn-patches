@@ -15,8 +15,7 @@ val disableUpdatePromptPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_PICASSO)
 
     execute {
-        // The splash activity funnels the whole update flow through one predicate that
-        // parses the server version code and compares it with the installed one.
+
         val splash = mutableClassDefBy(SPLASH_ACTIVITY)
         val gates = splash.methods.filter {
             it.returnType == "Z" && it.parameters.toList() == listOf("Ljava/lang/String;")
@@ -24,7 +23,6 @@ val disableUpdatePromptPatch = bytecodePatch(
         if (gates.size != 1) throw PatchException("Expected 1 update gate in splash, found ${gates.size}")
         gates.first().returnEarly(false)
 
-        // Second layer: an update is never newer than the installed build.
         mutableClassDefBy(UPDATE_INFO).methods
             .filter { it.returnType == "Ljava/lang/String;" && it.parameters.isEmpty() && it.name == "getVersionCode" }
             .forEach { it.returnEarly("0") }

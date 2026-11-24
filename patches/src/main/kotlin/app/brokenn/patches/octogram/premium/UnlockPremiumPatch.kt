@@ -11,8 +11,6 @@ import com.android.tools.smali.dexlib2.iface.ClassDef
 
 private const val PREMIUM_FIELD = "Lorg/telegram/tgnet/TLRPC\$User;->premium:Z"
 
-// Flips the client-side premium flag for the signed-in account only. Other users keep the
-// premium flag the server sent, so their badges stay off. Entitlements remain server-side.
 @Suppress("unused")
 val unlockPremiumPatch = bytecodePatch(
     name = "Enable premium",
@@ -32,8 +30,6 @@ val unlockPremiumPatch = bytecodePatch(
             }
         }
 
-        // Every premium-only UI path reads this cached flag, so pinning it unlocks the account
-        // without touching isPremiumUser(User), which only paints badges on other people.
         var patched = 0
         for ((cls, name) in premiumGetters) {
             mutableClassDefBy(cls).methods.filter { it.name == name && it.returnType == "Z" }.forEach { m ->

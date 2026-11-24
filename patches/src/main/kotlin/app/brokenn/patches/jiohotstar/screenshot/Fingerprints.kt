@@ -14,8 +14,6 @@ internal object UseSecureViewFingerprint : Fingerprint(
     returnType = "Z"
 )
 
-// The Activity window `FLAG_SECURE` (0x2000) setter.
-
 internal object ComposeFlagSecureFingerprint : Fingerprint(
     returnType = "V",
     filters = listOf(
@@ -30,7 +28,6 @@ internal object SurfaceSetSecureFingerprint : Fingerprint(
     custom = { method, _ -> method.callsSurfaceViewSetSecure() }
 )
 
-/** True when [method] invokes `SurfaceView.setSecure`, regardless of obfuscation. */
 private fun Method.callsSurfaceViewSetSecure(): Boolean =
     implementation?.instructions?.any { instruction ->
         instruction is ReferenceInstruction &&
@@ -41,4 +38,3 @@ private fun Method.callsSurfaceViewSetSecure(): Boolean =
                     reference.returnType == "V"
             } == true
     } == true
-

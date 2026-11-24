@@ -25,22 +25,11 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
-// The remote-config flag that arms the automatic permission popup. The key is server owned,
-// so the anchor survives obfuscation and app updates.
 private const val POPUP_FLAG = "all.system.pn_permission_popup.enabled"
-
-// A key the config service can never know, so the flag always falls back to its false default.
 private const val DISABLED_FLAG = "brokenn.system.pn_permission_popup.disabled"
-
-// App-owned adapter type held only by the frequency-cap manager, so the manager is found
-// without obfuscated names.
 private const val FCAP_DETAILS_ADAPTER = "Lcom/hotstar/ui/action/FCAPDetailsJsonAdapter;"
-
-// Public BFF model handed to the frequency-cap evaluator.
 private const val FREQUENCY_CAPPED_STATUS_ACTION =
     "Lcom/hotstar/bff/models/common/FrequencyCappedStatusAction;"
-
-// Source-level name of the evaluator, kept as a second identity check.
 private const val HANDLE_FCAP_LOG_PREFIX = "handleFrequencyCappedStatusAction"
 
 @Suppress("unused")
@@ -51,18 +40,14 @@ val hideNotificationPopupPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
     execute {
-        // Only the flag is muted. No permission call and no popup route is touched, so the
-        // system dialog still opens whenever the user asks for it.
         if (mutePopupFlag() == 0) throw PatchException("Notification popup flag not found")
         if (forceCapExhausted() == 0) throw PatchException("Frequency cap evaluator not found")
     }
 }
 
-// Points the popup flag at an unknown config key, so the popup can never be enabled remotely.
 private fun BytecodePatchContext.mutePopupFlag(): Int {
     var muted = 0
     classDefForEach { candidate ->
-        // Proxying every class is expensive, so short-circuit on the immutable def first.
         if (!candidate.hasStringConstant(POPUP_FLAG)) return@classDefForEach
         mutableClassDefBy(candidate).methods.forEach { method ->
             method.instrs().forEachIndexed { index, instruction ->
@@ -77,11 +62,6 @@ private fun BytecodePatchContext.mutePopupFlag(): Int {
     return muted
 }
 
-// The popup is a server dialog delivered as a frequency-capped action. The cap evaluator
-// decides with one boolean whether the capped action may run; forcing that boolean to false
-// makes every evaluation answer "already capped", so the popup never shows - not on a fresh
-// install and not after any cap window. Manual allow flows and the system dialog are
-// different code paths and stay untouched.
 private fun BytecodePatchContext.forceCapExhausted(): Int {
     val managers = mutableListOf<String>()
     classDefForEach { candidate ->
@@ -98,8 +78,6 @@ private fun BytecodePatchContext.forceCapExhausted(): Int {
     val evaluator = evaluators.single()
     val implementation = evaluator.implementation ?: return 0
 
-    // The decision holder is the only class that is both constructed inside the evaluator and
-    // written through a boolean field store.
     val constructed = implementation.instructions.mapNotNull { instruction ->
         if (instruction.opcode != Opcode.NEW_INSTANCE) return@mapNotNull null
         ((instruction as ReferenceInstruction).reference as TypeReference).type
@@ -122,10 +100,7 @@ private fun BytecodePatchContext.forceCapExhausted(): Int {
     if (sites.isEmpty()) return 0
 
     var forced = 0
-    // Insert from the back so earlier indices stay valid while the method grows.
     sites.sortedByDescending { it.first }.forEach { (index, valueRegister, _) ->
-        // The value register is overwritten with zero, so it must not be read again before
-        // its next write, or the evaluator would observe a corrupted value.
         requireRegisterDeadAfter(evaluator, index, valueRegister)
         evaluator.addInstructions(index, "const/4 v$valueRegister, 0x0")
         forced++

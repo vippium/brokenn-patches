@@ -23,7 +23,6 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
-// Widget types come from the server's proto contract, so they survive obfuscation and app updates.
 private const val PROFILE_DATA = "Lcom/hotstar/ui/model/widget/ProfileSelectionWidget\$Data;"
 private const val PROFILES_GETTER = "$PROFILE_DATA->getProfilesList()Ljava/util/List;"
 private const val BFF_PROFILE = "Lcom/hotstar/bff/models/widget/BffProfile;"
@@ -47,7 +46,6 @@ val hideKidsProfilePatch = bytecodePatch(
         val addIndex = mapper.tileAppendIndex()
         val (listReg, tileReg) = mapper.appendRegisters(addIndex)
 
-        // These instructions encode 4-bit register operands, so the scratch registers must be low.
         val provider = mapper.getFreeRegisterProvider(addIndex, SCRATCH_REGISTERS, listReg, tileReg)
         val type = provider.getFreeRegister4Bit()
         val kids = provider.getFreeRegister4Bit()
@@ -65,7 +63,6 @@ val hideKidsProfilePatch = bytecodePatch(
     }
 }
 
-// The contract's two-value ADULT/KIDS enum is the kids marker that no app or server rename touches.
 private fun BytecodePatchContext.kidsProfileConstant(): String {
     var constant: String? = null
     classDefForEach { candidate ->
@@ -81,7 +78,7 @@ private fun BytecodePatchContext.kidsProfileConstant(): String {
             if (name != null) pendingName = name
             if (ins.opcode != Opcode.SPUT_OBJECT || pendingName == null) return@forEach
             val field = (ins as ReferenceInstruction).reference as? FieldReference ?: return@forEach
-            // $VALUES is an enum array, so only a single-constant write names a constant.
+
             if (field.type != candidate.type) return@forEach
             writes[pendingName!!] = "${field.definingClass}->${field.name}:${field.type}"
         }
@@ -90,14 +87,11 @@ private fun BytecodePatchContext.kidsProfileConstant(): String {
     return constant ?: throw PatchException("Kids profile type enum not found")
 }
 
-// The BFF tile carries the profile type in exactly one field of that enum.
 private fun BytecodePatchContext.bffProfileFieldOfType(kidsType: String): String =
     mutableClassDefBy(BFF_PROFILE).fields.firstOrNull { it.type == kidsType }
         ?.let { "${it.definingClass}->${it.name}:${it.type}" }
         ?: throw PatchException("Profile type field not found")
 
-// The one mapper that turns the widget's profile list into BFF tiles: it reads that list and
-// appends every built tile, so filtering at the append covers every picker surface at once.
 private fun BytecodePatchContext.profilePickerMapper(): MutableMethod {
     var mapper: MutableMethod? = null
     classDefForEach { candidate ->
@@ -116,7 +110,6 @@ private fun ClassDef.hasProfilesGetter(): Boolean =
 private fun MutableMethod.tileAppendIndex(): Int =
     tileAppendIndexOrNull() ?: throw PatchException("Profile tile append not found")
 
-// The append follows the tile constructor, so the constructor call anchors the search.
 private fun MutableMethod.tileAppendIndexOrNull(): Int? {
     val initIndex = firstInstructionIndex { it.referenceText()?.contains(BFF_PROFILE_INIT) == true }
     if (initIndex < 0) return null
@@ -128,7 +121,6 @@ private fun MutableMethod.tileAppendIndexOrNull(): Int? {
 
 private val APPEND_OPCODES = setOf(Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE)
 
-// The append's own registers: the list being built and the tile about to enter it.
 private fun MutableMethod.appendRegisters(addIndex: Int): Pair<Int, Int> {
     val registers = when (val invoke = instrs()[addIndex]) {
         is FiveRegisterInstruction -> invoke.registerC to invoke.registerD

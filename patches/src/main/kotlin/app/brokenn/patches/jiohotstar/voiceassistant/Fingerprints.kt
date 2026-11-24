@@ -6,14 +6,12 @@ import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
-// Search-bar mic gate; false hides the primary mic branch.
 internal object VoiceSearchEnabledFingerprint : Fingerprint(
     definingClass = "Lcom/hotstar/ui/model/pagedata/ExplorePageData;",
     name = "getVoiceSearchEnabled",
     returnType = "Z"
 )
 
-// Page-proto CVD orb field; mappers gate on hasCvdOrb.
 internal object WatchPageCvdOrbFingerprint : Fingerprint(
     definingClass = "Lcom/hotstar/ui/model/pagedata/WatchPageData;",
     name = "hasCvdOrb",
@@ -38,7 +36,6 @@ internal object LandingV2PageCvdOrbFingerprint : Fingerprint(
     returnType = "Z"
 )
 
-// Equaliser-config readers (disambiguated by param count); false kills the fallback mic.
 internal object CvdEqualiserEventFingerprint : Fingerprint(
     returnType = "Ljava/lang/Object;",
     parameters = listOf("L", "L"),
@@ -55,7 +52,6 @@ internal object CvdEqualiserFlowFingerprint : Fingerprint(
     )
 )
 
-// Page-type parser; renaming the CVD wire names keeps every payload from resolving to a CVD page.
 internal object CvdPageTypeParserFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/String;"),
     filters = listOf(
@@ -64,7 +60,6 @@ internal object CvdPageTypeParserFingerprint : Fingerprint(
     )
 )
 
-// Navigation screens bind their route string in the static initialiser.
 internal object CvdPageScreenFingerprint : Fingerprint(
     definingClass = "Lcom/hotstar/navigation/Screen${'$'}CVDPage;",
     name = "<clinit>",
@@ -77,7 +72,6 @@ internal object CvdActionSheetScreenFingerprint : Fingerprint(
     returnType = "V"
 )
 
-// Renderers, anchored on the test tags they set rather than any obfuscated class name.
 internal object CvdOrbComposableFingerprint : Fingerprint(
     returnType = "V",
     filters = listOf(
@@ -100,14 +94,12 @@ internal object CvdActionSheetComposableFingerprint : Fingerprint(
     )
 )
 
-// Gate that lets the assistant open from core search.
 internal object CvdCoreSearchGateFingerprint : Fingerprint(
     filters = listOf(
         string("all.cvd.allowed_cvd_from_core_search_for_lpd")
     )
 )
 
-// Widget enum clinit (filters in string order); renamed wires make the parser skip CVD widgets.
 internal object CvdWidgetTypeFingerprint : Fingerprint(
     filters = listOf(
         string("CVDHeroWidget"),
@@ -117,7 +109,6 @@ internal object CvdWidgetTypeFingerprint : Fingerprint(
     )
 )
 
-// Sub-nav row parser; the Ask pill rides the ILLUSTRATION_PILL branch like Swiggy pills.
 internal object CvdSubNavParserFingerprint : Fingerprint(
     filters = listOf(
         string("getSubMenuItemsList(...)"),
@@ -125,7 +116,6 @@ internal object CvdSubNavParserFingerprint : Fingerprint(
     )
 )
 
-// The home suggestion tray converter: StaggeredTrayWidget -> its BFF model.
 internal object HomeSuggestionTrayFingerprint : Fingerprint(
     parameters = listOf("Lcom/hotstar/ui/model/widget/StaggeredTrayWidget;"),
     filters = listOf(

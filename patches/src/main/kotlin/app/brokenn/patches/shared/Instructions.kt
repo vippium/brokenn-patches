@@ -19,12 +19,8 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
-// Instruction helpers shared by every app's patch package: method scans,
-// reference lookups and animation-snap insertion.
-
 fun Method.instrs(): List<Instruction> = implementation?.instructions?.toList() ?: emptyList()
 
-// toString of the instruction's reference, or null when the instruction carries none.
 fun Instruction.referenceText(): String? =
     (this as? ReferenceInstruction)?.reference?.toString()
 
@@ -48,16 +44,12 @@ fun Method.isStatic(): Boolean = AccessFlags.STATIC.isSet(accessFlags)
 
 fun ClassDef.classStrings(): Set<String> = methods.flatMap { it.stringConstants() }.toSet()
 
-// Early-exit check for one string constant, far cheaper than building the full set when
-// scanning every class of every dex for a single anchor.
 fun ClassDef.hasStringConstant(value: String): Boolean = methods.any { method ->
     method.implementation?.instructions?.any { instruction ->
         (instruction as? ReferenceInstruction)?.reference.let { it as? StringReference }?.string == value
     } == true
 }
 
-// Opcodes whose first register operand is a destination, so touching it redefines the
-// register instead of reading its old value.
 private val WRITES_FIRST_REGISTER = setOf(
     Opcode.CONST_4, Opcode.CONST_16, Opcode.CONST, Opcode.CONST_HIGH16,
     Opcode.CONST_WIDE, Opcode.CONST_WIDE_16, Opcode.CONST_WIDE_32, Opcode.CONST_WIDE_HIGH16,
@@ -73,12 +65,9 @@ private val WRITES_FIRST_REGISTER = setOf(
     Opcode.SGET_OBJECT, Opcode.SGET_WIDE,
 )
 
-// True when the instruction redefines [register] instead of reading its old value.
 fun Instruction.redefinesRegister(register: Int): Boolean =
     opcode in WRITES_FIRST_REGISTER && touchedRegisters().firstOrNull() == register
 
-// Every register an instruction mentions, in operand order. For invokes with a register
-// count operand, only the argument registers are listed.
 fun Instruction.touchedRegisters(): List<Int> = when (this) {
     is RegisterRangeInstruction ->
         (startRegister until startRegister + registerCount).toList()
@@ -90,38 +79,25 @@ fun Instruction.touchedRegisters(): List<Int> = when (this) {
     else -> emptyList()
 }
 
-// Index of the first instruction matching the predicate, or -1.
 fun Method.firstInstructionIndex(predicate: (Instruction) -> Boolean): Int =
     instrs().indexOfFirst(predicate)
 
-// Index of the first instruction after [from] (exclusive) and within [limit] steps
-// matching the predicate, or -1.
 fun Method.nextInstructionIndex(from: Int, limit: Int = Int.MAX_VALUE, predicate: (Instruction) -> Boolean): Int {
     val impl = instrs()
-    // [Constraint] from + 1 + limit overflows Int for the default limit, so widen to Long
-    // before clamping — an overflowed negative end makes the scan silently return -1.
     val end = minOf(impl.size.toLong(), from + 1L + limit).toInt()
     for (i in from + 1 until end) if (predicate(impl[i])) return i
     return -1
 }
 
-// Index of the last instruction before [from] (exclusive) matching the predicate, or -1.
 fun Method.prevInstructionIndex(from: Int, predicate: (Instruction) -> Boolean): Int {
     val impl = instrs()
     for (i in from - 1 downTo 0) if (predicate(impl[i])) return i
     return -1
 }
 
-// Indices of all instructions matching the predicate.
 fun Method.instructionIndices(predicate: (Instruction) -> Boolean): List<Int> =
     instrs().withIndex().filter { predicate(it.value) }.map { it.index }
 
-// Insert const/4 0x0 into the duration register of every tween-factory call so
-// the animation snaps instead of tweening. The duration is the invoke's first register.
-// [Constraint] pass [fromIndex]/[toIndexExclusive] to scope the scan to the animation's
-// instruction window; an unscoped scan would also zero unrelated tweens in the method.
-// [Constraint] inserts shift every later index in the window, so callers must re-scan
-// (or use fingerprint matches) for anything after this call, never stale indices.
 fun MutableMethod.zeroTweenDurations(
     factoryClass: String,
     factoryMethod: String,
@@ -142,8 +118,7 @@ fun MutableMethod.zeroTweenDurations(
             is RegisterRangeInstruction -> invoke.startRegister
             else -> throw IllegalStateException("$failMessage: unexpected tween invoke format")
         }
-        // const/4 encodes only v0-v15; range invokes can start higher, so widen the
-        // encoding to match the register (const/16 covers v0-255, const the rest).
+
         val zero = when {
             reg <= 15 -> "const/4 v$reg, 0x0"
             reg <= 255 -> "const/16 v$reg, 0x0"

@@ -28,7 +28,7 @@ val skipLoginPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_PICASSO)
 
     execute {
-        // Session state lives in a "login_status" preference read by a single predicate.
+
         val classes = mutableListOf<ClassDef>()
         classDefForEach { classes.add(it) }
 
@@ -45,7 +45,6 @@ val skipLoginPatch = bytecodePatch(
                 .returnEarly(true)
         }
 
-        // The server flag that turns the whole flow into a login wall.
         val gates = classes.flatMap { classDef ->
             classDef.methods.filter { it.returnType == "Z" && it.callsMandatoryLogin() }
         }
