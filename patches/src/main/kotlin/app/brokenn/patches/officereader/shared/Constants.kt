@@ -10,7 +10,7 @@ object Constants {
         packageName = "net.sjava.officereader",
         apkFileType = ApkFileType.APK,
         targets = listOf(
-            AppTarget(version = "5.0.4")
+            AppTarget(version = "5.0.6")
         )
     )
 }
