@@ -23,7 +23,6 @@ import app.brokenn.patches.shared.instrs
 import app.brokenn.patches.shared.instructionIndices
 import app.brokenn.patches.shared.referenceText
 
-
 @Suppress("unused")
 val removeVoiceAssistantPatch = bytecodePatch(
     name = "Remove ChatGPT AI assistant",
@@ -32,13 +31,11 @@ val removeVoiceAssistantPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
     execute {
-        // Search-bar mic: force the server-driven voice-search gate off.
         VoiceSearchEnabledFingerprint.method.addInstructions(0, """
             const/4 v0, 0x0
             return v0
         """)
 
-        // CVD orb in page protos: false makes mappers drop it.
         for (fingerprint in listOf(
             WatchPageCvdOrbFingerprint,
             ExplorePageCvdOrbFingerprint,
@@ -51,7 +48,6 @@ val removeVoiceAssistantPatch = bytecodePatch(
             """)
         }
 
-        // Fallback mic branch and core-search entry: collapse the config readers to disabled.
         for (method in listOf(
             CvdEqualiserEventFingerprint.method,
             CvdEqualiserFlowFingerprint.method,
@@ -60,8 +56,6 @@ val removeVoiceAssistantPatch = bytecodePatch(
             method.zeroBooleanResult()
         }
 
-        // Unknown-widget cut: rename the CVD wire names so the parser skips them.
-        // The chat surfaces ride the same enum as the orb, so they go with it.
         val typeMethod = CvdWidgetTypeFingerprint.method
         val typeImpl = typeMethod.instrs()
         val wires = setOf(
@@ -71,7 +65,7 @@ val removeVoiceAssistantPatch = bytecodePatch(
             "ChatBubbleWidget",
             "ChatInputWidget"
         )
-        // replaceInstruction is 1:1, so snapshot indices stay valid across the loop.
+
         typeMethod.instructionIndices { instruction ->
             instruction.opcode == Opcode.CONST_STRING &&
                 (instruction as? ReferenceInstruction)?.reference.let { it is StringReference && it.string in wires }
@@ -81,7 +75,6 @@ val removeVoiceAssistantPatch = bytecodePatch(
             typeMethod.replaceInstruction(index, "const-string v$reg, \"${wire.string}Removed\"")
         }
 
-        // Routes and page-type wire names: renamed so no entry point resolves to a CVD page.
         for (fingerprint in listOf(
             CvdPageTypeParserFingerprint,
             CvdPageScreenFingerprint,
@@ -89,7 +82,7 @@ val removeVoiceAssistantPatch = bytecodePatch(
         )) {
             val routeMethod = fingerprint.method
             val routeImpl = routeMethod.instrs()
-            // replaceInstruction is 1:1, so snapshot indices stay valid across the loop.
+
             routeMethod.instructionIndices { instruction ->
                 instruction.opcode == Opcode.CONST_STRING &&
                     (instruction as? ReferenceInstruction)?.reference.let {
@@ -102,7 +95,6 @@ val removeVoiceAssistantPatch = bytecodePatch(
             }
         }
 
-        // Renderers: nothing paints even if CVD data reaches them by a path the wire rename misses.
         for (fingerprint in listOf(
             CvdOrbComposableFingerprint,
             CvdChatBubbleComposableFingerprint,
@@ -111,7 +103,6 @@ val removeVoiceAssistantPatch = bytecodePatch(
             fingerprint.method.returnEarly()
         }
 
-        // Watch Ask pill: skip illustration pills whose lottie is the CVD ask; parser null-guards the result.
         runCatching {
             val parser = CvdSubNavParserFingerprint.method
             val impl = parser.instrs()
@@ -121,7 +112,7 @@ val removeVoiceAssistantPatch = bytecodePatch(
                 impl[i].opcode == Opcode.INVOKE_STATIC &&
                     impl[i].referenceText()?.contains("LBd/b3;->a(") == true
             }
-            // Main list-add is the only one followed by a 16-bit goto (loop back-edge).
+
             val skipIdx = impl.indices.firstOrNull { i ->
                 i > anchorIdx && i + 1 < impl.size &&
                     impl[i].opcode == Opcode.INVOKE_VIRTUAL &&
@@ -168,7 +159,6 @@ val removeVoiceAssistantPatch = bytecodePatch(
             )
         }
 
-        // Nulls the tray converter result when its first item is a TopicsPill chip; the parser null-guards.
         val tray = HomeSuggestionTrayFingerprint.method
         val trayImpl = tray.instrs()
         val listIdx = trayImpl.indexOfFirst { ins ->
@@ -205,7 +195,6 @@ private val CVD_ROUTES = setOf(
     "ConversationalDiscoveryActionsheetPage"
 )
 
-// Replaces a config getter's unboxed boolean with false, leaving the coroutine resume path intact.
 private fun MutableMethod.zeroBooleanResult() {
     val unboxIndex = instrs().indexOfFirst {
         it.opcode == Opcode.INVOKE_VIRTUAL &&

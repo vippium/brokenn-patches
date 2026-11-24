@@ -11,12 +11,10 @@ object Constants {
         apkFileType = ApkFileType.APKM,
         appIconColor = 0x1A237E,
         targets = listOf(
-            AppTarget(version = "26.10.26.0")
+            AppTarget(version = "26.11.09.1")
         )
     )
 
-    // Stable (non-renamed) app classes referenced by fingerprints and emitted smali.
-    // [Implementation] inner-class types build from a semicolon-free base (TabWidget$Data).
     private const val TAB_WIDGET_BASE = "Lcom/hotstar/ui/model/widget/TabWidget"
     private const val ILLUSTRATION_PILL_BASE = "Lcom/hotstar/ui/model/widget/IllustrationPillWidget"
     const val TAB_WIDGET = "$TAB_WIDGET_BASE;"
@@ -30,16 +28,10 @@ object Constants {
     const val BFF_PILL_WIDGET = "Lcom/hotstar/bff/models/widget/BffIllustrationPillWidget;"
     const val BFF_PILL_SUB_MENU_ITEM = "Lcom/hotstar/bff/models/widget/BffIllustrationPillSubMenuItem;"
 
-    // The obfuscated Compose tween factory every nav/top-bar animation goes through.
-    const val TWEEN_FACTORY_CLASS = "LA/n;"
-    const val TWEEN_FACTORY_METHOD = "c"
-
-    // Extension classes, merged from extensions/brokenn-settings.mpe.
     const val SETTINGS_PACKAGE = "Lapp/brokenn/extension/jiohotstar/settings"
     const val BROKENN_PREFS_CLASS = "$SETTINGS_PACKAGE/BrokennPrefs;"
     const val BROKENN_STATUS_CLASS = "$SETTINGS_PACKAGE/BrokennStatus;"
 
-    /** invoke-static {vArgReg}, BrokennPrefs->method(String)Z / move-result vResultReg */
     fun prefsStringCall(method: String, argReg: String, resultReg: String) =
         "invoke-static {v$argReg}, $BROKENN_PREFS_CLASS->$method(Ljava/lang/String;)Z\n" +
             "move-result v$resultReg\n"

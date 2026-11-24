@@ -34,18 +34,15 @@ val enableScreenshotPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
     execute {
-        // Layer 1: the Activity window FLAG_SECURE (0x2000).
+
         runCatching {
             ComposeFlagSecureFingerprint.method.returnEarly()
         }
 
-        // Layer 2: the app's own AB switch that gates the legacy secure surface.
         runCatching {
             UseSecureViewFingerprint.method.returnEarly(false)
         }
 
-        // Layer 3: every method that marks a SurfaceView as secure. Matched by behaviour, so
-        // new player paths (Exo, Media3, tiledmedia) are covered without renaming anything.
         SurfaceSetSecureFingerprint.matchAllOrNull()?.forEach { candidate ->
             runCatching { candidate.method.disableSurfaceSecure() }
         }

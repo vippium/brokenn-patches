@@ -33,7 +33,7 @@ val antiDeleteMessagesPatch = bytecodePatch(
             mutableClassDefBy(c).methods.filter {
                 it.returnType == "Ljava/util/ArrayList;" && it.parameters.toList() == expected
             }.forEach { m ->
-                // useQueue == false means server-initiated delete → keep the rows, return null.
+
                 m.addInstructions(0, """
                     if-nez p4, :allow
                     const/4 v0, 0x0

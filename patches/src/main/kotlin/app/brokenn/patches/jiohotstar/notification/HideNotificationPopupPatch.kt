@@ -1,71 +1,123 @@
 package app.brokenn.patches.jiohotstar.notification
 
 import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
-import app.brokenn.patches.shared.constructsType
+import app.brokenn.patches.shared.hasStringConstant
 import app.brokenn.patches.shared.instrs
+import app.brokenn.patches.shared.redefinesRegister
+import app.brokenn.patches.shared.touchedRegisters
 import app.brokenn.patches.shared.referenceText
 import app.brokenn.patches.shared.stringConstants
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
+import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.iface.ClassDef
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
-private const val NUDGE_FCAP_ID = "notification_nudge_fcap"
-private const val FCAP_STATUS_ACTION = "Lcom/hotstar/bff/models/common/FrequencyCappedStatusAction;"
-private const val COMPOSER = "Landroidx/compose/runtime/b;"
+private const val POPUP_FLAG = "all.system.pn_permission_popup.enabled"
+private const val DISABLED_FLAG = "brokenn.system.pn_permission_popup.disabled"
+private const val FCAP_DETAILS_ADAPTER = "Lcom/hotstar/ui/action/FCAPDetailsJsonAdapter;"
+private const val FREQUENCY_CAPPED_STATUS_ACTION =
+    "Lcom/hotstar/bff/models/common/FrequencyCappedStatusAction;"
+private const val HANDLE_FCAP_LOG_PREFIX = "handleFrequencyCappedStatusAction"
 
 @Suppress("unused")
 val hideNotificationPopupPatch = bytecodePatch(
-    name = "Disable notification permission prompt",
-    description = "Disables the recurring notification permission nag shown every few app launches " +
-        "enabled from My Space."
+    name = "Hide notification nudge",
+    description = "Disables the in-app notification popup permanently.",
 ) {
     compatibleWith(COMPATIBILITY_JIOHOTSTAR)
 
     execute {
-        var nudgeClass: ClassDef? = null
-        classDefForEach { c ->
-            if (nudgeClass != null) return@classDefForEach
-            if (c.methods.any { m -> m.stringConstants().any { NUDGE_FCAP_ID in it } }) nudgeClass = c
-        }
-        val nudge = nudgeClass ?: throw PatchException("Notification nudge fcap not found")
-        val nudgeType = nudge.type
+        if (mutePopupFlag() == 0) throw PatchException("Notification popup flag not found")
+        if (forceCapExhausted() == 0) throw PatchException("Frequency cap evaluator not found")
+    }
+}
 
-        val gate = mutableClassDefBy(nudge).methods.filter {
-            it.returnType == "Ljava/lang/Object;" &&
-                it.parameterTypes.size == 2 &&
-                it.parameterTypes[1].toString() == "Liv/d;" &&
-                it.instrs().any { ins -> ins.referenceText()?.contains(FCAP_STATUS_ACTION) == true }
-        }.singleOrNull() ?: throw PatchException("Notification nudge gate not found")
-
-        // The nudge gate: a constant "no" means the popup is never authorised, whatever the fcap decides.
-        gate.addInstructions(
-            0,
-            "sget-object v0, Ljava/lang/Boolean;->FALSE:Ljava/lang/Boolean;\n" +
-                "return-object v0\n",
-        )
-
-        // The host composable the nudge mounts: blank it so no state can draw the sheet.
-        val hosts = mutableListOf<String>()
-        classDefForEach { c ->
-            if (c.methods.any { m ->
-                    m.returnType == "V" &&
-                        m.parameterTypes.size == 3 &&
-                        m.parameterTypes[1].toString() == COMPOSER &&
-                        m.parameterTypes[2].toString() == "I" &&
-                        m.constructsType(nudgeType)
-                }
-            ) hosts += c.type
+private fun BytecodePatchContext.mutePopupFlag(): Int {
+    var muted = 0
+    classDefForEach { candidate ->
+        if (!candidate.hasStringConstant(POPUP_FLAG)) return@classDefForEach
+        mutableClassDefBy(candidate).methods.forEach { method ->
+            method.instrs().forEachIndexed { index, instruction ->
+                if (instruction.opcode != Opcode.CONST_STRING) return@forEachIndexed
+                if (instruction.referenceText() != POPUP_FLAG) return@forEachIndexed
+                val register = method.getInstruction<OneRegisterInstruction>(index).registerA
+                method.replaceInstruction(index, "const-string v$register, \"$DISABLED_FLAG\"")
+                muted++
+            }
         }
-        if (hosts.isEmpty()) throw PatchException("Notification nudge host not found")
-        hosts.forEach { type ->
-            mutableClassDefBy(type).methods.filter { m ->
-                m.returnType == "V" &&
-                    m.parameterTypes.size == 3 &&
-                    m.parameterTypes[1].toString() == COMPOSER &&
-                    m.parameterTypes[2].toString() == "I" &&
-                    m.constructsType(nudgeType)
-            }.forEach { it.addInstructions(0, "return-void\n") }
+    }
+    return muted
+}
+
+private fun BytecodePatchContext.forceCapExhausted(): Int {
+    val managers = mutableListOf<String>()
+    classDefForEach { candidate ->
+        if (candidate.fields.any { it.type == FCAP_DETAILS_ADAPTER }) managers += candidate.type
+    }
+    if (managers.size != 1) return 0
+    val managerType = managers.single()
+    val managerDef = mutableClassDefBy(managerType)
+    val evaluators = managerDef.methods.filter { method ->
+        method.parameterTypes.contains(FREQUENCY_CAPPED_STATUS_ACTION) &&
+            method.stringConstants().any { it.startsWith(HANDLE_FCAP_LOG_PREFIX) }
+    }
+    if (evaluators.size != 1) return 0
+    val evaluator = evaluators.single()
+    val implementation = evaluator.implementation ?: return 0
+
+    val constructed = implementation.instructions.mapNotNull { instruction ->
+        if (instruction.opcode != Opcode.NEW_INSTANCE) return@mapNotNull null
+        ((instruction as ReferenceInstruction).reference as TypeReference).type
+    }.toSet()
+    val holderTypes = implementation.instructions.mapNotNull { instruction ->
+        if (instruction.opcode != Opcode.IPUT_BOOLEAN) return@mapNotNull null
+        val field = (instruction as ReferenceInstruction).reference as FieldReference
+        if (field.type != "Z" || field.definingClass !in constructed) return@mapNotNull null
+        field.definingClass
+    }.distinct()
+    if (holderTypes.size != 1) return 0
+    val holderType = holderTypes.single()
+
+    val sites = implementation.instructions.mapIndexedNotNull { index, instruction ->
+        if (instruction.opcode != Opcode.IPUT_BOOLEAN) return@mapIndexedNotNull null
+        val field = (instruction as ReferenceInstruction).reference as FieldReference
+        if (field.definingClass != holderType) return@mapIndexedNotNull null
+        Triple(index, (instruction as TwoRegisterInstruction).registerA, field)
+    }
+    if (sites.isEmpty()) return 0
+
+    var forced = 0
+    sites.sortedByDescending { it.first }.forEach { (index, valueRegister, _) ->
+        requireRegisterDeadAfter(evaluator, index, valueRegister)
+        evaluator.addInstructions(index, "const/4 v$valueRegister, 0x0")
+        forced++
+    }
+    return forced
+}
+
+private fun requireRegisterDeadAfter(
+    method: MutableMethod,
+    siteIndex: Int,
+    register: Int,
+) {
+    method.implementation!!.instructions.drop(siteIndex + 1).forEach { instruction ->
+        if (register !in instruction.touchedRegisters()) return@forEach
+        if (!instruction.redefinesRegister(register)) {
+            throw PatchException("Frequency cap decision register is read after the store")
         }
+        return
     }
 }
