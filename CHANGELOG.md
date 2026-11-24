@@ -1,3 +1,24 @@
+## [1.6.0-dev.2](https://github.com/vippium/brokenn-patches/compare/v1.6.0-dev.1...v1.6.0-dev.2) (2026-11-24)
+
+### ✨ New Features
+
+* **jiohotstar:** add `Hide kids profile` patch
+
+### ♻️ Shared
+
+* **jiohotstar:** refactored `Hide notification nudge` patch to work flawlessly
+* re-anchored all patches
+
+### 🐛 Bug Fixes
+
+* **officereader/unlock premium:** fixed manual switching to light theme not working
+* **officereader/amoled theme:** fixed black status bar and bottom bar, even in light theme
+
+### 🚀 Updated App Support
+
+* **jiohotstar:** 26.11.09.1
+* **officereader:** 5.0.6
+
 ## [1.6.0-dev.1](https://github.com/vippium/brokenn-patches/compare/v1.5.0...v1.6.0-dev.1) (2026-11-23)
 
 ### ✨ New Features
