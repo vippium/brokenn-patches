@@ -18,6 +18,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 from datetime import date
 
 REPO_SLUG = os.environ.get("GITHUB_REPOSITORY") or "vippium/brokenn-patches"
@@ -529,9 +530,49 @@ def load_custom_notes():
     return content or None
 
 
+NOTES_CACHE = os.path.join(tempfile.gettempdir(), "brokenn-release-notes.cache")
+
+
+def read_cached_notes(version):
+    """Return the custom body cached for this exact version, if any.
+
+    semantic-release regenerates the notes after the release commit (the
+    backmerge plugin's prepare step follows the git plugin's), by which time
+    the release pipeline has already cleared NOTES.md. The cache lets the
+    second generateNotes call return the same custom body instead of falling
+    back to the generated sections.
+    """
+    try:
+        with open(NOTES_CACHE, encoding="utf-8") as fh:
+            data = fh.read()
+    except OSError:
+        return None
+    cached_version, _, body = data.partition("\n")
+    if cached_version != version or not body.strip():
+        try:
+            os.unlink(NOTES_CACHE)
+        except OSError:
+            pass
+        return None
+    return body
+
+
+def write_cached_notes(version, body):
+    try:
+        with open(NOTES_CACHE, "w", encoding="utf-8") as fh:
+            fh.write(version + "\n" + body)
+    except OSError:
+        pass
+
+
 def render(commits, from_tag, version):
     cfg = CONFIG
     custom = load_custom_notes()
+    cached = None
+    if custom:
+        write_cached_notes(version, custom)
+    else:
+        cached = read_cached_notes(version)
     breaking = [c for c in commits if c["breaking"]]
     groups = {key: [] for key, _ in cfg["sections"]}
     for commit in commits:
@@ -553,8 +594,8 @@ def render(commits, from_tag, version):
         compare = f"https://github.com/{REPO_SLUG}/commits/v{version}"
     lines = [f"## [{version}]({compare}) ({date.today().isoformat()})"]
 
-    if custom:
-        lines.extend(["", custom])
+    if custom or cached:
+        lines.extend(["", custom or cached])
         return "\n".join(lines).strip() + "\n"
 
     if cfg["prepend_notes"]:
