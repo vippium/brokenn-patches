@@ -27,7 +27,7 @@
 ## <img src="https://cdn.simpleicons.org/android" height="20" /> Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.6.0-dev.2](https://github.com/vippium/brokenn-patches/releases/tag/v1.6.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;32 patches total
+> **[v1.6.0-dev.3](https://github.com/vippium/brokenn-patches/releases/tag/v1.6.0-dev.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;32 patches total
 <details open>
 <summary>📦 Office Reader&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
 <br>
