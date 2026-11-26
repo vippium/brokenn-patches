@@ -225,7 +225,7 @@ public class BrokennSettingsActivity extends Activity {
         LinearLayout labels = new LinearLayout(this);
         labels.setOrientation(LinearLayout.VERTICAL);
 
-        TextView headingView = text(heading, 15.5f, FG, true);
+        TextView headingView = text(heading, 15, FG, false);
         labels.addView(headingView);
 
         TextView descView = text(description, 12, SUBTLE, false);
