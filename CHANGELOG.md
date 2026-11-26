@@ -1,3 +1,11 @@
+## [1.6.0-dev.4](https://github.com/vippium/brokenn-patches/compare/v1.6.0-dev.3...v1.6.0-dev.4) (2026-11-26)
+
+### ✨ New Features
+* **hotstar tv:** add `hotstar tv` patches ([d5b7105](https://github.com/vippium/brokenn-patches/commit/d5b71053510c226722d274075683123c52b26f08))
+
+### 🔧 Improvements
+* **dependencies:** update morphe-gradle-plugin to 2.1.1 ([dddcfe1](https://github.com/vippium/brokenn-patches/commit/dddcfe1b92ca176417a20e89757a8c3e80987ffa))
+
 ## [1.6.0-dev.3](https://github.com/vippium/brokenn-patches/compare/v1.6.0-dev.2...v1.6.0-dev.3) (2026-11-25)
 
 ### 🐛 Bug Fixes

@@ -27,7 +27,7 @@
 ## <img src="https://cdn.simpleicons.org/android" height="20" /> Patches
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.6.0-dev.3](https://github.com/vippium/brokenn-patches/releases/tag/v1.6.0-dev.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;32 patches total
+> **[v1.6.0-dev.4](https://github.com/vippium/brokenn-patches/releases/tag/v1.6.0-dev.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;38 patches total
 <details open>
 <summary>📦 Office Reader&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
 <br>
@@ -120,6 +120,28 @@
 | [Remove ads](#remove-ads) | Removes banner, native, interstitial and rewarded ads. |  |
 | [Remove unused permissions](#remove-unused-permissions) | Removes phone state, advertising id, install referrer and badge permissions. |  |
 | [Skip login](#skip-login) | Treats the app as signed in and never shows the login screen. |  |
+
+</details>
+
+<details open>
+<summary>📦 Hotstar TV&nbsp;&nbsp;•&nbsp;&nbsp;6 patches</summary>
+<br>
+
+**Package name:** `in.startv.hotstartvonly`
+
+**🎯 Supported versions:**
+
+| 26.08.03.3 |
+| :---: |
+
+| Patch | Description |
+|:----------|:----------------:|
+| [Bypass signature check](#bypass-signature-check) | Bypasses app signature verification to allow API access. |  |
+| [Enable all codecs](#enable-all-codecs) | Unlocks H.265, VP9, AV1 and 4K playback on capable devices. |  |
+| [Force Dolby Vision](#force-dolby-vision) | Forces the Dolby Vision capability check to pass so DV streams are offered on capable displays. |  |
+| [Force HDR10](#force-hdr10) | Forces the HDR10 capability check to pass so HDR10 streams are offered on capable displays. |  |
+| [Premium unlock](#premium-unlock) | Unlocks premium UI features, removes subscription nudges, and enables downloads. |  |
+| [Remove ads](#remove-ads) | Removes pre-roll, mid-roll, live-match and home-feed ads. |  |
 
 </details>
 
