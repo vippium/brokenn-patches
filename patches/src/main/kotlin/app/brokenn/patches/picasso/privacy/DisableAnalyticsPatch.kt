@@ -4,8 +4,6 @@ import app.brokenn.patches.picasso.shared.Constants.COMPATIBILITY_PICASSO
 import app.morphe.patcher.patch.resourcePatch
 import org.w3c.dom.Element
 
-// Firebase reads both switches before it queues anything, so they turn collection off
-// at the source without touching login, which runs on Firebase Auth.
 private val FIREBASE_SWITCHES = mapOf(
     "firebase_analytics_collection_enabled" to "false",
     "firebase_crashlytics_collection_enabled" to "false",

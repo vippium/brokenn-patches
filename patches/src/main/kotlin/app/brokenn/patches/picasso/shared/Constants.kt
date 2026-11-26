@@ -13,7 +13,6 @@ object Constants {
         )
     )
 
-    // Server config models, keep their field names because Kotlin serialization reads them.
     const val ADS_CONFIG = "Lcom/offshore/picasso/network/model/config/AdsConfigNew;"
     const val UPDATE_INFO = "Lcom/offshore/picasso/network/model/config/ApkUpdateInfo;"
     const val CONFIGURATION = "Lcom/offshore/picasso/network/model/config/Configuration;"
@@ -22,7 +21,6 @@ object Constants {
     const val MAIN_ACTIVITY = "Lcom/offshore/picasso/MainActivity;"
     const val APP_CONFIG = "Lcom/offshore/picasso/network/model/config/AppConfig;"
 
-    // Ad wrappers: one per format, every request and render goes through them.
     const val BANNER_ADS = "Lcom/offshore/picasso/utils/ads/BannerAds;"
     const val INTERSTITIAL_ADS = "Lcom/offshore/picasso/utils/ads/PopUpAds;"
     const val NATIVE_ADS = "Lcom/offshore/picasso/utils/ads/NativeAds;"

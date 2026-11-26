@@ -8,11 +8,17 @@ entry. The commit range is passed by the releaserc via lodash templates:
     python3 .github/scripts/release_notes.py "${lastRelease.gitTag}" "${nextRelease.version}"
 
 Edit CONFIG to add/delete/reword sections without touching the logic below.
+
+Hand-written notes: put the release body in NOTES.md at the repo root. When it
+has content (HTML comments are stripped), the generated commit sections are
+replaced by that file verbatim; the version heading and compare link are still
+added automatically. The release pipeline clears the file after consuming it.
 """
 import os
 import re
 import subprocess
 import sys
+import tempfile
 from datetime import date
 
 REPO_SLUG = os.environ.get("GITHUB_REPOSITORY") or "vippium/brokenn-patches"
@@ -509,8 +515,64 @@ def commit_is_revert(hash_, commits):
     return False
 
 
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+NOTES_FILE = os.path.join(REPO_ROOT, "NOTES.md")
+
+
+def load_custom_notes():
+    try:
+        with open(NOTES_FILE, encoding="utf-8") as fh:
+            content = fh.read()
+    except OSError:
+        return None
+    content = re.sub("<!--.*?-->", "", content, flags=re.S)
+    content = re.sub("\n{3,}", "\n\n", content).strip()
+    return content or None
+
+
+NOTES_CACHE = os.path.join(tempfile.gettempdir(), "brokenn-release-notes.cache")
+
+
+def read_cached_notes(version):
+    """Return the custom body cached for this exact version, if any.
+
+    semantic-release regenerates the notes after the release commit (the
+    backmerge plugin's prepare step follows the git plugin's), by which time
+    the release pipeline has already cleared NOTES.md. The cache lets the
+    second generateNotes call return the same custom body instead of falling
+    back to the generated sections.
+    """
+    try:
+        with open(NOTES_CACHE, encoding="utf-8") as fh:
+            data = fh.read()
+    except OSError:
+        return None
+    cached_version, _, body = data.partition("\n")
+    if cached_version != version or not body.strip():
+        try:
+            os.unlink(NOTES_CACHE)
+        except OSError:
+            pass
+        return None
+    return body
+
+
+def write_cached_notes(version, body):
+    try:
+        with open(NOTES_CACHE, "w", encoding="utf-8") as fh:
+            fh.write(version + "\n" + body)
+    except OSError:
+        pass
+
+
 def render(commits, from_tag, version):
     cfg = CONFIG
+    custom = load_custom_notes()
+    cached = None
+    if custom:
+        write_cached_notes(version, custom)
+    else:
+        cached = read_cached_notes(version)
     breaking = [c for c in commits if c["breaking"]]
     groups = {key: [] for key, _ in cfg["sections"]}
     for commit in commits:
@@ -531,6 +593,10 @@ def render(commits, from_tag, version):
     else:
         compare = f"https://github.com/{REPO_SLUG}/commits/v{version}"
     lines = [f"## [{version}]({compare}) ({date.today().isoformat()})"]
+
+    if custom or cached:
+        lines.extend(["", custom or cached])
+        return "\n".join(lines).strip() + "\n"
 
     if cfg["prepend_notes"]:
         lines.extend(["", cfg["prepend_notes"]])

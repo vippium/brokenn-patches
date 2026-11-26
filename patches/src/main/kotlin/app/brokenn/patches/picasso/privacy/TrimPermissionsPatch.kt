@@ -6,8 +6,6 @@ import app.morphe.patcher.patch.resourcePatch
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 
-// Nothing in the app reads the phone state, the advertising id or a launcher badge,
-// these are all declared by SDK manifests that got merged in.
 private val UNWANTED = setOf(
     "android.permission.READ_PHONE_STATE",
     "com.google.android.gms.permission.AD_ID",
@@ -56,7 +54,7 @@ val trimPermissionsPatch = resourcePatch(
                 root.removeChild(node as Node)
             }
         }
-        // Every entry above ships in the manifest, a shortfall means the layout changed.
+
         if (removed.size < UNWANTED.size) {
             throw PatchException("Removed ${removed.size} of ${UNWANTED.size} permissions")
         }

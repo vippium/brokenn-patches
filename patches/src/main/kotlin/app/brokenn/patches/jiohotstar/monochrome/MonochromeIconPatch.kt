@@ -6,7 +6,6 @@ import app.morphe.patcher.patch.resourcePatch
 import java.io.File
 import org.w3c.dom.Element
 
-/** Adds a themed-icon layer to the JioHotstar launcher icon. */
 @Suppress("unused")
 val monochromeIconPatch = resourcePatch(
     name = "Monochrome icon support",

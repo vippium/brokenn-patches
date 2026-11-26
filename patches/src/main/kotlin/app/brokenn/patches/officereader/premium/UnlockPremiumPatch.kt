@@ -1,6 +1,7 @@
 package app.brokenn.patches.officereader.premium
 
 import app.brokenn.patches.officereader.shared.Constants.COMPATIBILITY_OFFICEREADER
+import app.brokenn.patches.shared.instrs
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
@@ -11,9 +12,12 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val ABOUT_FRAGMENT = "Lnet/sjava/officereader/ui/fragments/AboutFragment;"
 private const val BINDINGS = "Lnet/sjava/officereader/databinding/FragmentAboutBinding;"
+private const val RESULT_KEY = "theme_picker_result"
 
 internal object IsPurchasedFingerprint : Fingerprint(
     definingClass = "Lnet/sjava/officereader/services/OptionService;",
@@ -47,20 +51,32 @@ val unlockPremiumPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_OFFICEREADER)
 
     execute {
-        // Premium gate: the Play Billing flow only writes this preference flag.
+
         IsPurchasedFingerprint.method.addInstructions(0, """
             const/4 v0, 0x1
             return v0
         """)
 
-        // No in-app rate dialog.
         ShowRateAppFingerprint.method.addInstructions(0, "return-void")
 
-        // The rate-app row is built through p(...); return an unattached binding for it.
-        RowBuilderFingerprint.method.addInstructions(0, """
+        val rowMethod = RowBuilderFingerprint.method
+        var fragmentBase: String? = null
+        classDefForEach { candidate ->
+            if (fragmentBase != null) return@classDefForEach
+            if (candidate.type == ABOUT_FRAGMENT) fragmentBase = candidate.superclass
+        }
+        val baseType = fragmentBase ?: throw PatchException("AboutFragment class not found")
+        val inflaterOwner = rowMethod.instrs()
+            .mapNotNull { insn -> (insn as? ReferenceInstruction)?.reference as? MethodReference }
+            .filter { it.name == "getLayoutInflater" && it.returnType == "Landroid/view/LayoutInflater;" }
+            .map { it.definingClass }
+            .firstOrNull { it == baseType }
+            ?: throw PatchException("AboutFragment: Fragment base getLayoutInflater owner not found")
+
+        rowMethod.addInstructions(0, """
             sget v0, Lnet/sjava/officereader/R${'$'}id;->about_rate:I
             if-ne p3, v0, :pass
-            invoke-virtual {p0}, Lau2;->getLayoutInflater()Landroid/view/LayoutInflater;
+            invoke-virtual {p0}, $inflaterOwner->getLayoutInflater()Landroid/view/LayoutInflater;
             move-result-object v0
             const/4 v1, 0x0
             invoke-static {v0, v1, v1}, Lnet/sjava/officereader/databinding/AboutRowBinding;->inflate(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lnet/sjava/officereader/databinding/AboutRowBinding;
@@ -70,7 +86,6 @@ val unlockPremiumPatch = bytecodePatch(
             nop
         """)
 
-        // Family-apps section (title, card): VISIBLE(0) → GONE(8).
         val method = OnViewCreatedFingerprint.method
         val ins = method.implementation?.instructions?.toList()
             ?: throw PatchException("onViewCreated has no implementation")
@@ -99,5 +114,25 @@ val unlockPremiumPatch = bytecodePatch(
         if (hidden < 2) {
             throw PatchException("Expected 2 family-section visibility calls, patched $hidden")
         }
+
+        val themeIns = method.instrs()
+        val keyIndex = themeIns.indexOfFirst { insn ->
+            (insn as? ReferenceInstruction)?.reference.let { it as? StringReference }?.string == RESULT_KEY
+        }
+        if (keyIndex < 1) throw PatchException("Theme result key not found")
+        var ctorIndex = -1
+        var themeRegister = -1
+        for (i in keyIndex - 1 downTo 0) {
+            val mref = (themeIns[i] as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+            if (mref.name != "<init>") continue
+            if (mref.parameterTypes.toList() != listOf(ABOUT_FRAGMENT, "B")) continue
+            val prevRef = (themeIns.getOrNull(i - 1) as? ReferenceInstruction)?.reference as? TypeReference
+            if (prevRef == null || prevRef.type != mref.definingClass) continue
+            ctorIndex = i
+            themeRegister = (ins[i] as FiveRegisterInstruction).registerE
+            break
+        }
+        if (ctorIndex < 0) throw PatchException("Theme result listener constructor not found")
+        method.addInstructions(ctorIndex, "const/4 v$themeRegister, 0x0")
     }
 }

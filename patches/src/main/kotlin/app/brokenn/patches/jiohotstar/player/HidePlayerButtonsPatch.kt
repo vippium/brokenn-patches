@@ -10,11 +10,14 @@ import app.brokenn.patches.jiohotstar.watchpage.AdaptiveTabConverterFingerprint
 import app.brokenn.patches.shared.instrs
 import app.brokenn.patches.shared.instructionIndices
 import app.brokenn.patches.shared.prevInstructionIndex
+import app.brokenn.patches.shared.redefinesRegister
+import app.brokenn.patches.shared.touchedRegisters
 import app.brokenn.patches.shared.referenceText
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.getFreeRegisterProvider
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
@@ -32,9 +35,6 @@ val hidePlayerButtonsPatch = bytecodePatch(
     execute {
         enableStatus("hidePlayerButtons")
 
-        // BrokennPrefs controls which buttons hide at runtime — no re-patch needed.
-        // Filters control-menu items by title. Reverse-order patching keeps indices
-        // stable for safe register reassignment.
         val dConv = PlayerWidgetConverterFingerprint.method
         val dImpl = dConv.instrs()
 
@@ -50,18 +50,17 @@ val hidePlayerButtonsPatch = bytecodePatch(
                     l.referenceText()?.contains("Iterator;->hasNext") == true
             }
             require(head >= 0) { "PlayerWidgetConverter: loop head not found" }
-            // item type comes from the invoke's return type — never hardcode R8 names
             Site(idx, elemReg, head, ref.substringAfterLast(')'))
         }
         require(sites.isNotEmpty()) { "PlayerWidgetConverter: menu item sites not found" }
 
         for (site in sites.sortedByDescending { it.idx }) {
+            requireRegistersSafeInLoop(dImpl, site.idx + 2, site.loopHead, listOf(13, 15), "PlayerWidgetConverter")
             val block = buildString {
                 append("invoke-interface {v${site.elemReg}}, ${site.itemType}->getTitle()Ljava/lang/String;\n")
                 append("move-result-object v13\n")
                 append(Constants.prefsStringCall("isPlayerButtonHidden", "13", "15"))
                 append("if-nez v15, :pi_skip\n")
-                // nop pins the trailing label to a real instruction
                 append(":pi_keep\n")
                 append("nop\n")
             }
@@ -72,23 +71,30 @@ val hidePlayerButtonsPatch = bytecodePatch(
             )
         }
 
-        // The fullscreen bottom tab bar rides the landscape converter loop; side-sheet and
-        // peek lists are phone-invisible, so only the landscape cast is filtered.
         val tabContainer = AdaptiveTabConverterFingerprint.method
-        val castSites = tabContainer.instructionIndices { ins ->
-            ins.opcode == Opcode.CHECK_CAST &&
-                ins.referenceText()?.contains(TAB_WIDGET) == true
+        val tabImpl = tabContainer.instrs()
+        val landscapeMarker = tabImpl.indexOfFirst { ins ->
+            ins.opcode == Opcode.CONST_STRING &&
+                ins.referenceText() == "getLandscapeTabsList(...)"
         }
-        require(castSites.size >= 2) { "TabConverter: expected portrait and landscape casts" }
-        val landscapeSite = castSites[1]
+        require(landscapeMarker >= 0) { "TabConverter: landscape tabs getter not found" }
+        val nextListMarker = tabImpl.withIndex().firstOrNull { (idx, ins) ->
+            idx > landscapeMarker && ins.opcode == Opcode.CONST_STRING &&
+                ins.referenceText()?.endsWith("List(...)") == true
+        }?.index ?: tabImpl.size
+        val landscapeSite = tabImpl.withIndex().firstOrNull { (idx, ins) ->
+            idx in landscapeMarker + 1 until nextListMarker &&
+                ins.opcode == Opcode.CHECK_CAST &&
+                ins.referenceText()?.contains(TAB_WIDGET) == true
+        }?.index ?: throw IllegalStateException("TabConverter: landscape cast not found")
         val itemReg = tabContainer.getInstruction<OneRegisterInstruction>(landscapeSite).registerA
         val landscapeHead = tabContainer.prevInstructionIndex(landscapeSite) { ins ->
             ins.opcode == Opcode.INVOKE_INTERFACE &&
                 ins.referenceText()?.contains("Iterator;->hasNext") == true
         }
         require(landscapeHead >= 0) { "TabConverter: landscape loop head not found" }
-        // Snapshot before the insert below shifts indices; the label anchors to the object.
-        val tabImpl = tabContainer.instrs()
+
+        requireRegistersSafeInLoop(tabImpl, landscapeSite + 1, landscapeHead, listOf(5, 6), "TabConverter")
 
         val landscapeBlock = buildString {
             append("invoke-virtual {v$itemReg}, ${TAB_WIDGET}->getData()${TAB_WIDGET_DATA}\n")
@@ -139,5 +145,35 @@ val hidePlayerButtonsPatch = bytecodePatch(
             },
             ExternalLabel("pb_keep", backImpl[0])
         )
+    }
+}
+
+private fun requireRegistersSafeInLoop(
+    impl: List<com.android.tools.smali.dexlib2.iface.instruction.Instruction>,
+    injectIndex: Int,
+    loopHead: Int,
+    registers: List<Int>,
+    tag: String,
+) {
+    val backEdge = impl.withIndex().firstOrNull { (idx, ins) ->
+        idx > injectIndex && (ins.opcode == Opcode.GOTO ||
+            ins.opcode == Opcode.GOTO_16 || ins.opcode == Opcode.GOTO_32)
+    }?.index ?: throw IllegalStateException("$tag: loop back edge not found")
+
+    fun firstTouchIsWrite(from: Int, until: Int, register: Int): Boolean {
+        for (idx in from until until) {
+            val ins = impl[idx]
+            if (register !in ins.touchedRegisters()) continue
+            return ins.redefinesRegister(register)
+        }
+        return true
+    }
+    registers.forEach { register ->
+        require(firstTouchIsWrite(loopHead, injectIndex, register)) {
+            "$tag: register v$register is read before redefinition in the loop head half"
+        }
+        require(firstTouchIsWrite(injectIndex, backEdge, register)) {
+            "$tag: register v$register is read before redefinition in the loop tail half"
+        }
     }
 }

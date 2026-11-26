@@ -1,3 +1,42 @@
+## [1.6.0-dev.4](https://github.com/vippium/brokenn-patches/compare/v1.6.0-dev.3...v1.6.0-dev.4) (2026-11-26)
+
+### ✨ New Features
+* **hotstar tv:** add `hotstar tv` patches ([d5b7105](https://github.com/vippium/brokenn-patches/commit/d5b71053510c226722d274075683123c52b26f08))
+
+### 🔧 Improvements
+* **dependencies:** update morphe-gradle-plugin to 2.1.1 ([dddcfe1](https://github.com/vippium/brokenn-patches/commit/dddcfe1b92ca176417a20e89757a8c3e80987ffa))
+
+## [1.6.0-dev.3](https://github.com/vippium/brokenn-patches/compare/v1.6.0-dev.2...v1.6.0-dev.3) (2026-11-25)
+
+### 🐛 Bug Fixes
+* **ci:** keep custom notes across the post-commit regeneration ([4af1255](https://github.com/vippium/brokenn-patches/commit/4af12558c957b4b2431b36e4a8e2d14f97122287))
+
+## [1.6.0-dev.2](https://github.com/vippium/brokenn-patches/compare/v1.6.0-dev.1...v1.6.0-dev.2) (2026-11-24)
+
+### ✨ New Features
+
+* **jiohotstar:** add `Hide kids profile` patch
+
+### ♻️ Shared
+
+* **jiohotstar:** refactored `Hide notification nudge` patch to work flawlessly
+* re-anchored all patches
+
+### 🐛 Bug Fixes
+
+* **officereader/unlock premium:** fixed manual switching to light theme not working
+* **officereader/amoled theme:** fixed black status bar and bottom bar, even in light theme
+
+### 🚀 Updated App Support
+
+* **jiohotstar:** 26.11.09.1
+* **officereader:** 5.0.6
+
+## [1.6.0-dev.1](https://github.com/vippium/brokenn-patches/compare/v1.5.0...v1.6.0-dev.1) (2026-11-23)
+
+### ✨ New Features
+* **jiohotstar:** add `Use system font` patch ([af19bfc](https://github.com/vippium/brokenn-patches/commit/af19bfc26cc8f7f25342163b28f0506430b5788e))
+
 ## [1.5.0](https://github.com/vippium/brokenn-patches/compare/v1.4.1...v1.5.0) (2026-11-23)
 
 ### ✨ New Features

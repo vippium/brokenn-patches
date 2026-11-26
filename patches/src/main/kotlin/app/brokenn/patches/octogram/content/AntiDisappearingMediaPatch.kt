@@ -24,7 +24,6 @@ private fun Method.hasWideLiteral(value: Long) =
 private fun Method.hasNarrowLiteral(value: Int) =
     implementation?.instructions?.any { (it as? NarrowLiteralInstruction)?.narrowLiteral == value } == true
 
-// MessageObject is located by its unique sponsored-caption joiner string.
 private fun isMessageObject(c: ClassDef): Boolean =
     c.methods.any { " featuring " in it.stringConstants() }
 
@@ -67,7 +66,7 @@ val antiDisappearingMediaPatch = bytecodePatch(
                 } else if (m.isStatic() && m.parameters.toList() == listOf(MSG_PARAM) &&
                     m.startsWithInstanceOf(TL_SECRET)
                 ) {
-                    // static isSecretMedia / isSecretPhotoOrVideo
+
                     m.addInstructions(0, """
                         const/4 v0, 0x0
                         return v0
@@ -76,7 +75,7 @@ val antiDisappearingMediaPatch = bytecodePatch(
                 } else if (m.isStatic() && m.parameters.toList() == listOf(MSG_PARAM) &&
                     m.constructsType(PAID_MEDIA)
                 ) {
-                    // shouldEncryptPhotoOrVideo
+
                     m.addInstructions(0, """
                         const/4 v0, 0x0
                         return v0

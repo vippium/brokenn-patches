@@ -17,7 +17,6 @@ import org.w3c.dom.Element
 private const val NAV_PRESS_CLASS = "Lapp/brokenn/extension/jiohotstar/settings/NavPress;"
 private const val SETTINGS_ACTIVITY = "app.brokenn.extension.jiohotstar.settings.BrokennSettingsActivity"
 
-/** Declares the settings activity so NavPress can launch it. */
 private val brokennSettingsManifestPatch = resourcePatch {
     execute {
         document("AndroidManifest.xml").use { manifest ->
