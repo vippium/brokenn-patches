@@ -1,0 +1,19 @@
+package app.brokenn.patches.jiohotstar.playback.mirroring
+
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.patch.bytecodePatch
+import app.brokenn.patches.jiohotstar.shared.Constants.COMPATIBILITY_JIOHOTSTAR
+
+@Suppress("unused")
+val enableScreenMirroringPatch = bytecodePatch(
+    name = "Enable screen mirroring",
+    description = "Allows playback while screen mirroring or HDMI is connected."
+) {
+    compatibleWith(COMPATIBILITY_JIOHOTSTAR)
+
+    execute {
+        MultipleDisplayCheckFingerprint.method.addInstructions(0, """
+            return-void
+        """)
+    }
+}
