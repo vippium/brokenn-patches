@@ -1,0 +1,15 @@
+package app.brokenn.patches.jiohotstar.playback.drm
+
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.AccessFlags
+
+internal object IsDolbyVisionSupportedFingerprint : Fingerprint(
+    returnType = "Z",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
+    parameters = listOf("Landroid/content/Context;", "Z", "I", "Z"),
+    filters = listOf(
+        string("dv"),
+        string("bklst"),
+    )
+)
