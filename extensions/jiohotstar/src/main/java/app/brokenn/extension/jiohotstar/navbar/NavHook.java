@@ -11,21 +11,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * Runtime hook for the bottom navigation items.
- *
- * The app assembles its bottom bar items (BottomMenuNavItem) from the BFF menu and
- * hands them to the bar composable. Two hook points use this class:
- *
- * - processNavItems: right before the bar renders its list. It records the tab
- *   titles (and their icon glyphs) the app currently shows so the settings screen
- *   can offer them, then applies the saved layout.
- * - applyNavItems: on the assembler sites that store intermediate menu lists. It
- *   only applies the layout, so unrelated menu widgets can never pollute the tab
- *   editor's discovered list.
- *
- * Layout format:  Home:1|Search:1|My Space:0   (title:visible, in display order)
- */
 @SuppressWarnings("unused")
 public final class NavHook {
 
@@ -39,16 +24,10 @@ public final class NavHook {
     private NavHook() {
     }
 
-    /**
-     * Called from the patched assembler right before a nav item list is stored.
-     * Applies the saved layout only; discovery is recorded exclusively by the
-     * render-side hook.
-     */
     public static void applyNavItems(Object list) {
         processNavItems(list, false);
     }
 
-    /** Called from the patched bottom bar composable right before the list is rendered. */
     public static void processNavItems(Object list) {
         processNavItems(list, true);
     }
@@ -78,7 +57,6 @@ public final class NavHook {
 
             List<Object> current = new ArrayList<>(items);
             List<Object> result = new ArrayList<>();
-            // Items in saved order first (visible ones only).
             for (String key : order.keySet()) {
                 if (!Boolean.TRUE.equals(order.get(key))) continue;
                 Object item = findByTitle(current, key);
@@ -97,7 +75,6 @@ public final class NavHook {
                 }
             }
             if (result.isEmpty()) {
-                // Never blank the bar.
                 return;
             }
 
@@ -107,7 +84,6 @@ public final class NavHook {
             backing.addAll(result);
             rememberLastTab(p, backing);
         } catch (Throwable ignored) {
-            // Fail open: the app keeps its own order.
         }
     }
 
@@ -187,11 +163,6 @@ public final class NavHook {
         }
     }
 
-    /**
-     * Icon glyph codepoint: nav items carry an icon font reference whose obfuscated
-     * holder keeps the codepoint in field "b". The settings preview renders the same
-     * glyphs with the app's soul_icons font, so it looks like the real bar.
-     */
     private static char glyphOf(Object item) {
         try {
             Method icon = item.getClass().getMethod("getDefaultIcon");
@@ -236,10 +207,6 @@ public final class NavHook {
         return title.trim().toLowerCase(Locale.ROOT);
     }
 
-    /**
-     * Item title: BottomMenuNavItem has an unobfuscated getTitle(); the server-side
-     * BFF models keep their display name in the obfuscated field "b".
-     */
     private static String titleOf(Object item) {
         try {
             if (getTitle == null) {
@@ -247,7 +214,6 @@ public final class NavHook {
                     getTitle = item.getClass().getMethod("getTitle");
                     getTitle.setAccessible(true);
                 } catch (NoSuchMethodException ignored) {
-                    // Fall through to the field lookup below.
                 }
             }
             if (getTitle != null) {

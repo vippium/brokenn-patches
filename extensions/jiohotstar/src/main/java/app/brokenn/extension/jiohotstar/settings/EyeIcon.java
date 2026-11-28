@@ -51,12 +51,10 @@ public final class EyeIcon {
     private EyeIcon() {
     }
 
-    /** Open eye - the tab is visible. */
     public static Drawable show(Context context, int color) {
         return icon(context, VISIBLE_PNG, color);
     }
 
-    /** Eye with a slash - the tab is hidden. */
     public static Drawable hide(Context context, int color) {
         return icon(context, HIDDEN_PNG, color);
     }

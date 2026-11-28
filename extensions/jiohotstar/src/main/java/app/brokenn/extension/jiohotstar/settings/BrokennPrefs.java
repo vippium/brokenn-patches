@@ -19,7 +19,6 @@ public final class BrokennPrefs {
         }
     }
 
-    /** True when the watch-page tab strip should drop the given tab title. */
     public static boolean isTabHidden(String title) {
         if (title == null) return false;
         String key;
@@ -34,7 +33,6 @@ public final class BrokennPrefs {
         return p != null && p.getBoolean(key, false);
     }
 
-    /** True when the fullscreen player bottom bar should drop the given button title. */
     public static boolean isPlayerButtonHidden(String title) {
         if (title == null) return false;
         String key;
@@ -145,7 +143,6 @@ public final class BrokennPrefs {
                     collectStrings(v, out, depth + 1);
                 }
             } catch (Throwable t) {
-                // skip unreadable field
             }
         }
     }

@@ -4,11 +4,9 @@ package app.brokenn.extension.jiohotstar.settings;
 public final class BrokennStatus {
     private BrokennStatus() {}
 
-    // Set when "Hide player buttons" is included.
     public static boolean hidePlayerButtons = false;
     public static void hidePlayerButtons() { hidePlayerButtons = true; }
 
-    // Set when "Hide watch page elements" is included.
     public static boolean hideWatchPageElements = false;
     public static void hideWatchPageElements() { hideWatchPageElements = true; }
 

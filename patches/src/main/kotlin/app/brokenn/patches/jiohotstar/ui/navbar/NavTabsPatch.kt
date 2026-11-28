@@ -35,7 +35,6 @@ val navTabsPatch = bytecodePatch(
     execute {
         var hooked = false
 
-        // ---- Primary: render-side hook -----------------------------------------
         val renderMethod = runCatching { NavRenderFingerprint.method }.getOrNull()
         if (renderMethod != null) {
             val listReadIndex = renderMethod.firstInstructionIndex { ins ->

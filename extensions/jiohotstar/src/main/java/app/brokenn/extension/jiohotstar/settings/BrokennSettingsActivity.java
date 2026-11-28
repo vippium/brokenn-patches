@@ -50,7 +50,6 @@ public class BrokennSettingsActivity extends Activity {
             getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
 
-        // Top sheet: blue-to-purple gradient fading out inside the upper half.
         android.widget.FrameLayout frame = new android.widget.FrameLayout(this);
         frame.setBackgroundColor(BG);
 
@@ -74,7 +73,6 @@ public class BrokennSettingsActivity extends Activity {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(20), dp(8), dp(20), dp(20));
 
-        // Pinned app bar: back chevron and title.
         final int barHeight = dp(88);
         LinearLayout appBar = new LinearLayout(this);
         appBar.setOrientation(LinearLayout.HORIZONTAL);
@@ -83,7 +81,6 @@ public class BrokennSettingsActivity extends Activity {
 
         ChevronView back = new ChevronView(this, FG, false);
         back.setRotation(90f); // down-pointing V rotated to point left
-        // Padded holder: bigger round touch target with an oval ripple.
         android.widget.FrameLayout backHolder = new android.widget.FrameLayout(this);
         backHolder.setPadding(dp(10), dp(10), dp(10), dp(10));
         backHolder.addView(back);
@@ -179,7 +176,6 @@ public class BrokennSettingsActivity extends Activity {
         setContentView(frame);
     }
 
-    /** Adds a plain section heading (no card). */
     private void addStaticHeading(LinearLayout parent, String heading) {
         TextView headingView = text(heading, 12, ACCENT, true);
         headingView.setLetterSpacing(0.12f);
@@ -187,7 +183,6 @@ public class BrokennSettingsActivity extends Activity {
         parent.addView(headingView);
     }
 
-    /** Adds a static (non-collapsible) section: plain heading + card. Returns the content card. */
     private LinearLayout addStaticSection(LinearLayout parent, String heading) {
         TextView headingView = text(heading, 12, ACCENT, true);
         headingView.setLetterSpacing(0.12f);
@@ -198,11 +193,9 @@ public class BrokennSettingsActivity extends Activity {
         return card;
     }
 
-    /** Collapsible card with a title/description header and chevron; returns the content container. */
     private LinearLayout featureCard(LinearLayout parent, String heading, String description) {
         LinearLayout card = newCard(parent);
 
-        // LayoutTransition animates the child visibility change.
         LayoutTransition cardTransition = new LayoutTransition();
         cardTransition.setDuration(220);
         card.setLayoutTransition(cardTransition);
@@ -216,7 +209,6 @@ public class BrokennSettingsActivity extends Activity {
         LinearLayout header = new LinearLayout(this);
         header.setOrientation(LinearLayout.HORIZONTAL);
         header.setGravity(Gravity.CENTER_VERTICAL);
-        // Row padding so the chevron lines up with the check/cross buttons.
         header.setPadding(dp(20), dp(10), dp(20), dp(10));
         header.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -247,7 +239,6 @@ public class BrokennSettingsActivity extends Activity {
         return content;
     }
 
-    /** Removes a trailing divider left after the last row of a card. */
     private void removeTrailingDivider(LinearLayout card) {
         int n = card.getChildCount();
         if (n > 0 && card.getChildAt(n - 1).getClass() == View.class) {
@@ -255,7 +246,6 @@ public class BrokennSettingsActivity extends Activity {
         }
     }
 
-    /** Adds a thin divider between rows inside a card. */
     private void addDivider(LinearLayout card) {
         View divider = new View(this);
         divider.setBackgroundColor(0x1FFFFFFF);
@@ -289,14 +279,12 @@ public class BrokennSettingsActivity extends Activity {
 
     private GradientDrawable cardBackground() {
         GradientDrawable drawable = new GradientDrawable();
-        // Glass: translucent fill over the gradient, hairline white stroke.
         drawable.setColor(0x9E17171E);
         drawable.setCornerRadius(dp(16));
         drawable.setStroke(dp(1), 0x2EFFFFFF);
         return drawable;
     }
 
-    /** About row: label left, value right. */
     private void addRow(LinearLayout card, String label, String value) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
@@ -335,7 +323,6 @@ public class BrokennSettingsActivity extends Activity {
         card.addView(row);
     }
 
-    /** Toggle row: title + gray description on the left, check/cross button on the right. */
     private void addToggle(LinearLayout card, String label, String description, final String key, boolean def) {
         addToggle(card, label, description, key, def, false);
     }
@@ -371,7 +358,6 @@ public class BrokennSettingsActivity extends Activity {
         });
         row.addView(toggle);
 
-        // Whole row toggles, Material-style.
         row.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -381,10 +367,8 @@ public class BrokennSettingsActivity extends Activity {
 
         addRipple(row, false);
         card.addView(row);
-        // Single row card: no trailing divider.
     }
 
-    /** Feed filter row: opens the tray-title editor dialog when tapped. */
     private void addFilterRow(LinearLayout card) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
@@ -413,7 +397,6 @@ public class BrokennSettingsActivity extends Activity {
         card.addView(row);
     }
 
-    /** Summary for the feed filter row: entry count, or None when empty. */
     private String filterSummary() {
         String raw = prefs.getString("hidden_shelves", "").trim();
         if (raw.length() == 0) return "None";
@@ -424,7 +407,6 @@ public class BrokennSettingsActivity extends Activity {
         return n + (n == 1 ? " tray" : " trays");
     }
 
-    /** Editor for hidden tray titles, one per line; OK persists to "hidden_shelves". */
     private void showFeedFilterDialog(final TextView valueText) {
         final android.app.Dialog dialog = new android.app.Dialog(this);
         dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
@@ -582,7 +564,6 @@ public class BrokennSettingsActivity extends Activity {
         card.addView(view);
     }
 
-    /** Thin chevron drawn as a vector; used for the back arrow and expanders. */
     private static final class ChevronView extends View {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final int sizePx;
@@ -623,7 +604,6 @@ public class BrokennSettingsActivity extends Activity {
         }
     }
 
-    /** Check/cross circle button; the glyph pops in with a rotate+scale entrance. */
     private final class ToggleView extends View {
         interface OnChange { void onChange(boolean checked); }
 
@@ -701,7 +681,6 @@ public class BrokennSettingsActivity extends Activity {
             float cy = getHeight() / 2f;
             float radius = sizePx / 2f;
 
-            // Circle: dark fill with outline when off, accent fill when on.
             paint.setStyle(Paint.Style.FILL);
             paint.setColor(lerpColor(FILL_OFF, trackOn, progress));
             canvas.drawCircle(cx, cy, radius, paint);
@@ -715,7 +694,6 @@ public class BrokennSettingsActivity extends Activity {
                 paint.setAlpha(255);
             }
 
-            // Glyph: pops in with a rotate+scale entrance; check when on, cross when off.
             float scale = 0.5f + 0.5f * iconProgress;
             float rotation = (showCheck ? -90f : 90f) * (1f - iconProgress);
             paint.setStrokeWidth(strokePx);
@@ -776,9 +754,6 @@ public class BrokennSettingsActivity extends Activity {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
-    // -------------------------------------------------------------------------
-    // Navigation bar: reorder + visibility
-    // -------------------------------------------------------------------------
 
     private static final int NAV_ROW_HEIGHT_DP = 52;
 
@@ -810,7 +785,6 @@ public class BrokennSettingsActivity extends Activity {
         });
         addRipple(row, false);
         card.addView(row);
-        // Single row card: no trailing divider.
     }
 
     private String navSummary() {
@@ -836,7 +810,6 @@ public class BrokennSettingsActivity extends Activity {
             return;
         }
 
-        // Saved layout: ordered ids + visibility.
         final java.util.LinkedHashMap<String, Boolean> saved = new java.util.LinkedHashMap<>();
         String layout = p.getString("nav_tab_layout", null);
         if (layout != null) {
@@ -921,7 +894,6 @@ public class BrokennSettingsActivity extends Activity {
         subtitle.setPadding(0, dp(6), 0, dp(14));
         box.addView(subtitle);
 
-        // ---- Live navbar preview: real icon glyphs + labels, like the actual bar --
         final LinearLayout preview = new LinearLayout(this);
         preview.setOrientation(LinearLayout.HORIZONTAL);
         GradientDrawable previewBg = new GradientDrawable();
@@ -936,7 +908,6 @@ public class BrokennSettingsActivity extends Activity {
         previewGap.setPadding(0, dp(12), 0, 0);
         box.addView(previewGap);
 
-        // ---- Draggable tab list ---------------------------------------------------
         final LinearLayout list = new LinearLayout(this);
         list.setOrientation(LinearLayout.VERTICAL);
 
@@ -1000,7 +971,6 @@ public class BrokennSettingsActivity extends Activity {
         box.addView(scroller, new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, maxH));
 
-        // Every row's eye, so the state can be refreshed whenever visibility changes.
         final java.util.LinkedHashMap<String, android.widget.ImageView> eyes =
             new java.util.LinkedHashMap<>();
         final Runnable refreshEyes = new Runnable() {
@@ -1026,7 +996,6 @@ public class BrokennSettingsActivity extends Activity {
         updatePreview.run();
         refreshEyes.run();
 
-        // ---- Buttons ---------------------------------------------------------------
         LinearLayout buttons = new LinearLayout(this);
         buttons.setOrientation(LinearLayout.HORIZONTAL);
         buttons.setGravity(Gravity.CENTER_VERTICAL);
@@ -1144,7 +1113,6 @@ public class BrokennSettingsActivity extends Activity {
         handle.setGravity(Gravity.CENTER);
         row.addView(handle, new LinearLayout.LayoutParams(dp(44), dp(NAV_ROW_HEIGHT_DP)));
 
-        // Center block: icon glyph + name, centered in the space between the handles.
         LinearLayout center = new LinearLayout(this);
         center.setOrientation(LinearLayout.HORIZONTAL);
         center.setGravity(Gravity.CENTER);
@@ -1169,8 +1137,6 @@ public class BrokennSettingsActivity extends Activity {
 
         final android.widget.ImageView eye = new android.widget.ImageView(this);
         eye.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
-        // Same muted tone and roughly the same box as the drag handle so the two ends
-        // of the row read as a pair.
         eye.setImageDrawable(EyeIcon.show(this, SUBTLE));
         eye.setPadding(dp(11), dp(17), dp(11), dp(17));
         eye.setOnClickListener(new View.OnClickListener() {

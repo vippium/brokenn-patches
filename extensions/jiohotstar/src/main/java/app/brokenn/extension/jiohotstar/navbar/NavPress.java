@@ -102,7 +102,6 @@ public final class NavPress {
         }
     }
 
-    /** True when the item is the right-most tab of the bar. */
     private static boolean isLastTab(Object item) {
         try {
             String title = titleOf(item);
@@ -116,7 +115,6 @@ public final class NavPress {
         }
     }
 
-    /** True when the saved navigation layout hides the Profile tab. */
     private static boolean profileTabHidden() {
         try {
             Context context = appContext();
